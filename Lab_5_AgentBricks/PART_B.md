@@ -1,4 +1,4 @@
-# Lab 6 Part B: Multi-Agent with External MCP Server
+# Lab 5 Part B: Multi-Agent with External MCP Server
 
 In this part, you will create an agent using a pre-deployed Neo4j MCP server, then build a Multi-Agent Supervisor that coordinates both the Genie space (from Part A) and the Neo4j graph database to answer complex questions spanning structured data and graph relationships.
 
@@ -363,9 +363,12 @@ Your multi-agent system can now intelligently route questions to the appropriate
 
 ## Next Steps
 
-- Experiment with more complex multi-hop queries
-- Add additional subagents (Unity Catalog functions, Knowledge Assistants)
-- Explore the Genie and MCP APIs for programmatic access
+**Congratulations!** You've completed Part 2 of the workshop.
+
+For advanced material (all-day sessions or self-paced learning), continue with **Part 3 - Advanced GraphRAG and Agents**:
+
+- **[Lab 6 - Advanced RAG](../Lab_6_Advanced_RAG)**: Learn Text2Cypher retrieval and automated entity extraction
+- **[Lab 10 - Aura Agents API](../Lab_10_Aura_Agents_API)**: Programmatically invoke Aura Agents via REST API
 
 ## Resources
 

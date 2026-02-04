@@ -1,4 +1,4 @@
-# Lab 6: Databricks AgentBricks - Genie & Multi-Agent Systems
+# Lab 5: Databricks AgentBricks - Genie & Multi-Agent Systems
 
 Build intelligent multi-agent systems using Databricks AgentBricks that combine natural language SQL querying with graph-based relationship discovery.
 
@@ -235,9 +235,11 @@ Warehouse: Serverless SQL
 
 ---
 
-## Next Labs
+## Next Steps
 
-After completing this lab, continue with:
+**Congratulations!** You've completed Part 2 of the workshop.
 
-- **Lab 7**: Neo4j MCP Agent - Build custom LangGraph agents with MCP tools
-- **Lab 10**: Aura Agents API - Programmatic access to Neo4j Aura agents
+For advanced material (all-day sessions or self-paced learning), continue with **Part 3 - Advanced GraphRAG and Agents**:
+
+- **[Lab 6 - Advanced RAG](../Lab_6_Advanced_RAG)**: Learn Text2Cypher retrieval and automated entity extraction
+- **[Lab 10 - Aura Agents API](../Lab_10_Aura_Agents_API)**: Programmatically invoke Aura Agents via REST API

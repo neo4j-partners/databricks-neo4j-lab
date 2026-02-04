@@ -1,4 +1,4 @@
-# Lab 6: Databricks Genie & AgentBricks
+# Lab 5 Part A: Databricks Genie & AgentBricks
 
 In this lab, you will create an AI/BI Genie space to enable natural language querying of financial services data, then integrate it as a subagent within Databricks AgentBricks Multi-Agent Supervisor to build a coordinated multi-agent system.
 
@@ -294,8 +294,7 @@ Your multi-agent system can now coordinate complex financial analysis tasks by l
 
 ## Next Steps
 
-- **Lab 7**: Explore Neo4j MCP integration to add graph-based reasoning to your agent system
-- **Lab 10**: Build programmatic clients for the Aura Agents API
+Continue with **[Part B: Multi-Agent with External MCP Server](./PART_B.md)** to integrate a Neo4j graph database via MCP and build a coordinated multi-agent system.
 
 ## Resources
 

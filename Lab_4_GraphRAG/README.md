@@ -1,4 +1,4 @@
-# Lab 5 - GraphRAG with Neo4j
+# Lab 4 - GraphRAG with Neo4j
 
 This lab teaches you how to build Graph Retrieval-Augmented Generation (GraphRAG) applications using the official **neo4j-graphrag** Python library with **Databricks Model Serving**. Through two hands-on notebooks, you'll progress from loading data to building production-ready GraphRAG pipelines.
 
@@ -217,7 +217,7 @@ Ensure your vector index dimensions match the embedder output:
 
 **Congratulations!** You've completed the GraphRAG lab.
 
-Continue to **[Lab 6 - Aura Agents API](../Lab_6_Aura_Agents_API)** to learn how to call your Aura Agent programmatically via REST API.
+Continue to **[Lab 5 - AgentBricks Multi-Agent Systems](../Lab_5_AgentBricks)** to build intelligent multi-agent systems using Databricks AI/BI Genie and AgentBricks.
 
 ## Additional Resources
 

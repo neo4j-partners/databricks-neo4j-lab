@@ -189,15 +189,15 @@ You have now built an Aura Agent that combines three powerful retrieval patterns
 | **Similarity Search** | Semantic retrieval | Finding relevant content by meaning |
 | **Text2Cypher** | Flexible natural language | Ad-hoc questions about the data |
 
-These same patterns are implemented programmatically in Lab 5 (GraphRAG) and Lab 7 (MCP) using Python.
+These same patterns are implemented programmatically in Lab 4 (GraphRAG) using Python.
 
 ## Next Steps
 
 **This completes Part 1 - No-Code Getting Started.**
 
-To continue with the coding labs, proceed to **Part 2 - Introduction to Agents and GraphRAG with Neo4j**:
+To continue with the coding labs, proceed to **Part 2 - GraphRAG with Neo4j**:
 
-[Lab 4 - Intro to Bedrock and Agents](../Lab_4_Intro_to_Bedrock_and_Agents) - Set up your development environment in Amazon SageMaker and learn how AI agents work with LangGraph.
+[Lab 4 - GraphRAG with Neo4j](../Lab_4_GraphRAG) - Build GraphRAG pipelines using the neo4j-graphrag Python library with Databricks Foundation Models.
 
 ## Future Tools
 

@@ -1,14 +1,13 @@
-# Lab 6 - Aura Agents API
+# Lab 10 - Aura Agents API
 
 In this lab, you'll learn how to call the Neo4j Aura Agent you created in Lab 2 programmatically using Python. This enables you to integrate your no-code Aura Agent into applications, scripts, and automated workflows.
 
 ## Prerequisites
 
 Before starting, make sure you have:
-- Completed **Lab 0** (AWS sign-in)
+- Completed **Lab 0** (Sign-in)
 - Completed **Lab 1** (Neo4j Aura setup)
 - Completed **Lab 2** (Built an Aura Agent with tools)
-- Completed **Lab 4** (SageMaker setup)
 
 ## Lab Overview
 
@@ -157,7 +156,13 @@ Try these questions with your agent (same as Lab 2):
 
 ## Next Steps
 
-Continue to [Lab 7 - Neo4j MCP Agent](../Lab_7_Neo4j_MCP_Agent) to build an AI agent that queries your Neo4j knowledge graph using the Model Context Protocol.
+Congratulations! You've completed all the labs. You now have experience with:
+- No-code AI agents using Neo4j Aura Agents
+- GraphRAG pipelines with neo4j-graphrag and Databricks
+- Multi-agent systems with Databricks AgentBricks
+- Programmatic API access to Aura Agents
+
+For additional learning, explore the resources below.
 
 ## Resources
 
