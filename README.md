@@ -4,6 +4,20 @@ Build AI Agents and Knowledge Graphs with Neo4j and Databricks.
 
 This hands-on workshop teaches you how to build production-ready AI agents that combine the power of graph databases with modern cloud platforms. You'll work with a comprehensive Aircraft Digital Twin dataset, learning to load data into Neo4j, query it with natural language, and build multi-agent systems that intelligently route questions to the right data source.
 
+## Dual Database Architecture
+
+The workshop is built on a dual database architecture that assigns each workload to the platform best suited for it. Databricks Lakehouse handles high-volume time-series sensor telemetry — optimized for aggregations, trend analysis, and statistical queries over columnar data. Neo4j Aura stores the richly connected relational data — aircraft topology, component hierarchies, maintenance events, flights, and airport routes — where a graph database can traverse multi-hop relationships natively without expensive JOINs.
+
+Together, the two platforms provide a complete Aircraft Digital Twin: Databricks for "how are the sensors trending?" and Neo4j for "what is connected to what, and why did it fail?"
+
+![Dual Database Architecture](images/dual-database-architecture.png)
+
+## Lab Architecture
+
+The end-to-end lab architecture centers on a **Multi-Agent Supervisor** built with Databricks AgentBricks. When a user asks a question, the supervisor routes it to the right agent: a **Genie Agent** for sensor telemetry analytics over Unity Catalog tables, or a **Neo4j MCP Agent** for graph-powered queries over the knowledge graph. The Neo4j MCP Server runs on AWS AppRunner, exposing the graph database through the Model Context Protocol so agents can query it with natural language. Neo4j Aura provides the graph database, while Databricks handles notebooks, model serving, and vector search.
+
+![Lab Architecture Overview](images/lab-architecture-overview.png)
+
 ## Overview
 
 Participants work through lab exercises in Databricks and Neo4j Aura, using Databricks as the notebook environment for ETL, multi-agent orchestration, and semantic search.

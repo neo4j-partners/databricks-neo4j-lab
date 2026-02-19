@@ -9,6 +9,8 @@
 .LSOverride
 ._*
 
+slides/**/*.html
+
 # Windows
 Thumbs.db
 ehthumbs.db
