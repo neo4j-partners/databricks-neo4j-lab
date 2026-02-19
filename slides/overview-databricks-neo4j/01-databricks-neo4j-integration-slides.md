@@ -145,6 +145,22 @@ Good for domain-specific terms and fault codes that need exact matching
 
 ---
 
+## Neo4j in Unity Catalog: Federated Queries via JDBC
+
+Neo4j can also be registered as a **JDBC connection in Unity Catalog**, making graph data queryable alongside your Lakehouse tables using standard SQL.
+
+**How it works:**
+- A JDBC connection to Neo4j is configured in Unity Catalog with the Neo4j JDBC driver
+- The driver **automatically translates SQL into Cypher** — so users and tools write SQL, and Neo4j executes it as a graph query
+- Graph data can be queried directly or **materialized as Delta tables** for use in dashboards and Genie spaces
+
+**Why it matters:**
+- **Unified governance** — graph data is managed under the same Unity Catalog access controls and lineage as everything else
+- **Federated queries** — combine graph relationships and Lakehouse metrics in a single SQL statement
+- **Genie-ready** — materialized graph data can power natural language analytics without any Cypher knowledge
+
+---
+
 ## Neo4j as an MCP Server
 
 **Model Context Protocol (MCP)** is an open standard that lets AI agents use external tools. Neo4j can act as an MCP server, giving any AI agent the ability to query a knowledge graph.
