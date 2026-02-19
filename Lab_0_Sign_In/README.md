@@ -11,28 +11,22 @@ Enter your email, the event code from the information sheet, and the validation 
 
 ![](images/07.png)
 
-Once the entered information is validated, you will receive your own AWS and Neo4j accounts. Please refrain from sharing this account information with fellow attendees, as it is specifically assigned to you. Remember to save this information, as you will need it until the end of the lab. These accounts will be terminated by the end of the day.
+Once the entered information is validated, you will receive your own Databricks and Neo4j accounts. Please refrain from sharing this account information with fellow attendees, as it is specifically assigned to you. Remember to save this information, as you will need it until the end of the lab. These accounts will be terminated by the end of the day.
 
 ## Improving the Labs
 As you work through these labs, we'd appreciate your feedback. Please open an issue on the [GitHub repository](https://github.com/neo4j-partners/databricks-neo4j-lab/issues) for bugs, usability suggestions, or general comments. Pull requests are welcome too!
 
-## Sign into AWS
-We're going to sign into a new AWS account.  You may already have other AWS accounts.  If you use Chrome, you might consider using incognito mode for these exercises.  That's not mandatory though and other browsers work fine too.
-Our next step is to open the AWS console [here](https://console.aws.amazon.com/). 
+## Sign into Databricks
+We're going to sign into a Databricks workspace. You may already have other Databricks accounts. If you use Chrome, you might consider using incognito mode for these exercises. That's not mandatory though and other browsers work fine too.
 
-Select "IAM User."
+Your workshop admin has added you to a shared Databricks workspace. You received an email from Databricks inviting you to collaborate.
 
-![](images/01.png)
+1. Click the link in the invitation email to open the Databricks sign-in page.
+2. Select **Sign in with email**.
+3. Databricks sends a one-time passcode (OTP) to your email address.
+4. Check your inbox, copy the 6-digit code, and enter it on the sign-in page.
 
-Now enter the Account ID you were given and click "Next."
-
-![](images/02.png)
-
-Enter the IAM user name and Password you were given.  Click the check box for "Remember this account."  Click "Sign in."
-
-![](images/03.png)
-
-We're now authenticated and logged into the AWS console.
+> **Tip:** The passcode expires after a few minutes. If it expires, click **Resend code** on the sign-in page to get a new one.
 
 ![](images/04.png)
 
@@ -40,5 +34,4 @@ At this point you can click through to dismiss any help dialogs. In the next lab
 
 ## Next Steps
 
-Continue to [Lab 1 - Aura Setup](../Lab_1_Aura_Setup) to create your Neo4j Aura database and load the SEC filings knowledge graph.
-
+Continue to [Lab 1 - Aura Setup](../Lab_1_Aura_Setup) to create your Neo4j Aura database and load the Aircraft Digital Twin knowledge graph.

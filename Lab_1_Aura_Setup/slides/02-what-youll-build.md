@@ -2,22 +2,22 @@
 
 ## The Knowledge Graph
 
-Your database will contain SEC 10-K filings from major tech companies:
+Your database will contain an Aircraft Digital Twin dataset:
 
 | Entity Type | Examples |
 |-------------|----------|
-| **Companies** | Apple, Microsoft, NVIDIA, Meta |
-| **Risk Factors** | Cybersecurity, supply chain, regulatory |
-| **Products** | iPhone, Azure, GPUs, advertising |
-| **Executives** | CEOs, CFOs, board members |
-| **Asset Managers** | BlackRock, Vanguard, Berkshire Hathaway |
+| **Aircraft** | Boeing 737-800, Airbus A320/A321, Embraer E190 |
+| **Systems** | Engines, Avionics, Hydraulics |
+| **Components** | Turbines, Compressors, Pumps |
+| **Flights** | Flight operations with departure/arrival |
+| **Maintenance Events** | Fault tracking with severity |
 
 ## Relationships
 
 ```
-(BlackRock)-[:OWNS]->(Apple)
-(Apple)-[:FACES_RISK]->(Cybersecurity Threats)
-(Apple)-[:MENTIONS]->(iPhone)
+(Aircraft)-[:HAS_SYSTEM]->(System)-[:HAS_COMPONENT]->(Component)
+(Aircraft)-[:OPERATES_FLIGHT]->(Flight)-[:DEPARTS_FROM]->(Airport)
+(Component)-[:HAS_EVENT]->(MaintenanceEvent)
 ```
 
 ---

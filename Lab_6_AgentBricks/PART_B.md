@@ -1,0 +1,537 @@
+# Part B: Multi-Agent Supervisor for Aircraft Intelligence
+
+In this part, you'll create a multi-agent supervisor that intelligently routes questions to either the **Genie space** (for sensor analytics) or the **Neo4j MCP agent** (for graph relationships). This enables natural language queries that span both data sources.
+
+**Estimated Time:** 45 minutes
+
+---
+
+## Why Two Data Sources?
+
+Aircraft intelligence requires two fundamentally different types of data, and each is best served by a purpose-built system:
+
+### Genie + Lakehouse: Built for Time-Series Data
+
+The Genie space queries **Unity Catalog tables** in the Databricks Lakehouse, which excels at high-volume, time-stamped sensor telemetry. With **345,600+ rows** of hourly readings across 90 days, the Lakehouse handles:
+
+- **Time-series aggregations** — rolling averages, daily trends, percentile calculations
+- **Statistical analysis** — standard deviation, anomaly detection, fleet-wide comparisons
+- **Columnar scans** — efficiently filtering and grouping millions of readings by date range, sensor type, or aircraft
+
+SQL and the Lakehouse architecture (Delta Lake, columnar storage, query optimization) are purpose-built for these analytical workloads. Genie translates natural language into SQL, giving users instant access to this data without writing queries.
+
+### Neo4j: Built for Rich Relational Data
+
+The Neo4j knowledge graph stores the **relationships and structure** of the aircraft fleet — how aircraft connect to systems, systems to components, components to maintenance events, flights to airports, and delays to root causes. Graph databases excel at:
+
+- **Multi-hop traversals** — "Which components in the hydraulics system of AC1001 had maintenance events that caused flight delays?"
+- **Relationship patterns** — finding connected entities across 8+ node types and 13 relationship types
+- **Topology queries** — understanding the hierarchy from aircraft down to individual sensors
+- **Path analysis** — tracing cause-and-effect chains through the graph
+
+Tabular databases require expensive JOINs across many tables for these queries, while Neo4j traverses relationships natively in milliseconds.
+
+### The Multi-Agent Supervisor: Combining Both
+
+The supervisor you'll build in this lab routes each question to the right data source — **time-series questions go to Genie, relationship questions go to Neo4j** — and for complex questions that span both, it queries each system sequentially and synthesizes a combined answer. For example, "Find aircraft with high EGT and show their maintenance history" first gets high-EGT aircraft from the Lakehouse, then retrieves their maintenance events from the graph.
+
+---
+
+## Prerequisites
+
+Before starting, ensure you have:
+- Completed **Part A** (Genie space for sensor analytics)
+- Access to the Unity Catalog: `databricks-neo4j-lab.lakehouse` (tables) and `databricks-neo4j-lab.lab-schema` (volume)
+
+> **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 5 notebooks they completed.
+
+---
+
+## Step 1: Verify Neo4j MCP Connection
+
+The Neo4j MCP connection has been **pre-configured** by the workshop administrators. In this step you'll verify that it's available and working in your workspace.
+
+### 1.1 Check Unity Catalog Connections
+
+1. In the left navigation pane, click **Catalog**
+2. Click **External connections** (or navigate to the **Connections** tab)
+3. Locate the Neo4j MCP connection named `neo4j_agentcore_mcp`
+4. Verify the connection status shows as configured
+
+> **Note:** This MCP connection points to the administrator's Neo4j Aura instance, which contains the full Aircraft Digital Twin dataset. You do not need to configure this yourself — it has been set up ahead of time so that all participants share the same complete graph data.
+
+### 1.2 Verify MCP Tools Are Available
+
+The Neo4j MCP server provides these tools:
+- `get-schema`: Retrieves the Neo4j graph schema (labels, relationships, properties)
+- `read-cypher`: Executes read-only Cypher queries
+
+You can test these in AI Playground before creating the supervisor:
+1. Navigate to **Playground** in the left navigation
+2. Select **GPT OSS 120B**
+3. Click **Add your own tool** > **+ Add tool** > **MCP Servers** > **External MCP Servers** > **neo4j_agentcore_mcp**
+4. Ask:
+
+```
+What is the schema of the database?
+Which aircraft had critical maintenance events?
+```
+
+---
+
+## Step 2: Create the Multi-Agent Supervisor
+
+### 2.1 Navigate to Agent Bricks
+
+1. In the left navigation pane, click **Agents**
+2. Find the **Multi-Agent Supervisor** tile
+3. Click **Build**
+
+### 2.2 Configure Basic Settings
+
+1. **Name:** `Aircraft Intelligence Hub [YOUR_INITIALS]`
+   - Example: `Aircraft Intelligence Hub RK`
+2. **Description:**
+   ```
+   Intelligent coordinator for aircraft analytics combining sensor telemetry
+   data from Unity Catalog with knowledge graph relationships from Neo4j.
+   ```
+
+---
+
+## Step 3: Add the Neo4j Graph Agent
+
+### 3.1 Add and Configure the External MCP Server
+
+1. In the supervisor configuration under **Configure Agents**, click **+ Add**
+2. From the **Type** dropdown, select **External MCP Server**
+3. From the **Unity Catalog connection** dropdown, select `neo4j_agentcore_mcp`
+4. The **Agent Name** `mcp-neo4j-agentcore-mcp` will auto-populate
+
+![MCP Connection Configuration](images/mcp_connection.png)
+
+5. In the **Describe the content** field, paste the following. The supervisor uses this description to decide which agent handles each question, so detail matters:
+
+```
+Queries the Neo4j knowledge graph to explore aircraft relationships, topology, and operational data.
+
+BEST FOR:
+- Aircraft topology: "What systems does aircraft AC1001 have?"
+- Component hierarchy: "Show all components in the hydraulics system"
+- Maintenance events: "Which aircraft had critical maintenance events?"
+- Flight operations: "Find flights delayed due to maintenance"
+- Relationship patterns: "Which airports does ExampleAir fly to?"
+- Graph traversals: "Show the path from aircraft to sensor"
+
+DATA AVAILABLE (loaded from /Volumes/databricks-neo4j-lab/lab-schema/lab-volume/):
+- Aircraft (20): Fleet inventory with tail numbers, models, operators
+- Systems (~80): Engines, Avionics, Hydraulics per aircraft
+- Components (320): Turbines, Compressors, Pumps, etc.
+- Sensors (160): Monitoring equipment metadata
+- MaintenanceEvents (300): Faults, severity, corrective actions
+- Flights (800): Operations with departure/arrival
+- Delays (~300): Delay causes and durations
+- Airports (12): Route network locations
+
+RELATIONSHIP TYPES:
+- HAS_SYSTEM: Aircraft -> System
+- HAS_COMPONENT: System -> Component
+- HAS_SENSOR: System -> Sensor
+- HAS_EVENT: Component -> MaintenanceEvent
+- OPERATES_FLIGHT: Aircraft -> Flight
+- DEPARTS_FROM / ARRIVES_AT: Flight -> Airport
+- HAS_DELAY: Flight -> Delay
+
+DO NOT USE FOR:
+- Time-series sensor readings (use sensor_data_agent instead)
+- Statistical aggregations over readings
+- Trend analysis or rolling averages
+```
+
+---
+
+## Step 4: Add the Genie Space Agent
+
+### 4.1 Add Genie Space
+
+1. Click **+ Add** to add another agent
+2. From the **Type** dropdown, select **Genie Space**
+3. Select your Genie space from Part A: `Aircraft Sensor Analyst [YOUR_INITIALS]`
+
+### 4.2 Configure Agent Settings
+
+1. **Agent Name:** `sensor_data_agent`
+   - Edit the auto-populated name if needed
+2. **Description:**
+
+```
+Analyzes aircraft sensor telemetry data using SQL queries over Unity Catalog tables.
+
+DATA LOCATION:
+- Catalog: databricks-neo4j-lab
+- Schema: lakehouse
+- Tables: sensor_readings, sensors, systems, aircraft
+
+BEST FOR:
+- Time-series analytics: "What is the average EGT over the last 30 days?"
+- Statistical analysis: "Show sensors above the 95th percentile"
+- Trend detection: "Show daily vibration trends for Engine 1"
+- Fleet comparisons: "Compare fuel flow between Boeing and Airbus"
+- Anomaly detection: "Find EGT readings above 690 degrees"
+- Aggregations: "What was the maximum N1 speed recorded?"
+
+DATA AVAILABLE:
+- sensor_readings (345,600+ rows): Hourly telemetry over 90 days
+- sensors (160 rows): Sensor metadata (type, unit, system)
+- systems (~80 rows): Aircraft system information
+- aircraft (20 rows): Fleet metadata (model, operator)
+
+SENSOR TYPES:
+- EGT: Exhaust Gas Temperature (640-700 C)
+- Vibration: Engine vibration (0.05-0.50 ips)
+- N1Speed: Fan speed (4,300-5,200 rpm)
+- FuelFlow: Fuel consumption (0.85-1.95 kg/s)
+
+DO NOT USE FOR:
+- Relationship queries (use mcp-neo4j-agentcore-mcp)
+- Maintenance event details
+- Flight operations or delays
+- Component-level fault tracking
+```
+
+---
+
+## Step 5: Create the Agent
+
+Click **Create Agent** to deploy the supervisor.
+
+> **Note:** Deployment may take several minutes to complete. The status will update when ready.
+
+---
+
+## Step 6: Configure Supervisor Instructions
+
+### 6.1 Set Supervisor Instructions
+
+1. Scroll to the bottom of the agent configuration page
+2. Expand the **Optional** section
+3. In the **Instructions** field, enter the following:
+
+```
+# Aircraft Intelligence Hub - Routing Instructions
+
+You are an intelligent coordinator for aircraft analytics. Your role is to understand user questions and route them to the appropriate specialized agent.
+
+## Available Agents
+
+### sensor_data_agent (Genie Space - Unity Catalog SQL)
+Use for questions about:
+- Sensor readings and telemetry data
+- Time-series analytics (averages, trends, rolling windows)
+- Statistical analysis (percentiles, standard deviation)
+- Fleet-wide comparisons of sensor metrics
+- Anomaly detection based on readings
+- Questions containing: EGT, vibration, N1, fuel flow, temperature, readings, averages, trends
+
+### mcp-neo4j-agentcore-mcp (Neo4j Knowledge Graph - Cypher)
+Use for questions about:
+- Aircraft structure and topology
+- Component relationships and hierarchy
+- Maintenance events and fault history
+- Flight operations, routes, delays
+- "Which", "what systems", "connected to", "related to" questions
+- Questions about maintenance, flights, delays, airports
+
+## Routing Rules
+
+1. **Sensor values/readings** -> sensor_data_agent
+   - "What is the EGT for..."
+   - "Show vibration readings..."
+   - "Average fuel flow..."
+
+2. **Relationships/structure** -> mcp-neo4j-agentcore-mcp
+   - "What systems does aircraft X have?"
+   - "Which components..."
+   - "Show maintenance events..."
+
+3. **Flights/operations** -> mcp-neo4j-agentcore-mcp
+   - "Which flights were delayed?"
+   - "What airports does..."
+   - "Show flight routes..."
+
+4. **Maintenance history** -> mcp-neo4j-agentcore-mcp
+   - "What maintenance events..."
+   - "Which components had faults?"
+   - "Critical maintenance..."
+
+5. **Statistical aggregations on readings** -> sensor_data_agent
+   - "Average", "maximum", "minimum", "percentile"
+   - "Trend", "over time", "daily", "monthly"
+   - "Compare", "between", "by model"
+
+## Complex Queries (Multi-Agent)
+
+For questions that need BOTH sources, process sequentially:
+
+1. **"Find aircraft with high vibration AND recent maintenance"**
+   - First: sensor_data_agent -> Get aircraft with high vibration
+   - Then: mcp-neo4j-agentcore-mcp -> Get maintenance events for those aircraft
+
+2. **"Which engines have abnormal EGT and what components were serviced?"**
+   - First: sensor_data_agent -> Find abnormal EGT readings
+   - Then: mcp-neo4j-agentcore-mcp -> Find maintenance events for those engines
+
+3. **"Compare sensor trends for aircraft that had delays"**
+   - First: mcp-neo4j-agentcore-mcp -> Get aircraft with delays
+   - Then: sensor_data_agent -> Get sensor trends for those aircraft
+
+## Response Guidelines
+
+1. For single-agent queries: Return the agent's response directly
+2. For multi-agent queries: Synthesize a combined response that integrates both perspectives
+3. Always cite which data source provided each piece of information
+4. If a query cannot be answered by either agent, explain what data would be needed
+```
+
+### 6.2 Save Changes
+
+Click **Update Agent** to save the instructions.
+
+---
+
+## Step 7: Test the Multi-Agent System
+
+### 7.1 Start Testing
+
+Once deployment completes:
+1. Use the **Test your Agent** panel on the right side of the Build tab
+2. Or click **Open in Playground** for expanded testing with AI Judge features
+
+### 7.2 Test Single-Agent Routing
+
+**Test 1: Sensor Analytics (should route to sensor_data_agent)**
+```
+What is the average EGT temperature across the fleet?
+```
+Verify: The query is routed to sensor_data_agent and returns a numerical average
+
+**Test 2: Graph Relationships (should route to mcp-neo4j-agentcore-mcp)**
+```
+What systems does aircraft AC1001 have?
+```
+Verify: The query is routed to mcp-neo4j-agentcore-mcp and returns engine, avionics, hydraulics systems
+
+**Test 3: Maintenance Events (should route to mcp-neo4j-agentcore-mcp)**
+```
+Show me all critical maintenance events in the last month
+```
+Verify: Returns maintenance events with severity=CRITICAL
+
+**Test 4: Fleet Comparison (should route to sensor_data_agent)**
+```
+Compare average vibration readings between Boeing and Airbus aircraft
+```
+Verify: Returns grouped statistics by manufacturer
+
+### 7.3 Test Multi-Agent Queries
+
+**Test 5: Combined Query**
+```
+Find aircraft with EGT readings above 680 degrees and show their maintenance history
+```
+Expected behavior:
+1. Supervisor routes to sensor_data_agent for high EGT aircraft
+2. Supervisor routes to mcp-neo4j-agentcore-mcp for maintenance history
+3. Response synthesizes both data sources
+
+**Test 6: Another Combined Query**
+```
+Which engines had above-average vibration, and what components were recently serviced on those engines?
+```
+Expected behavior:
+1. Get high-vibration engines from sensor_data_agent
+2. Get maintenance events from mcp-neo4j-agentcore-mcp
+3. Combine and present results
+
+---
+
+## Step 8: Improve Through Feedback
+
+### 8.1 Add Example Questions
+
+1. Navigate to the **Examples** tab
+2. Click **+ Add** to introduce test questions
+3. Enter questions that represent common user queries
+
+### 8.2 Share with Subject Matter Experts
+
+1. Share the configuration page link with domain experts
+2. Grant experts `CAN_MANAGE` permission on the supervisor
+3. Ensure experts have appropriate access to each subagent
+
+### 8.3 Add Guidelines
+
+1. Select each example question
+2. Add **Guidelines** labels that refine routing behavior
+3. Test again to validate improvements
+4. Click **Update Agent** to save changes
+
+---
+
+## Step 9: Optional - Query the Endpoint Programmatically
+
+1. Click **See Agent status** or **Open in Playground**
+2. Select **Get code** to retrieve API examples
+3. Choose between **Curl API** or **Python API**
+
+Example Python usage:
+```python
+import requests
+
+# Get your endpoint URL from the agent status page
+ENDPOINT_URL = "https://<workspace>.databricks.com/serving-endpoints/<agent-name>/invocations"
+
+headers = {
+    "Authorization": f"Bearer {DATABRICKS_TOKEN}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(
+    ENDPOINT_URL,
+    headers=headers,
+    json={"messages": [{"role": "user", "content": "What systems does AC1001 have?"}]}
+)
+print(response.json())
+```
+
+---
+
+## Summary
+
+You've created a multi-agent system that combines two purpose-built data platforms:
+
+- **Genie + Lakehouse for time-series data** — SQL-powered analytics over 345,600+ sensor readings, ideal for aggregations, trends, and statistical analysis
+- **Neo4j for rich relational data** — graph-powered traversals across aircraft topology, maintenance events, flights, and delays, ideal for relationship queries and multi-hop navigation
+- **Intelligent routing** — the supervisor directs each question to the right data source automatically
+- **Cross-source synthesis** — complex questions that span both systems are answered by querying each sequentially and combining the results
+- **Natural language access** — users ask questions without needing SQL or Cypher knowledge
+
+### Architecture Recap
+
+```
+User Question
+     |
+     v
+Multi-Agent Supervisor
+     |
+     +---> "sensor readings?" ---> Genie Space ---> Unity Catalog (Lakehouse)
+     |        time-series              SQL           databricks-neo4j-lab.lakehouse
+     |        aggregations                           345,600+ sensor readings
+     |        trend analysis
+     |
+     +---> "relationships?" ---> Neo4j MCP ---> Knowledge Graph (Aura)
+     |        topology               Cypher       8 node types, 13 relationship types
+     |        maintenance                         admin's pre-configured instance
+     |        flights/delays
+     |
+     +---> "both needed?" ---> Sequential calls to both agents
+                               |
+                               v
+                         Synthesized Response
+```
+
+### Data Sources
+
+| Source | Location | Query Language | Best For |
+|--------|----------|----------------|----------|
+| Sensor Telemetry | `databricks-neo4j-lab.lakehouse.sensor_readings` | SQL | Time-series analytics, trends, aggregations |
+| Aircraft Metadata | `databricks-neo4j-lab.lakehouse.aircraft` | SQL | Fleet-wide comparisons, filtering |
+| Knowledge Graph | Neo4j Aura (admin instance, via MCP) | Cypher | Relationships, topology, graph traversals |
+| Graph Data Origin | `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/` | - | - |
+
+---
+
+## Troubleshooting
+
+### "Agent not responding"
+- Check MCP connection status in **Catalog** > **Connections**
+- Verify Neo4j instance is running
+- Test Genie space independently in AI Playground
+- Ensure user has `USE CONNECTION` permission on the MCP connection
+
+### "Wrong agent selected"
+- Review and enhance agent descriptions with more specific keywords
+- Add explicit routing patterns in supervisor instructions
+- Use the Examples tab to add labeled training questions
+
+### "Cypher query failed"
+- Check that Neo4j data was loaded correctly (Lab 5)
+- Verify node labels and relationship types match documentation
+- Review Cypher syntax for errors
+- Test queries directly in Neo4j Aura console first
+
+### "SQL query failed"
+- Verify table names in Unity Catalog: `databricks-neo4j-lab.lakehouse`
+- Check column names match documentation
+- Ensure Genie space has access to all required tables
+- Test queries directly in SQL Editor first
+
+### "Permission denied"
+- For Genie space: User needs access to the space AND underlying data tables
+- For MCP server: User needs `USE CONNECTION` permission on the Unity Catalog connection
+- For supervisor: User needs `CAN QUERY` permission on the agent endpoint
+
+---
+
+## Sample Queries Reference
+
+### Sensor Analytics (sensor_data_agent)
+```
+What is the average EGT temperature for aircraft N95040A?
+Show daily vibration trends for Engine 1 in August 2024
+Find all sensors with readings above the 95th percentile
+Compare fuel flow rates by aircraft model
+What was the maximum N1 speed recorded?
+```
+
+### Graph Queries (mcp-neo4j-agentcore-mcp)
+```
+What systems does aircraft AC1001 have?
+Show all components in the hydraulics system
+Which aircraft had critical maintenance events?
+Find flights that were delayed due to maintenance
+What airports are in the route network?
+```
+
+### Combined Queries (both agents)
+```
+Find aircraft with high EGT and show their recent maintenance
+Which engines have abnormal vibration and what was serviced?
+Compare sensor trends for aircraft that had delays vs. those that didn't
+Show maintenance events for aircraft with the lowest fuel efficiency
+```
+
+---
+
+## Next Steps
+
+Congratulations! You've built a complete multi-agent system for aircraft intelligence. Consider these extensions:
+
+1. **Add Documentation Agent**: Integrate semantic search as a third agent for maintenance procedures
+
+2. **Create Unity Catalog Functions**: Build custom Python functions as additional tools
+
+3. **Production Deployment**: Deploy as a REST API for integration with other systems
+
+4. **Add Guardrails**: Configure output validation and safety filters
+
+5. **Enable Feedback**: Set up user feedback collection for continuous improvement
+
+---
+
+## References
+
+- [Multi-Agent Supervisor Documentation](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor)
+- [External MCP Servers](https://docs.databricks.com/aws/en/generative-ai/mcp/external-mcp)
+- [Agent Bricks Overview](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/)
+- [Unity Catalog Connections](https://docs.databricks.com/en/data-governance/unity-catalog/index.html)

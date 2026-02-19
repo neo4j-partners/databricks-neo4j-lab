@@ -8,15 +8,15 @@
 
 ### Try These Explorations
 
-**Find Asset Manager Networks:**
-- Search for "BlackRock"
-- Expand to see owned companies
-- Explore shared risk factors
+**Find Aircraft Systems:**
+- Search for "Aircraft"
+- Expand to see connected systems
+- Explore component hierarchies
 
-**Discover Risk Patterns:**
-- Search for "cybersecurity"
-- See which companies face this risk
-- Find common risk themes
+**Discover Maintenance Patterns:**
+- Search for "MaintenanceEvent"
+- See which components have faults
+- Find maintenance severity patterns
 
 ### Apply Graph Algorithms
 - Use **Degree Centrality** to find highly connected nodes

@@ -1,27 +1,25 @@
-# Lab Steps: Restore Backup
+# Lab Steps: Data Loading
 
 ## Part 2: Load the Knowledge Graph
 
-### Step 1: Download Backup
-Download `finance_data.backup` from the GitHub repository.
+Data loading is handled in **Lab 5 - Databricks ETL to Neo4j** using:
 
-### Step 2: Upload to Aura
-1. Go to your instance in the Aura Console
-2. Click **... menu** → **Backup & restore**
-3. Click **Upload backup**
-4. Drag in the backup file
+### Notebook 01: Spark Connector ETL
+- Loads Aircraft, System, and Component nodes from CSV files in Unity Catalog
+- Uses the Neo4j Spark Connector
 
-### Step 3: Wait for Restore
-Your instance will restart with the complete knowledge graph.
+### Notebook 02: Full Dataset Load
+- Adds Sensors, Airports, Flights, Delays, MaintenanceEvents, and Removals
+- Uses the Python neo4j driver
 
-## What's in the Backup?
+## What You'll Load
 
 | Content | Count |
 |---------|-------|
-| Companies | 8 major tech firms |
-| Risk Factors | 200+ extracted risks |
-| Products | 100+ products/services |
-| Text Chunks | 1000+ embedded passages |
+| Aircraft | 20 with tail numbers and models |
+| Systems | 80 (Engines, Avionics, Hydraulics) |
+| Components | 320 (Turbines, Compressors, Pumps) |
+| Flights | ~800 flight operations |
 
 ---
 

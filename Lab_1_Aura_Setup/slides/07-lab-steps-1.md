@@ -2,21 +2,17 @@
 
 ## Part 1: Create Your Database
 
-### Step 1: Subscribe via AWS Marketplace
-1. Navigate to Neo4j Aura in AWS Marketplace
-2. Click **Subscribe** and accept terms
-3. Click **Set up your account**
+### Step 1: Sign Up for Neo4j Aura
+1. Follow the signup process provided by your workshop organizer (SSO or Free Trial)
+2. Create a Neo4j Aura account
+3. Verify your email
 
-### Step 2: Create Your Account
-1. Create a Neo4j Aura account
-2. Verify your email
-
-### Step 3: Provision Database
+### Step 2: Provision Database
 1. Click **Create Instance**
 2. Choose your configuration
 3. Wait for provisioning (1-2 minutes)
 
-### Step 4: Save Credentials
+### Step 3: Save Credentials
 **Important:** Download and save the connection file - the password is only shown once!
 
 ---

@@ -2,56 +2,45 @@
 
 ## Program Name
 
-Build Generative AI & GraphRAG Agents with Neo4j and Databricks
+Build AI Agents and Knowledge Graphs with Neo4j and Databricks
 
 ## Workshop Overview
 
-This workshop equips participants with practical skills to combine Neo4j's graph database platform with Databricks AI/ML capabilities to build explainable, context-aware AI applications using GraphRAG and agentic patterns.
+This workshop equips participants with practical skills to combine Neo4j's graph database platform with Databricks AI/ML capabilities to build production-ready AI agents that combine the power of graph databases with modern cloud platforms.
 
-Participants will work with a real-world dataset—SEC 10-K financial filings—to experience how knowledge graphs enhance AI applications with structured context and relationship-aware retrieval.
+Participants will work with a comprehensive Aircraft Digital Twin dataset to experience how knowledge graphs enhance AI applications with structured context and relationship-aware retrieval.
 
 Through a series of guided exercises, attendees will:
 
 - Deploy and explore Neo4j Aura, the fully managed cloud graph platform
-- Build no-code AI agents with Neo4j Aura Agents
-- Understand foundational GenAI and retrieval strategies
-- Build GraphRAG pipelines using Databricks Foundation Model APIs
+- Load data into Neo4j using the Spark Connector and Python driver
+- Build multi-agent systems with Databricks AgentBricks that coordinate across SQL and graph data sources
 - Connect to Neo4j using the Model Context Protocol (MCP) server for standardized graph access
-- Create intelligent multi-agent systems with Databricks AgentBricks that coordinate across SQL and graph data sources
-- Invoke Aura Agents programmatically via REST API
+- Build GraphRAG pipelines using Databricks Foundation Model APIs
+- Add semantic search capabilities with vector embeddings
 
 ---
 
 ## Lab Agenda
 
-### Part 1 – No-Code Getting Started with Neo4j Aura (Beginner Friendly)
+### Phase 1 – Setup (Beginner Friendly)
 
 #### Overview
 
-Get hands-on with Neo4j Aura and build your first AI agent without writing any code. You'll provision a cloud graph database, load a real-world knowledge graph of SEC 10-K financial filings, and create an intelligent agent that can answer natural language questions about companies, risk factors, and ownership relationships.
-
-#### Introductions & Lecture — Introduction to Neo4j Aura and Aura Agents
-
-- Neo4j Aura: A fully managed, cloud-native graph database platform
-- Neo4j Aura on AWS: Native deployment via AWS Marketplace with seamless integration
-- Aura Agents: Build, test, and deploy AI agents grounded in your graph data without writing code
+Get connected to all workshop resources and set up your Neo4j Aura database.
 
 #### Labs
 
-- **Lab 0 – Sign In**: Sign into AWS Console and workshop environment
-- **Lab 1 – Neo4j Aura Setup**: Provision Neo4j Aura, restore a pre-built SEC 10-K knowledge graph, and explore relationships using Neo4j Explore
-- **Lab 2 – Aura Agents**: Create a no-code AI agent using Neo4j Aura Agents
-  - Configure semantic search tools for vector-based retrieval
-  - Add Text2Cypher tools for natural language to Cypher translation
-  - Test the agent with questions about companies, risks, and ownership
+- **Lab 0 – Sign In**: Sign into Databricks and workshop environment
+- **Lab 1 – Neo4j Aura Setup**: Provision Neo4j Aura and save connection credentials for later labs
 
 ---
 
-### Part 2 – GraphRAG with Neo4j and Databricks (Intermediate)
+### Phase 2 – Databricks ETL & Multi-Agent Analytics (Intermediate)
 
 #### Overview
 
-Move beyond no-code tools and build production-ready GraphRAG pipelines using Python. You'll use the neo4j-graphrag library with Databricks Foundation Models to implement vector search, graph traversal, and LLM-powered generation. Then, create sophisticated multi-agent systems using Databricks AgentBricks that coordinate between SQL data sources and Neo4j graph queries via the Model Context Protocol.
+Load aircraft data into Neo4j and build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph — two purpose-built systems for two fundamentally different types of data.
 
 #### Lecture — Neo4j + Generative AI Concepts
 
@@ -67,33 +56,29 @@ Move beyond no-code tools and build production-ready GraphRAG pipelines using Py
 
 #### Labs
 
-- **Lab 4 – GraphRAG with Neo4j**: Build GraphRAG pipelines using the neo4j-graphrag Python library with Databricks Foundation Models for embeddings and text generation
-- **Lab 5 – AgentBricks Multi-Agent**: Build a multi-agent system with Databricks AgentBricks
-  - Create a Databricks AI/BI Genie space for natural language SQL queries
+- **Lab 5 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector and Python driver
+  - Load core aircraft topology (Aircraft, System, Component) via Spark Connector
+  - Load full dataset (Sensors, Airports, Flights, Delays, Maintenance Events, Removals) via Python driver
+  - Validate with Cypher queries and explore in Neo4j Aura
+- **Lab 6 – AgentBricks Multi-Agent**: Build a multi-agent system with Databricks AgentBricks
+  - Create a Databricks AI/BI Genie space for natural language sensor analytics
   - Connect to Neo4j via external MCP server for graph queries
   - Build a Multi-Agent Supervisor that routes questions to the appropriate data source
-  - Test cross-system queries combining structured data and graph relationships
+  - Test cross-system queries combining sensor telemetry and graph relationships
 
 ---
 
-### Part 3 – Advanced GraphRAG and Agents (Advanced)
+### Phase 3 – Semantic Search & GraphRAG (Intermediate-Advanced)
 
 #### Overview
 
-Dive deeper into advanced retrieval techniques and production integration patterns. You'll learn to convert natural language directly to Cypher queries using Text2Cypher, automatically extract knowledge graphs from unstructured text, and programmatically invoke your Aura Agents via REST APIs with secure OAuth2 authentication.
-
-> **Optional Section:** This part of the workshop is designed for all-day sessions or as advanced material that participants can take home and complete on their own infrastructure. It builds on the skills from Parts 1 and 2 and is ideal for those who want to dive deeper into production integration patterns.
-
-#### What You'll Learn
-
-- Advanced Retrieval: Text2Cypher and automated entity extraction techniques
-- Aura Agents API: Programmatic invocation of Aura Agents via REST API
-- OAuth2 Authentication: Secure machine-to-machine authentication with client credentials
+Add semantic search capabilities to the knowledge graph — chunk maintenance documentation, generate vector embeddings, and build GraphRAG retrievers that blend similarity search with graph traversal.
 
 #### Labs
 
-- **Lab 6 – Advanced RAG**: Learn advanced retrieval and knowledge graph construction techniques
-  - Use Text2Cypher to convert natural language questions directly to Cypher queries
-  - Extract entities and relationships automatically from unstructured text
-  - Build knowledge graphs programmatically using SimpleKGPipeline
-- **Lab 10 – Aura Agents API**: Programmatically invoke your Aura Agent from external applications using REST APIs with OAuth2 authentication
+- **Lab 7 – Semantic Search**: Build GraphRAG pipelines over maintenance documentation
+  - Load the A320-200 Maintenance Manual into Neo4j as Document/Chunk nodes
+  - Generate embeddings using Databricks Foundation Model APIs (BGE-large)
+  - Create a vector index for similarity search
+  - Build GraphRAG retrievers combining vector search with graph traversal
+  - Compare standard vector retrieval vs. graph-enhanced retrieval results

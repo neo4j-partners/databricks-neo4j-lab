@@ -2,7 +2,7 @@
 
 ## Workshop Overview
 
-Welcome to the **Neo4j and Amazon Bedrock** hands-on lab!
+Welcome to the **Neo4j and Databricks** hands-on lab!
 
 In this workshop, you'll learn to build AI-powered applications that combine:
 - **Knowledge Graphs** - Structured data with relationships
@@ -11,7 +11,7 @@ In this workshop, you'll learn to build AI-powered applications that combine:
 
 ## This Lab
 
-Set up your Neo4j Aura database and explore a pre-built SEC 10-K filings knowledge graph.
+Set up your Neo4j Aura database and save your connection credentials for use in later labs.
 
 ---
 

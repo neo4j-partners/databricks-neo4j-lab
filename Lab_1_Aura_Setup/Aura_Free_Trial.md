@@ -26,4 +26,4 @@ Follow these steps to create a free Neo4j Aura account and database instance:
 
 ---
 
-**Next:** Return to the [Lab 1 README](README.md#part-2-restore-the-backup) to continue with restoring the backup. Since your instance was already created during signup, you can skip directly to Part 2.
+**Next:** Return to the [Lab 1 README](README.md) to save your credentials. Since your instance was already created during signup, you can skip the "Create Your Database Instance" section and proceed to [Lab 5 - Databricks ETL to Neo4j](../Lab_5_Databricks_ETL_Neo4j).
