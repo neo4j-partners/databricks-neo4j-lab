@@ -6,6 +6,8 @@ In this lab, you'll build a multi-agent system using Databricks AgentBricks that
 
 ## Multi-Agent Architecture
 
+![Lab Architecture Overview](../images/lab-architecture-overview.png)
+
 ## Overview of the Two Data Sources - Databricks Lakehouse and Neo4j Knowledge Graph
 
 Aircraft intelligence requires both **time-series telemetry** and **rich relational data**, and each is best served by a purpose-built platform:
