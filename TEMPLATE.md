@@ -13,7 +13,7 @@ Participants will work with a comprehensive Aircraft Digital Twin dataset to exp
 Through a series of guided exercises, attendees will:
 
 - Deploy and explore Neo4j Aura, the fully managed cloud graph platform
-- Load data into Neo4j using the Spark Connector and Python driver
+- Load data into Neo4j using the Spark Connector
 - Build multi-agent systems with Databricks AgentBricks that coordinate across SQL and graph data sources
 - Connect to Neo4j using the Model Context Protocol (MCP) server for standardized graph access
 - Build GraphRAG pipelines using Databricks Foundation Model APIs
@@ -56,9 +56,9 @@ Load aircraft data into Neo4j and build a multi-agent supervisor that combines t
 
 #### Labs
 
-- **Lab 5 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector and Python driver
+- **Lab 5 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector
   - Load core aircraft topology (Aircraft, System, Component) via Spark Connector
-  - Load full dataset (Sensors, Airports, Flights, Delays, Maintenance Events, Removals) via Python driver
+  - Load full dataset (Sensors, Airports, Flights, Delays, Maintenance Events, Removals) via Spark Connector
   - Validate with Cypher queries and explore in Neo4j Aura
 - **Lab 6 – AgentBricks Multi-Agent**: Build a multi-agent system with Databricks AgentBricks
   - Create a Databricks AI/BI Genie space for natural language sensor analytics

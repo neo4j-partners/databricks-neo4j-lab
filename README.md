@@ -73,7 +73,7 @@ Together the dataset includes:
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 5 - Databricks ETL to Neo4j](./Lab_5_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector and Python driver | 45 min |
+| [Lab 5 - Databricks ETL to Neo4j](./Lab_5_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
 | [Lab 6 - AgentBricks](./Lab_6_AgentBricks) | Build a multi-agent supervisor combining Genie Space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
 
 ---

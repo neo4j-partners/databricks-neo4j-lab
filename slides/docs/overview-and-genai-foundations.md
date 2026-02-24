@@ -8,7 +8,7 @@ A participant reference covering the workshop overview, GenAI capabilities and l
 
 ### What You'll Build
 
-- **Load** aircraft fleet data into a Neo4j knowledge graph using the Spark Connector and Python driver
+- **Load** aircraft fleet data into a Neo4j knowledge graph using the Spark Connector
 - **Explore** a pre-deployed AWS AgentCore agent that queries Neo4j via MCP
 - **Build** a multi-agent supervisor combining Databricks Genie (sensor analytics) with Neo4j MCP (graph queries)
 - **Add** semantic search with vector embeddings and GraphRAG retrievers
