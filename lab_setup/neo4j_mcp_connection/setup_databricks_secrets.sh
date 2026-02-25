@@ -129,31 +129,15 @@ if ! databricks auth describe $PROFILE_FLAG &> /dev/null; then
 fi
 log_info "Databricks CLI authenticated"
 
-# Load values from .mcp-credentials.json
-log_step "Loading configuration from .mcp-credentials.json"
+# Validate required values in .mcp-credentials.json
+log_step "Validating .mcp-credentials.json"
 
-GATEWAY_URL=$(jq -r '.gateway_url // empty' "$CREDENTIALS_FILE")
-TOKEN_URL=$(jq -r '.token_url // empty' "$CREDENTIALS_FILE")
-CLIENT_ID=$(jq -r '.client_id // empty' "$CREDENTIALS_FILE")
-CLIENT_SECRET=$(jq -r '.client_secret // empty' "$CREDENTIALS_FILE")
-OAUTH_SCOPE=$(jq -r '.scope // empty' "$CREDENTIALS_FILE")
-
-# Extract gateway host from gateway_url (keep scheme, remove path)
-# Example: https://xxx.bedrock-agentcore.us-west-2.amazonaws.com/mcp -> https://xxx.bedrock-agentcore.us-west-2.amazonaws.com
-# Databricks HTTP connections require the https:// scheme in the host option
-if [[ -n "$GATEWAY_URL" ]]; then
-    GATEWAY_HOST=$(echo "$GATEWAY_URL" | sed -E 's|(https?://[^/]+).*|\1|')
-else
-    GATEWAY_HOST=""
-fi
-
-# Validate required values
 missing=()
-[[ -z "$GATEWAY_URL" ]] && missing+=("gateway_url")
-[[ -z "$TOKEN_URL" ]] && missing+=("token_url")
-[[ -z "$CLIENT_ID" ]] && missing+=("client_id")
-[[ -z "$CLIENT_SECRET" ]] && missing+=("client_secret")
-[[ -z "$OAUTH_SCOPE" ]] && missing+=("scope")
+for field in gateway_url token_url client_id client_secret scope; do
+    if [[ -z "$(jq -r ".$field // empty" "$CREDENTIALS_FILE")" ]]; then
+        missing+=("$field")
+    fi
+done
 
 if [[ ${#missing[@]} -gt 0 ]]; then
     log_error "Missing required values in .mcp-credentials.json: ${missing[*]}"
@@ -164,12 +148,7 @@ if [[ ${#missing[@]} -gt 0 ]]; then
     exit 1
 fi
 
-log_info "Gateway URL: $GATEWAY_URL"
-log_info "Gateway Host: $GATEWAY_HOST"
-log_info "Token URL: $TOKEN_URL"
-log_info "Client ID: $CLIENT_ID"
-log_info "Client Secret: [REDACTED - ${#CLIENT_SECRET} characters]"
-log_info "OAuth Scope: $OAUTH_SCOPE"
+log_info "Credentials file validated (${#missing[@]} missing fields)"
 
 # Create secret scope (ignore error if already exists)
 log_step "Creating secret scope: $SCOPE_NAME"
@@ -179,23 +158,23 @@ else
     log_warn "Secret scope already exists (or failed to create - continuing)"
 fi
 
-# Function to set a secret
-set_secret() {
+# Function to set a secret by piping directly from jq to avoid secrets in shell variables or process listings
+set_secret_from_jq() {
     local key=$1
-    local value=$2
+    local jq_expr=$2
     log_info "Setting secret: $key"
-    # Use echo -n to avoid trailing newline, pipe to put-secret
-    echo -n "$value" | databricks secrets put-secret "$SCOPE_NAME" "$key" $PROFILE_FLAG
+    jq -r -j "$jq_expr" "$CREDENTIALS_FILE" | databricks secrets put-secret "$SCOPE_NAME" "$key" $PROFILE_FLAG
 }
 
 # Set secrets for OAuth2 M2M authentication
+# Values are piped directly from jq to databricks CLI to avoid exposure in shell variables or process listings
 log_step "Storing OAuth2 secrets in Databricks"
 
-set_secret "gateway_host" "$GATEWAY_HOST"
-set_secret "client_id" "$CLIENT_ID"
-set_secret "client_secret" "$CLIENT_SECRET"
-set_secret "token_endpoint" "$TOKEN_URL"
-set_secret "oauth_scope" "$OAUTH_SCOPE"
+set_secret_from_jq "gateway_host" '.gateway_url | sub("/mcp$"; "")'
+set_secret_from_jq "client_id" '.client_id'
+set_secret_from_jq "client_secret" '.client_secret'
+set_secret_from_jq "token_endpoint" '.token_url'
+set_secret_from_jq "oauth_scope" '.scope'
 
 log_info "All secrets stored successfully"
 

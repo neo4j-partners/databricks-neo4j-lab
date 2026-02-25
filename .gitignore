@@ -3,6 +3,9 @@
 .env.*
 *.env
 
+# Credentials
+.mcp-credentials.json
+
 # macOS
 .DS_Store
 .AppleDouble
