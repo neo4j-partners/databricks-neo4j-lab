@@ -130,6 +130,28 @@ The graph connections turn an isolated text answer into a **contextual, grounded
 
 ---
 
+<style scoped>
+section { font-size: 25px; }
+</style>
+
+## Flexible Vector Store Options
+
+GraphRAG's vector store is **pluggable** — you are not locked into a single vector database.
+
+The `neo4j-graphrag-python` library supports **external vector stores** through its `ExternalRetriever` pattern. Vectors live in the store your team already uses, while Neo4j provides the graph context enrichment.
+
+| Vector Store | How It Works |
+|---|---|
+| **Neo4j** (built-in) | Vectors and graph in one database — simplest setup |
+| **Databricks Vector Search** | Keep vectors in your Lakehouse alongside your Delta tables |
+| **Pinecone, Weaviate, Qdrant** | Built-in support via optional extras in `neo4j-graphrag-python` |
+
+**The pattern:** The external store handles similarity search and returns matching IDs. Neo4j resolves those IDs to nodes and traverses the graph for context. Each system does what it is best at.
+
+**The key insight:** Graph context is the value-add — regardless of where your vectors live.
+
+---
+
 ## Three Ways to Retrieve Knowledge
 
 GraphRAG supports multiple retrieval strategies depending on how much context you need:
@@ -144,6 +166,10 @@ Good for specific questions like "what maintenance is required for this aircraft
 Good for domain-specific terms and fault codes that need exact matching
 
 ---
+
+<style scoped>
+section { font-size: 25px; }
+</style>
 
 ## Neo4j in Unity Catalog: Federated Queries via JDBC
 
@@ -173,13 +199,33 @@ This means an AI agent on Databricks can **explore and query Neo4j on its own** 
 
 ---
 
+## The Data Discovery Problem
+
+- Enterprise lakehouses grow fast — **hundreds of schemas, thousands of tables**
+- Analysts spend significantly more time finding and understanding data than actually analyzing it
+- AI agents can write SQL, but struggle to know **which table to query** or **what a column means**
+- Unity Catalog governs access, but treats relationships as join paths — not **first-class semantic connections**
+- The graph can fill this gap: a **semantic layer** that maps business meaning onto physical data
+
+---
+
+## Neo4j as a Semantic Layer
+
+- **Sync Unity Catalog metadata into Neo4j**: catalogs, schemas, tables, columns as a connected graph
+- Layer on **domain knowledge**: business concepts mapped to physical assets, metric definitions, authoritative sources
+- **Metadata enrichment**: domain experts curate the semantic connections, agents query them at runtime
+- Agents get **structured business context** — know what to query, not just how to query
+- Text-to-SQL accuracy jumps when agents understand the domain
+- **Complementary to Unity Catalog**: UC governs access and lineage, the graph adds **meaning and connections**
+
+---
+
 ## Multi-Agent Analytics
 
-When you have data in **both** platforms, you can build specialized AI agents for each and combine them under a single supervisor.
-
-The idea is simple: instead of one agent that tries to do everything, you create **focused agents** that each do one thing well, and a **supervisor** that knows which agent to call.
-
-The end user just asks a question in plain English — the system figures out where to go.
+- Data lives in **both** platforms — build specialized AI agents for each
+- Instead of one agent that tries to do everything, create **focused agents** that each do one thing well
+- A **supervisor** routes questions to the right agent automatically
+- The end user asks a question in plain English — the system figures out where to go
 
 ---
 

@@ -198,46 +198,16 @@ All slides are organized by lab module for easy navigation.
 
 ## 🚀 How to Use These Slides
 
-### Option 1: Marp CLI (Recommended)
+### Running Slides
 
-Install Marp CLI:
+Requires Node.js 22 LTS (`brew install node@22`) and a one-time `npm install` in this directory.
+
 ```bash
-npm install -g @marp-team/marp-cli
+cd slides
+/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp overview-databricks-neo4j --server
 ```
 
-**Present slides:**
-```bash
-cd /path/to/slides
-marp 01-what-is-genai-slides.md --server
-```
-
-**Export to PDF:**
-```bash
-marp 01-what-is-genai-slides.md --pdf
-```
-
-**Export to HTML:**
-```bash
-marp 01-what-is-genai-slides.md --html
-```
-
-**Export all slides:**
-```bash
-marp *.md --pdf --allow-local-files
-```
-
-### Option 2: VS Code with Marp Extension
-
-1. Install the [Marp for VS Code](https://marketplace.visualstudio.com/items?itemName=marp-team.marp-vscode) extension
-2. Open any slide file
-3. Click "Open Preview" button or press `Cmd+K V`
-4. Present using the preview window
-
-### Option 3: Marp Web
-
-1. Visit [Marp Web](https://web.marp.app/)
-2. Copy and paste slide content
-3. Present directly in browser
+Opens at http://localhost:8080/. Replace `overview-databricks-neo4j` with any slide deck directory name.
 
 ## 📝 Slide Format
 
@@ -373,32 +343,18 @@ neo4j-and-azure-lab/
 
 ## 🔧 Troubleshooting
 
+**`require is not defined in ES module scope` error?**
+- Marp CLI is incompatible with Node.js 25+. Install Node 22 LTS: `brew install node@22`
+
 **Images not showing?**
-- Ensure `images/` folder is at correct location (../images from slides/)
 - Use `--allow-local-files` flag with Marp CLI
-
-**Formatting issues?**
-- Update Marp CLI: `npm update -g @marp-team/marp-cli`
-- Try different themes
-
-**PDF export fails?**
-- Install Chromium: `npx @marp-team/marp-cli --version`
-- Use `--allow-local-files` flag
 
 ## 📦 Export All Presentations
 
-**Create PDFs for all slides:**
 ```bash
-cd /path/to/slides
-for file in [0-9]*.md; do
-  marp "$file" --pdf --allow-local-files
-done
-```
-
-**Create HTML presentations:**
-```bash
-for file in [0-9]*.md; do
-  marp "$file" --html --allow-local-files
+cd slides
+for dir in overview-*/; do
+  /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp "$dir" --pdf --allow-local-files
 done
 ```
 
@@ -413,18 +369,8 @@ done
 ## 🎯 Quick Start
 
 ```bash
-# Install Marp
-npm install -g @marp-team/marp-cli
-
-# Navigate to slides
-cd /path/to/graphacademy/slides
-
-# Start presenting first slide
-marp 01-what-is-genai-slides.md --server
-
-# Browser will open with presentation
-# Use arrow keys to navigate
-# Press 'F' for fullscreen
+cd slides
+/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp overview-databricks-neo4j --server
 ```
 
 ---
