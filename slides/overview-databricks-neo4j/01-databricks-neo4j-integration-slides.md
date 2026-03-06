@@ -214,6 +214,7 @@ This means an AI agent on Databricks can **explore and query Neo4j on its own** 
 - **Sync Unity Catalog metadata into Neo4j**: catalogs, schemas, tables, columns as a connected graph
 - Layer on **domain knowledge**: business concepts mapped to physical assets, metric definitions, authoritative sources
 - **Metadata enrichment**: domain experts curate the semantic connections, agents query them at runtime
+- Analysts discover data faster through **business concepts** instead of hunting through schemas
 - Agents get **structured business context** — know what to query, not just how to query
 - Text-to-SQL accuracy jumps when agents understand the domain
 - **Complementary to Unity Catalog**: UC governs access and lineage, the graph adds **meaning and connections**
