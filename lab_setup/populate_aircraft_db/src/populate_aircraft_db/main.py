@@ -288,5 +288,31 @@ def samples_cmd() -> None:
         run_all_samples(driver, sample_size=settings.sample_size)
 
 
+@app.command("agent-samples")
+def agent_samples_cmd() -> None:
+    """Simulate the Neo4j Aura Agent: send natural language questions to the LLM,
+    generate Cypher or vector searches, execute them, and display results."""
+    from .agent_samples import run_agent_samples
+
+    settings = Settings()  # type: ignore[call-arg]
+    creds = _resolve_llm_credentials(settings)
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        run_agent_samples(
+            driver,
+            provider=creds.provider,
+            openai_key=creds.openai_key,
+            anthropic_key=creds.anthropic_key,
+            azure_key=creds.azure_key,
+            azure_endpoint=settings.azure_openai_endpoint if creds.provider == "azure" else None,
+            azure_api_version=settings.azure_openai_api_version if creds.provider == "azure" else None,
+            llm_model=creds.llm_model,
+            embedding_model=creds.embedding_model,
+            embedding_dimensions=creds.embedding_dims,
+            sample_size=settings.sample_size,
+        )
+
+
 if __name__ == "__main__":
     app()
