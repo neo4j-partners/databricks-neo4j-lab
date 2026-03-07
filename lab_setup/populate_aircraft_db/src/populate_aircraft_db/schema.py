@@ -33,7 +33,7 @@ FULLTEXT_INDEXES: list[tuple[str, str, list[str]]] = [
     ("document_search", "Document", ["title", "aircraftType"]),
 ]
 
-# Constraints for entity types created by the `enrich` command.
+# Constraints for entity types created by the enrichment phase of `setup`.
 # SimpleKGPipeline deduplicates on the `name` property.
 EXTRACTION_CONSTRAINTS: list[tuple[str, str]] = [
     ("OperatingLimit", "name"),

@@ -5,6 +5,8 @@ from __future__ import annotations
 import time
 from collections.abc import Generator
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Literal
 
 import sys
 
@@ -58,82 +60,25 @@ def _connect(settings: Settings) -> Generator[Driver, None, None]:
         driver.close()
 
 
-@app.command()
-def load() -> None:
-    """Load all nodes and relationships into Neo4j."""
-    settings = Settings()  # type: ignore[call-arg]
-    start = time.monotonic()
-
-    print(f"Connecting to {settings.neo4j_uri}...")
-    with _connect(settings) as driver:
-        print("Creating constraints...")
-        create_constraints(driver)
-        print("\nCreating indexes...")
-        create_indexes(driver)
-        print("\nCreating fulltext indexes...")
-        create_fulltext_indexes(driver)
-        print()
-
-        load_nodes(driver, settings.data_dir)
-        print()
-        load_relationships(driver, settings.data_dir)
-
-        verify(driver)
-
-    elapsed = time.monotonic() - start
-    print(f"\nDone in {_fmt_elapsed(elapsed)}.")
+# ---------------------------------------------------------------------------
+# LLM credential resolution
+# ---------------------------------------------------------------------------
 
 
-@app.command("verify")
-def verify_cmd() -> None:
-    """Print node and relationship counts (read-only)."""
-    settings = Settings()  # type: ignore[call-arg]
-
-    print(f"Connecting to {settings.neo4j_uri}...")
-    with _connect(settings) as driver:
-        verify(driver)
-
-
-@app.command("clean")
-def clean_cmd() -> None:
-    """Clear all nodes and relationships from the database."""
-    settings = Settings()  # type: ignore[call-arg]
-
-    print(f"Connecting to {settings.neo4j_uri}...")
-    with _connect(settings) as driver:
-        clear_database(driver)
-
-    print("\nDone.")
+@dataclass
+class _LLMCredentials:
+    provider: Literal["openai", "anthropic", "azure"]
+    openai_key: str | None
+    anthropic_key: str | None
+    azure_key: str | None
+    llm_model: str
+    embedding_model: str
+    embedding_dims: int
 
 
-@app.command("clean-enrichment")
-def clean_enrichment_cmd() -> None:
-    """Clear enrichment data (Documents, Chunks, extracted entities) while preserving the operational graph."""
-    from .pipeline import clear_enrichment_data
-
-    settings = Settings()  # type: ignore[call-arg]
-
-    print(f"Connecting to {settings.neo4j_uri}...")
-    with _connect(settings) as driver:
-        clear_enrichment_data(driver)
-
-    print("\nDone.")
-
-
-@app.command("enrich")
-def enrich_cmd() -> None:
-    """Chunk maintenance manuals, generate embeddings, and extract entities via SimpleKGPipeline."""
-    from .pipeline import (
-        clear_enrichment_data,
-        link_to_existing_graph,
-        process_all_documents,
-        validate_enrichment,
-    )
-
-    settings = Settings()  # type: ignore[call-arg]
+def _resolve_llm_credentials(settings: Settings) -> _LLMCredentials:
+    """Validate and resolve LLM credentials from settings. Raises typer.BadParameter on failure."""
     provider = settings.llm_provider
-
-    # Resolve credentials and model names per provider.
     openai_key = None
     anthropic_key = None
     azure_key = None
@@ -180,67 +125,155 @@ def enrich_cmd() -> None:
             f"Unknown provider: {provider!r}. Use 'openai', 'anthropic', or 'azure'."
         )
 
+    if provider == "azure":
+        embedding_model = settings.azure_openai_embedding_deployment
+        embedding_dims = settings.azure_openai_embedding_dimensions
+    else:
+        embedding_model = settings.openai_embedding_model
+        embedding_dims = settings.openai_embedding_dimensions
+
+    return _LLMCredentials(
+        provider=provider,
+        openai_key=openai_key,
+        anthropic_key=anthropic_key,
+        azure_key=azure_key,
+        llm_model=llm_model,
+        embedding_model=embedding_model,
+        embedding_dims=embedding_dims,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Enrichment helper
+# ---------------------------------------------------------------------------
+
+
+def _run_enrich(driver: Driver, settings: Settings, creds: _LLMCredentials) -> None:
+    """Run the enrichment pipeline: chunk, embed, extract entities, and link."""
+    from .pipeline import (
+        clear_enrichment_data,
+        link_to_existing_graph,
+        process_all_documents,
+        validate_enrichment,
+    )
+
+    print("Clearing existing enrichment data (safe re-run)...")
+    clear_enrichment_data(driver)
+    print()
+
+    if settings.enrich_sample_size:
+        print(f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model},"
+              f" sample_size={settings.enrich_sample_size} chunks/doc)...")
+    else:
+        print(f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model})...")
+
+    process_all_documents(
+        driver,
+        settings.data_dir,
+        provider=creds.provider,
+        openai_api_key=creds.openai_key,
+        anthropic_api_key=creds.anthropic_key,
+        azure_api_key=creds.azure_key,
+        azure_endpoint=settings.azure_openai_endpoint if creds.provider == "azure" else None,
+        azure_api_version=settings.azure_openai_api_version if creds.provider == "azure" else None,
+        llm_model=creds.llm_model,
+        embedding_model=creds.embedding_model,
+        embedding_dimensions=creds.embedding_dims,
+        chunk_size=settings.chunk_size,
+        chunk_overlap=settings.chunk_overlap,
+        enrich_sample_size=settings.enrich_sample_size,
+    )
+
+    print("\nCreating extraction constraints (post entity-resolution)...")
+    create_extraction_constraints(driver)
+
+    print("\nCreating embedding indexes...")
+    create_embedding_indexes(driver, creds.embedding_dims)
+
+    print("\nLinking to existing graph...")
+    link_to_existing_graph(driver)
+
+    validate_enrichment(driver)
+
+
+# ---------------------------------------------------------------------------
+# CLI commands
+# ---------------------------------------------------------------------------
+
+
+@app.command("setup")
+def setup_cmd() -> None:
+    """Load CSV data into Neo4j and run GraphRAG enrichment in a single pass."""
+    settings = Settings()  # type: ignore[call-arg]
+
+    # Validate LLM credentials early, before any Neo4j work.
+    creds = _resolve_llm_credentials(settings)
+
     start = time.monotonic()
 
     print(f"Connecting to {settings.neo4j_uri}...")
     with _connect(settings) as driver:
-        print("Creating constraints and indexes...")
+        print("Creating constraints...")
         create_constraints(driver)
+        print("\nCreating indexes...")
         create_indexes(driver)
+        print("\nCreating fulltext indexes...")
         create_fulltext_indexes(driver)
-        # NOTE: extraction constraints are created AFTER the pipeline runs.
-        # SimpleKGPipeline uses CREATE (not MERGE), so pre-existing uniqueness
-        # constraints on entity labels cause batch write failures when the same
-        # entity name appears in multiple chunks.
         print()
 
-        print("Clearing existing enrichment data (safe re-run)...")
-        clear_enrichment_data(driver)
+        load_nodes(driver, settings.data_dir)
+        print()
+        load_relationships(driver, settings.data_dir)
         print()
 
-        if settings.enrich_sample_size:
-            print(f"Running SimpleKGPipeline (LLM: {provider}/{llm_model},"
-                  f" sample_size={settings.enrich_sample_size} chunks/doc)...")
-        else:
-            print(f"Running SimpleKGPipeline (LLM: {provider}/{llm_model})...")
-        if provider == "azure":
-            embedding_model = settings.azure_openai_embedding_deployment
-            embedding_dims = settings.azure_openai_embedding_dimensions
-        else:
-            embedding_model = settings.openai_embedding_model
-            embedding_dims = settings.openai_embedding_dimensions
-
-        process_all_documents(
-            driver,
-            settings.data_dir,
-            provider=provider,
-            openai_api_key=openai_key,
-            anthropic_api_key=anthropic_key,
-            azure_api_key=azure_key,
-            azure_endpoint=settings.azure_openai_endpoint if provider == "azure" else None,
-            azure_api_version=settings.azure_openai_api_version if provider == "azure" else None,
-            llm_model=llm_model,
-            embedding_model=embedding_model,
-            embedding_dimensions=embedding_dims,
-            chunk_size=settings.chunk_size,
-            chunk_overlap=settings.chunk_overlap,
-            enrich_sample_size=settings.enrich_sample_size,
-        )
-
-        print("\nCreating extraction constraints (post entity-resolution)...")
-        create_extraction_constraints(driver)
-
-        print("\nCreating embedding indexes...")
-        create_embedding_indexes(driver, embedding_dims)
-
-        print("\nLinking to existing graph...")
-        link_to_existing_graph(driver)
+        try:
+            _run_enrich(driver, settings, creds)
+        except Exception as exc:
+            print(f"\n[FAIL] Enrichment failed: {exc}")
+            print("CSV data was loaded successfully. Fix the issue and re-run:")
+            print("  uv run populate-aircraft-db setup")
+            raise typer.Exit(code=1)
 
         verify(driver)
-        validate_enrichment(driver)
 
     elapsed = time.monotonic() - start
     print(f"\nDone in {_fmt_elapsed(elapsed)}.")
+
+
+@app.command("verify")
+def verify_cmd() -> None:
+    """Print node and relationship counts (read-only)."""
+    settings = Settings()  # type: ignore[call-arg]
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        verify(driver)
+
+
+@app.command("clean")
+def clean_cmd() -> None:
+    """Clear all nodes and relationships from the database."""
+    settings = Settings()  # type: ignore[call-arg]
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        clear_database(driver)
+
+    print("\nDone.")
+
+
+@app.command("clean-enrichment")
+def clean_enrichment_cmd() -> None:
+    """Clear enrichment data (Documents, Chunks, extracted entities) while preserving the operational graph."""
+    from .pipeline import clear_enrichment_data
+
+    settings = Settings()  # type: ignore[call-arg]
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        clear_enrichment_data(driver)
+
+    print("\nDone.")
 
 
 @app.command("samples")

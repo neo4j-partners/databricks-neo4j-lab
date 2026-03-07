@@ -28,12 +28,12 @@ class Settings(BaseSettings):
 
     data_dir: DirectoryPath = _DATA_DIR  # type: ignore[assignment]
 
-    # OpenAI embeddings — required for the `enrich` command.
+    # OpenAI embeddings — required for the `setup` command.
     openai_api_key: Optional[SecretStr] = None
     openai_embedding_model: str = "text-embedding-3-small"
     openai_embedding_dimensions: int = 1536
 
-    # OpenAI chat model — used by the `enrich` command for entity extraction.
+    # OpenAI chat model — used by the `setup` command for entity extraction.
     openai_extraction_model: str = "gpt-5-mini"
 
     # LLM provider selection — "openai" or "anthropic".
@@ -51,11 +51,11 @@ class Settings(BaseSettings):
     azure_openai_embedding_deployment: Optional[str] = None
     azure_openai_embedding_dimensions: int = 1536
 
-    # Chunking settings for the `enrich` command.
+    # Chunking settings for the `setup` command.
     chunk_size: int = 800
     chunk_overlap: int = 100
 
-    # Limit chunks processed per document during enrich (0 = no limit).
+    # Limit chunks processed per document during setup (0 = no limit).
     enrich_sample_size: int = 0
 
     # Number of rows to show per section in the `samples` command.

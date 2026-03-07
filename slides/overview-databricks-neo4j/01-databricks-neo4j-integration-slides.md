@@ -33,6 +33,24 @@ The Better Together Value
 
 ---
 
+## What the Graph Looks Like
+
+- Graphs naturally model the real world
+- Data in Neo4j lives as **nodes** (entities/nouns) and **relationships** (how they connect)
+- In the diagram: `(parentheses)` are nodes, `[:brackets]` are relationships
+
+```
+(Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_COMPONENT]-> (Component)
+     |
+     |--[:OPERATED_FLIGHT]-> (Flight) -[:DEPARTED_FROM]-> (Airport)
+                                |
+                                |--[:HAD_DELAY]-> (Delay)
+```
+
+Every node and relationship can carry properties (names, dates, measurements), so the graph is rich with context — not just connections.
+
+---
+
 ## Why Combine Databricks and Neo4j?
 
 Databricks and Neo4j solve **different problems well**.
@@ -45,31 +63,7 @@ Most real-world problems have both: numbers that need crunching **and** relation
 
 ---
 
-## The Neo4j Spark Connector
-
-The **Neo4j Spark Connector** is how data flows between the two platforms.
-
-Two-way bridge:
-- **Databricks → Neo4j:** Take rows from your Lakehouse tables and turn them into nodes and relationships in a graph
-- **Neo4j → Databricks:** Pull graph data back into DataFrames for analytics or ML
-
-It works natively with Spark, so your existing Databricks notebooks and workflows can read from and write to Neo4j without leaving the platform.
-
----
-
-## Tables Become Graphs
-
-Data in Databricks lives in **rows and columns**. Data in Neo4j lives as **nodes and relationships**.
-
-The Spark Connector handles the translation:
-
-| Lakehouse (Databricks) | Knowledge Graph (Neo4j) |
-|------------------------|------------------------|
-| A row in an Aircraft table | An Aircraft node |
-| A row in a Systems table | A System node |
-| A foreign key linking them | A `HAS_SYSTEM` relationship |
-
-What was implicit in table joins becomes **explicit and traversable** in the graph.
+![bg contain](dual-database-architecture.png)
 
 ---
 
@@ -78,26 +72,11 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 The typical pattern is:
 
 1. **Store your raw data** in Databricks — CSVs, Delta tables, whatever you have
-2. **Use the Spark Connector** to write that data into Neo4j as nodes and relationships
-3. **Query the graph** to answer relationship-heavy questions that tables struggle with
+2. **Use the Neo4j Connector** to write that data into Neo4j as nodes and relationships
+3. **Not all data moves** — only the subset that fits a graph model (entities and relationships) is extracted
+4. **Query the graph** to answer relationship-heavy questions that tables struggle with
 
 **Example:** An aircraft fleet dataset becomes a connected graph where you can naturally ask "which components were on aircraft that had delays after a specific type of maintenance?" — a question that would require many table joins but is a simple graph traversal.
-
----
-
-## What the Graph Looks Like
-
-Once loaded, the knowledge graph captures both **physical structure** and **operational history**:
-
-```
-(Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_COMPONENT]-> (Component)
-     |
-     |--[:OPERATED_FLIGHT]-> (Flight) -[:DEPARTED_FROM]-> (Airport)
-                                |
-                                |--[:HAD_DELAY]-> (Delay)
-```
-
-Every node and relationship can carry properties (names, dates, measurements), so the graph is rich with context — not just connections.
 
 ---
 
@@ -144,7 +123,6 @@ The `neo4j-graphrag-python` library supports **external vector stores** through 
 |---|---|
 | **Neo4j** (built-in) | Vectors and graph in one database — simplest setup |
 | **Databricks Vector Search** | Keep vectors in your Lakehouse alongside your Delta tables |
-| **Pinecone, Weaviate, Qdrant** | Built-in support via optional extras in `neo4j-graphrag-python` |
 
 **The pattern:** The external store handles similarity search and returns matching IDs. Neo4j resolves those IDs to nodes and traverses the graph for context. Each system does what it is best at.
 
@@ -379,4 +357,36 @@ Once the Neo4j agent is running as a serving endpoint, you combine it with a Gen
 - **GraphRAG** combines document search with graph context for smarter AI answers
 
 Together, you get the analytical power of the Lakehouse **and** the relationship intelligence of the graph — connected, not siloed.
+
+---
+
+## Appendix: Technical Details
+
+---
+
+## Tables Become Graphs
+
+Data in Databricks lives in **rows and columns**. Data in Neo4j lives as **nodes and relationships**.
+
+The Spark Connector handles the translation:
+
+| Lakehouse (Databricks) | Knowledge Graph (Neo4j) |
+|------------------------|------------------------|
+| A row in an Aircraft table | An Aircraft node |
+| A row in a Systems table | A System node |
+| A foreign key linking them | A `HAS_SYSTEM` relationship |
+
+What was implicit in table joins becomes **explicit and traversable** in the graph.
+
+---
+
+## The Neo4j Spark Connector
+
+The **Neo4j Spark Connector** is how data flows between the two platforms.
+
+Two-way bridge:
+- **Databricks → Neo4j:** Take rows from your Lakehouse tables and turn them into nodes and relationships in a graph
+- **Neo4j → Databricks:** Pull graph data back into DataFrames for analytics or ML
+
+It works natively with Spark, so your existing Databricks notebooks and workflows can read from and write to Neo4j without leaving the platform.
 

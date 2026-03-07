@@ -16,8 +16,7 @@ All Python tools use `uv` for package management and `hatchling` as build backen
 ```bash
 cd lab_setup/populate_aircraft_db
 uv sync                                    # Install dependencies
-uv run populate-aircraft-db load           # Load CSV data into Neo4j
-uv run populate-aircraft-db enrich         # Chunk docs + embeddings + entity extraction
+uv run populate-aircraft-db setup           # Load CSV data + enrich (chunking, embeddings, entity extraction)
 uv run populate-aircraft-db verify         # Print node/relationship counts
 uv run populate-aircraft-db clean          # Delete all data
 uv run populate-aircraft-db samples        # Run showcase Cypher queries

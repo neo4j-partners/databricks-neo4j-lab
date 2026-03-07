@@ -1,6 +1,6 @@
 # populate-aircraft-db
 
-Standalone CLI tool that loads the Aircraft Digital Twin dataset into a Neo4j Aura instance. Handles the full pipeline: CSV data loading, and a single `enrich` command that uses `neo4j-graphrag`'s `SimpleKGPipeline` for maintenance manual chunking, OpenAI embedding generation, and LLM-powered entity extraction (OpenAI or Anthropic).
+Standalone CLI tool that loads the Aircraft Digital Twin dataset into a Neo4j Aura instance. The `setup` command handles the full pipeline: CSV data loading, maintenance manual chunking, OpenAI embedding generation, and LLM-powered entity extraction (OpenAI or Anthropic) via `neo4j-graphrag`'s `SimpleKGPipeline`.
 
 ## Quick Start
 
@@ -15,15 +15,14 @@ cp .env.example .env
 uv sync                              # OpenAI only
 uv sync --extra anthropic            # include Anthropic support
 uv run populate-aircraft-db clean
-uv run populate-aircraft-db load
+uv run populate-aircraft-db setup
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `load` | Load all nodes and relationships from CSV files |
-| `enrich` | Chunk maintenance manuals, generate embeddings, extract OperatingLimit entities, and cross-link to operational graph (uses SimpleKGPipeline). Safe to re-run — clears enrichment data first. |
+| `setup` | Load CSV data into Neo4j and run GraphRAG enrichment (chunking, embeddings, entity extraction, cross-linking) in a single pass. Safe to re-run — uses MERGE for CSV data and clears enrichment data before re-enriching. |
 | `samples` | Run sample queries showcasing the knowledge graph (read-only, no API keys needed) |
 | `verify` | Print node and relationship counts (read-only) |
 | `clean` | Delete all nodes and relationships |
@@ -35,8 +34,7 @@ All configuration is via `.env` — no command-line flags needed.
 
 ```bash
 uv run populate-aircraft-db clean
-uv run populate-aircraft-db load
-uv run populate-aircraft-db enrich    # uses LLM_PROVIDER from .env (default: openai)
+uv run populate-aircraft-db setup     # uses LLM_PROVIDER from .env (default: openai)
 uv run populate-aircraft-db samples   # run sample queries to explore the graph
 ```
 
@@ -49,21 +47,21 @@ Settings are loaded from a `.env` file in the project root or from environment v
 | `NEO4J_URI` | yes | - | Connection URI (e.g. `neo4j+s://...`) |
 | `NEO4J_USERNAME` | no | `neo4j` | Neo4j username |
 | `NEO4J_PASSWORD` | yes | - | Neo4j password |
-| `OPENAI_API_KEY` | for enrich | - | OpenAI API key (always needed — embeddings use OpenAI) |
+| `OPENAI_API_KEY` | for setup | - | OpenAI API key (always needed — embeddings use OpenAI) |
 | `OPENAI_EMBEDDING_MODEL` | no | `text-embedding-3-small` | Embedding model |
 | `OPENAI_EMBEDDING_DIMENSIONS` | no | `1536` | Embedding dimensions |
 | `OPENAI_EXTRACTION_MODEL` | no | `gpt-4o-mini` | Chat model for entity extraction (OpenAI) |
 | `LLM_PROVIDER` | no | `openai` | LLM provider for extraction: `openai` or `anthropic` |
-| `ANTHROPIC_API_KEY` | for enrich (anthropic) | - | Anthropic API key |
+| `ANTHROPIC_API_KEY` | for setup (anthropic) | - | Anthropic API key |
 | `ANTHROPIC_EXTRACTION_MODEL` | no | `claude-sonnet-4-5-20250929` | Chat model for entity extraction (Anthropic) |
-| `CHUNK_SIZE` | no | `800` | Characters per chunk (enrich) |
-| `CHUNK_OVERLAP` | no | `100` | Overlap between chunks (enrich) |
-| `ENRICH_SAMPLE_SIZE` | no | `0` | Max chunks per document during enrich (`0` = no limit) |
+| `CHUNK_SIZE` | no | `800` | Characters per chunk (setup) |
+| `CHUNK_OVERLAP` | no | `100` | Overlap between chunks (setup) |
+| `ENRICH_SAMPLE_SIZE` | no | `0` | Max chunks per document during setup (`0` = no limit) |
 | `SAMPLE_SIZE` | no | `10` | Rows per section in the `samples` command |
 
 ## What Gets Loaded
 
-### `load` -- Operational graph (from CSVs)
+### Phase 1: Operational graph (from CSVs)
 
 **9 node types:** Aircraft, System, Component, Sensor, Airport, Flight, Delay, MaintenanceEvent, Removal
 
@@ -71,7 +69,7 @@ Settings are loaded from a `.env` file in the project root or from environment v
 
 CSV files are read from `lab_setup/aircraft_digital_twin_data/`.
 
-### `enrich` -- Document chunks, embeddings, and operating limits
+### Phase 2: Document chunks, embeddings, and operating limits
 
 Uses `neo4j-graphrag`'s `SimpleKGPipeline` to process three maintenance manuals (A320-200, A321neo, B737-800):
 
