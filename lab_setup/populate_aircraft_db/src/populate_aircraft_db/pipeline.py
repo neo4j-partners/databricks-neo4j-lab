@@ -375,6 +375,7 @@ def process_all_documents(
                     "aircraftType": meta.aircraft_type,
                     "title": meta.title,
                     "type": "maintenance_manual",
+                    "path": meta.filename,
                 },
             )
             print(f"  [OK] Pipeline complete for {meta.document_id}")

@@ -158,6 +158,7 @@ def _flight_operations(driver: Driver, limit: int) -> None:
 
 _MAINT_Q = """\
 MATCH (me:MaintenanceEvent)-[:AFFECTS_AIRCRAFT]->(a:Aircraft)
+WHERE me.reported_at IS NOT NULL
 OPTIONAL MATCH (me)-[:AFFECTS_SYSTEM]->(s:System)
 RETURN a.tail_number AS aircraft, me.event_id AS event,
        me.reported_at AS date, me.severity AS severity, me.fault AS fault,
@@ -229,6 +230,7 @@ ORDER BY d.documentId"""
 
 _CHAIN_Q = """\
 MATCH (c:Chunk)-[:FROM_DOCUMENT]->(d:Document)
+WHERE c.index IS NOT NULL
 WITH d, c ORDER BY d.documentId, c.index
 WITH d, c LIMIT $limit
 OPTIONAL MATCH (c)-[:NEXT_CHUNK]->(next:Chunk)

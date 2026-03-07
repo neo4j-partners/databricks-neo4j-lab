@@ -86,3 +86,9 @@ Creates indexes:
 - **Fulltext index:** `maintenanceChunkText` on `Chunk.text`
 
 **Note:** Entity resolution requires APOC, which is available on Neo4j Aura by default. See `FIX_MANUALS.md` for known sensor name mismatches.
+
+## Known Issues
+
+### Document `path` property
+
+`SimpleKGPipeline` from `neo4j-graphrag` sets a default `path: "document.txt"` and `document_type: "inline_text"` on `Document` nodes when text is passed inline via `pipeline.run_async(text=...)`. To ensure Document nodes have a meaningful `path` value (e.g. `MAINTENANCE_A320.md`), we explicitly include `"path": meta.filename` in the `document_metadata` dict. Without this override, all Document nodes share the same generic `"document.txt"` path, which produces misleading results when agents query for document locations.
