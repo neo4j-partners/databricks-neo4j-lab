@@ -1,3 +1,5 @@
 * xref:index.adoc[Databricks + Neo4j Workshop]
 * Slides
 ** xref:slides/slides-overview.adoc[Databricks + Neo4j Integration]
+** xref:slides/slides-intro-databricks-neo4j.adoc[Introduction to Databricks + Neo4j]
+** xref:slides/slides-power-of-graphrag.adoc[The Power of GraphRAG]
