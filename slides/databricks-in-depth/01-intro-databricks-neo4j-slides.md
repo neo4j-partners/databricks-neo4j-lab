@@ -41,6 +41,19 @@ Delta Lake Stores the Records, Neo4j Reveals the Connections
 
 ---
 
+## What the Graph Looks Like
+
+- Graphs model the real world as **nodes** (entities) and **relationships** (connections)
+- `(parentheses)` are nodes, `[:brackets]` are relationships
+
+```
+(:Account)-[:TRANSFERRED_TO {amount, timestamp, channel}]->(:Account)
+```
+
+Each Account node carries properties (account_id, customer_name, status). Each TRANSFERRED_TO relationship carries transaction details (amount, timestamp, channel).
+
+---
+
 ## What Each Platform Answers
 
 | | Databricks | Neo4j |
@@ -89,19 +102,6 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 ## Fraud Ring — Dual Database Architecture
 
 ![Fraud Ring Dual Database Architecture](fraud-ring-dual-architecture.png)
-
----
-
-## What the Graph Looks Like
-
-- Graphs model the real world as **nodes** (entities) and **relationships** (connections)
-- `(parentheses)` are nodes, `[:brackets]` are relationships
-
-```
-(:Account)-[:TRANSFERRED_TO {amount, timestamp, channel}]->(:Account)
-```
-
-Each Account node carries properties (account_id, customer_name, status). Each TRANSFERRED_TO relationship carries transaction details (amount, timestamp, channel).
 
 ---
 
