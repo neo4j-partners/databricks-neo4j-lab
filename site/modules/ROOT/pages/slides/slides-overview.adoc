@@ -1,4 +1,4 @@
-= Databricks + Neo4j Integration — Slides
+= Better Together: The Value Proposition — Slides
 
 ++++
 <iframe src="../_attachments/slides/overview/01-databricks-neo4j-integration-slides.html"

@@ -44,7 +44,7 @@ RAG and GraphRAG reduce these problems but don't remove them. The path forward i
 
 ---
 
-## What GraphRAG Solves and Where It Stops
+## What GraphRAG Solves and Where Agents Take Over
 
 - **RAG** grounds LLM answers in retrieved content, reducing hallucinations and giving the model access to private data
 - **GraphRAG** adds graph structure to retrieval: the answer includes not just relevant text but the entities and relationships surrounding it
@@ -76,27 +76,44 @@ One agent per data shape. A supervisor to coordinate them.
 
 ---
 
+## What Is Databricks Genie?
+
+- **Compound AI system:** not a single LLM, but multiple interacting components specialized for turning natural language into SQL
+- **Unity Catalog awareness:** Genie reads table names, descriptions, and primary/foreign key relationships to understand your data before generating a query
+- **Column-level context:** column names and descriptions are intelligently filtered so only relevant metadata reaches the model
+- **Example SQL queries:** domain experts provide sample queries that Genie selects from when they match the user's question
+- **Plain-text instructions:** natural language guidelines that teach Genie domain terminology, business rules, and edge cases
+- **Read-only execution:** every generated query is read-only, so Genie can never modify your data
+
+---
+
 ## Databricks Genie for Structured Data
 
-**Genie** translates natural language into SQL against governed Delta tables. No SQL knowledge required from the end user.
+- **Genie Spaces:** a curated environment where domain experts select tables, define JOIN relationships, and add up to 100 instructions per space
+- **Connect to your tables:** the financial transaction tables from the fraud example
+- **Add domain knowledge:** instructions that teach Genie what "suspicious transfer" means, what normal transaction volumes look like, and what a flagged account is
+- **Users ask in English:** "What is the total transfer volume for account-1234 in the last 90 days?" becomes SQL, executes against Delta Lake, and returns the answer
+- **Trusted Assets:** when a response matches a parameterized example query or SQL function exactly, Genie marks it as "Trusted" so users know the answer came from a verified path
 
-1. **Connect Genie to your tables:** the financial transaction tables from the fraud example
-2. **Add domain knowledge:** plain-text instructions that teach Genie what "suspicious transfer" means, what normal transaction volumes look like, what a flagged account is
-3. **Users ask in English:** "What is the total transfer volume for account-1234 in the last 90 days?" becomes SQL, executes against Delta Lake, and returns the answer
+---
 
-Domain experts configure **Genie Spaces** with curated table sets, sample queries, and up to 100 instructions per space.
+## What Is the Neo4j MCP Agent?
+
+- **Graph-specialized agent:** just as Genie is purpose-built for SQL, this agent is purpose-built for Cypher, the query language for graph databases
+- **Schema awareness:** the agent inspects the graph schema to learn every node label, relationship type, and property key before generating a single query
+- **Structure, not guessing:** because the agent knows that `Account` nodes connect through `TRANSFERRED_TO` relationships, it writes precise traversals instead of hallucinating table names or join conditions
+- **Domain instructions:** a system prompt teaches the agent graph-specific terminology, traversal patterns, and what questions the graph is designed to answer
+- **Cypher expertise:** the agent generates Cypher the same way Genie generates SQL, each agent mastering the query language that fits its data shape
 
 ---
 
 ## Neo4j MCP Agent for Graph Queries
 
-**Model Context Protocol (MCP)** lets AI agents use external tools. Neo4j acts as an MCP server, giving agents the ability to query the knowledge graph directly.
-
-1. **Inspect the schema:** the agent learns what node types and relationship types exist
-2. **Generate Cypher:** the agent writes a query against verified structure, not guessed table names
-3. **Execute and return:** results come back as structured data the agent can reason over
-
-"Which accounts are within three hops of the flagged account?" The agent discovers the `Account` nodes and `TRANSFERRED_TO` relationships from the schema, then generates and runs the traversal.
+- **Schema-first querying:** the agent calls `get-neo4j-schema` to discover the exact node types and relationship types available, then generates Cypher against verified structure instead of guessing
+- **Connect to your graph:** the fraud knowledge graph with `Account` nodes and `TRANSFERRED_TO` relationships
+- **Add domain context:** system prompt instructions that teach the agent what a flagged account is, how fraud rings are structured, and what traversal depth is appropriate
+- **Users ask in English:** "Which accounts are within three hops of the flagged account?" becomes a Cypher traversal, executes against Neo4j, and returns the connected accounts
+- **Read-only by default:** agents in this workshop use only `read-neo4j-cypher`, so they can never modify production graph data
 
 ---
 
@@ -133,21 +150,14 @@ A **supervisor agent** sits above both specialists and routes questions based on
 
 ---
 
-## Multi-Agent Routing in the Fraud Domain
+## How the Supervisor Decides
 
-**"What is the average transaction amount for flagged accounts?"**
-→ Supervisor sends to the **Genie agent:** numeric aggregation over the transaction ledger
-
-**"Which accounts are reachable within three hops of account-1234?"**
-→ Supervisor sends to the **Neo4j agent:** variable-depth graph traversal
-
-**"Find accounts in circular transaction chains and show their total transfer volumes"**
-→ Supervisor calls **both agents in sequence:**
-  1. Neo4j agent runs cycle detection to identify the ring
-  2. Genie agent queries the transaction ledger for volume totals scoped to those accounts
-  3. Supervisor combines the structural pattern with the financial evidence
-
-No Cypher or SQL knowledge required from the investigator.
+- **Agent descriptions:** each sub-agent registers what it can do, and the supervisor matches questions against those descriptions
+- **Guidelines:** domain experts add instructions like "questions about paths belong to the graph agent"
+- **Aggregation signals:** "total," "average," or "count" route to Genie because they imply SQL aggregation
+- **Relationship signals:** "connected to," "within N hops," or "shared device" route to Neo4j because they imply traversal
+- **Decomposition:** when both signal types appear, the supervisor breaks it into sub-tasks for each agent
+- **Iterative refinement:** if routing is wrong, experts add a guideline and the correction applies immediately
 
 ---
 

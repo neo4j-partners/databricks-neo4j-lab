@@ -1,4 +1,4 @@
-= Introduction to Databricks + Neo4j — Slides
+= Architecture Deep Dive — Slides
 
 ++++
 <iframe src="../_attachments/slides/databricks-in-depth/01-intro-databricks-neo4j-slides.html"

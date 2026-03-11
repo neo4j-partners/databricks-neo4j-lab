@@ -1,4 +1,4 @@
-= The Power of GraphRAG — Slides
+= GraphRAG: Graph-Enhanced Retrieval — Slides
 
 ++++
 <iframe src="../_attachments/slides/databricks-in-depth/02-power-of-graphrag-slides.html"
