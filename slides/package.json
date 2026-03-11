@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build:html": "/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-databricks-neo4j/ -o ../site/modules/ROOT/attachments/slides/overview/ --allow-local-files"
+  },
   "dependencies": {
     "@marp-team/marp-cli": "^4.2.3"
   }

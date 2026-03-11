@@ -1,1 +1,3 @@
 * xref:index.adoc[Databricks + Neo4j Workshop]
+* Slides
+** xref:slides/slides-overview.adoc[Databricks + Neo4j Integration]
