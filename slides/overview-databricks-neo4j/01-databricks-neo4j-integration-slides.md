@@ -55,7 +55,7 @@ Every node and relationship can carry properties (names, dates, measurements), s
 
 Databricks and Neo4j solve **different problems well**.
 
-**Databricks** excels at working with large volumes of structured data — aggregations, time-series analysis, and machine learning over tables.
+**Databricks** excels at working with large volumes of structured and unstructured data — aggregations, time-series analysis, and machine learning over tables.
 
 **Neo4j** excels at understanding **how things connect** — following chains of relationships, finding patterns, and answering questions about structure.
 
