@@ -142,80 +142,124 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 
 ---
 
-# Building the Pipeline
+# Building the Intelligence Platform
 
 From data intelligence through graph intelligence to agents that query both
 
 ---
 
-## Building the Intelligence Platform: The Data Pipeline
+## The Intelligence Platform
 
-- **ELT/Curation:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
+- **Data Pipeline:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
 - **Knowledge Graph Construction:** AML policy docs → chunking → embeddings + entity extraction → graph enrichment
+- **Data Analytics:** graph insights + lakehouse data → dashboards, reports, ML features
 - **GraphRAG Retrieval/Agent:** investigation queries → vector search + graph traversal + SQL → combined results
 
 <!--
-Three distinct stages connect Databricks to Neo4j, each building
-a layer of intelligence. ELT is data intelligence: data loads into
-cloud storage first, then gets transformed inside the lakehouse.
-Delta Lake enforces schema, cleanses data, and renames columns.
-The Spark Connector then batch-loads curated tables as graph nodes
+Four stages connect Databricks to Neo4j, each building a layer
+of intelligence. The Data Pipeline is data intelligence: data
+loads into cloud storage, gets transformed inside the lakehouse,
+and the Spark Connector batch-loads curated tables as graph nodes
 and relationships. Knowledge Graph Construction uses the
 neo4j-graphrag-python Knowledge Graph Builder (SimpleKGPipeline)
 to chunk regulatory and AML policy documents, generate embeddings,
-extract entities, and write them back into Neo4j, enriching the
-graph with document-derived knowledge. GraphRAG Retrieval combines
-vector search with graph traversal via the VectorCypherRetriever,
-exposed as MCP tools so investigation agents can query the graph
-and the lakehouse together.
+extract entities, and write them back into Neo4j. Data Analytics
+combines graph insights written back to Delta with lakehouse data
+for dashboards, reports, and ML features, queried through Unity
+Catalog JDBC for governed cross-system joins. GraphRAG Retrieval
+combines vector search with graph traversal via the
+VectorCypherRetriever, exposed as MCP tools so investigation
+agents can query the graph and the lakehouse together.
+-->
+
+---
+
+## Connection Patterns by Platform Stage
+
+- **Data Pipeline:** Neo4j Spark Connector (batch writes)
+- **Knowledge Graph Construction:** Neo4j Python driver via neo4j-graphrag-python
+- **Data Analytics:** Spark Connector (Graph Data Science reads) + Unity Catalog JDBC (governed SQL, BI tools)
+- **GraphRAG Retrieval/Agent:** Neo4j MCP Server + Python driver
+
+<!--
+Each platform stage uses a different connector optimized for its
+workload. The Data Pipeline uses the Spark Connector for batch
+DataFrame writes into Neo4j. This is the primary path for bulk
+loading structured data.
+
+Knowledge Graph Construction uses the Neo4j Python driver directly,
+not the Spark Connector. The SimpleKGPipeline from
+neo4j-graphrag-python handles chunking, LLM-based entity
+extraction, and embedding generation, none of which are Spark
+operations.
+
+Data Analytics uses both connectors. The Spark Connector provides
+first-class GDS integration: invoke PageRank, community detection,
+and other graph algorithms directly, get results as DataFrames for
+ML features and Gold Delta tables. Neo4j's docs position this as
+a "graph co-processor" in existing Spark ML workflows. Unity
+Catalog JDBC adds the governed SQL layer: register Neo4j as a
+JDBC connection, query graph data via SQL translated to Cypher,
+join graph results with Delta tables, and connect BI tools like
+Power BI and Tableau through standard JDBC.
+
+GraphRAG Retrieval uses the Neo4j MCP Server to expose schema
+inspection and read-only Cypher as agent tools. The Python driver
+powers the VectorCypherRetriever underneath, combining vector
+search with graph traversal in a single query.
 -->
 
 ---
 
 ## The Medallion Architecture
 
-- **Bronze:** raw data lands from cloud storage, no transformation
-- **Silver:** cleaned, typed, graph-friendly columns, ready for the Spark Connector
-- **Gold:** graph algorithm results (cycle detection, community scores) written back to Delta
-
-Data flows forward through the layers, graph insights flow back. This is the bidirectional pipeline where data intelligence and graph intelligence **compound each other's value**.
+- **Bronze:** raw data lands from cloud storage; no transformation
+- **Silver:** cleaned, typed, governed tables; the Spark Connector reads from here
+- **Gold:** business-ready outputs enriched by graph insights (fraud alerts, risk scores, ML features)
+- **Bidirectional flow:** data flows forward through the layers, graph insights flow back
 
 <!--
-The Medallion Architecture is how Databricks organizes data
-engineering pipelines. Bronze is the raw landing zone: files arrive
-from cloud storage as-is. Silver is the curation layer: schema
-enforcement, type casting, column renaming. Customer_ID becomes
-account_id, Txn_Amount becomes amount. This is where data becomes
-ready for the Spark Connector to write into Neo4j.
+The Medallion Architecture is how Databricks organizes the Data
+Pipeline stage. Bronze is the raw landing zone: files arrive from
+cloud storage with no transformation. Silver is the general
+curation layer: schema enforcement, type casting, column renaming.
+Customer_ID becomes account_id, Txn_Amount becomes amount. Silver
+tables are governed and ready for downstream consumers, including
+the Spark Connector writing to Neo4j.
 
-Gold is where graph insights flow back. Cycle detection flags
-fraud rings, PageRank scores identify influential accounts,
-Louvain community detection clusters tightly connected groups.
-These results write back to Delta as columns in Gold tables,
-available for dashboards, ML features, and case management.
+Gold is where all intelligence converges. Graph algorithm results
+(cycle detection, PageRank, community scores) write back to Delta
+as columns in Gold tables. These join with operational data that
+never left the lakehouse to produce fraud alerts, risk scores,
+and ML feature tables for case management.
 
-The bidirectional flow is the key insight: Silver feeds the graph,
-Gold captures what the graph discovers.
+Data flows forward through the layers, graph insights flow back.
+Silver feeds the graph, Gold captures what the graph discovers.
+This bidirectional flow is where data intelligence and graph
+intelligence compound each other's value.
 -->
 
 ---
 
 ## Financial Fraud as a Working Example
 
-- **Money laundering hides in plain sight:** circular transfers across account chains
+- **The use case:** money laundering through circular transfers across account chains
 - **Each transfer looks legitimate.** The cycle reveals the fraud
-- **Cypher:** one query detects 2-6 hop cycles in milliseconds
-- **SQL equivalent:** nested SQL joins (CTEs) with cycle-detection guards
+- **Cypher in the graph:** one query detects 2-6 hop cycles in milliseconds
+- **SQL in the lakehouse:** nested SQL joins (CTEs) with cycle-detection guards
 
 <!--
-Funds move through chains of accounts and return to the origin.
-Each individual transfer looks legitimate in isolation. The circular
-pattern is only visible when you follow the connections. Detecting
-a cycle of 2-6 hops is a single Cypher query returning in
-milliseconds. The equivalent SQL requires recursive CTEs with
-explicit cycle-detection guards to prevent infinite loops. This is
-a small enough model to explain in minutes, but complex enough to
-reveal patterns invisible in flat tables.
+We'll use financial fraud to walk through each pipeline stage.
+Money laundering moves funds through chains of accounts and back
+to the origin. Each individual transfer looks legitimate in
+isolation. The circular pattern is only visible when you follow
+the connections.
+
+This is where the dual platform pays off. Cypher detects the
+cycle in the graph: a single query finds 2-6 hop loops in
+milliseconds. The equivalent SQL in the lakehouse requires
+recursive CTEs with explicit cycle-detection guards. Both
+platforms contribute, neither can answer alone.
 -->
 
 ---
@@ -266,24 +310,24 @@ Spark Connector projecting connections into the graph.
 
 ## Extracting Connection Data from the Lakehouse
 
-- **Delta Lake** remains the governed source of truth: schema enforcement, ACID transactions, time travel
-- **Neo4j** receives the connected data: relationship patterns made explicit and traversable
-- **Foreign keys become relationships:** implicit joins become traversable edges
+- **Most data stays in Delta:** aggregates, metrics, logs, documents
+- **Connection data moves to the graph:** which accounts transfer to which, which entities share addresses
+- **Foreign keys become relationships:** `from_account` and `to_account` columns become `TRANSFERRED_TO` edges
 
 <!--
-Delta Lake is the governed foundation. Schema enforcement catches
-bad data at write time. ACID transactions guarantee consistency.
-Time travel lets you recover from bad loads. Unity Catalog adds
-access controls and audit logging. That's the data intelligence
-layer, and it stays in the lakehouse.
+Not everything moves to the graph. Aggregates, metrics, logs, and
+documents stay in Delta where they belong. Only the subset with
+connection patterns worth traversing projects into Neo4j.
 
-Neo4j receives only the connected data: the subset where
-relationships between entities are worth making explicit. In the
-lakehouse, those connections live in foreign keys and join tables.
-In the graph, they become first-class citizens, directly
-traversable without computing joins at query time.
+The signal for what moves: if the question is "who is connected to
+whom," that data belongs in the graph. Account-to-account transfers,
+shared devices, shared addresses, shared SSNs. In the lakehouse
+these connections are buried in foreign keys and join tables. In
+the graph they become first-class citizens, directly traversable
+without computing joins at query time.
 
-Not everything moves. Most data stays in Delta.
+Delta Lake remains the governed source of truth. The graph receives
+a projection of connection data, not a copy of the lakehouse.
 -->
 
 ---
@@ -299,65 +343,131 @@ Not everything moves. Most data stays in Delta.
 
 ## Loading the Graph
 
-- **Nodes first:** each row in the accounts Delta table becomes an Account node, with batched upserts that create if new or update if existing
-- **Relationships second:** the connector matches existing Account nodes by property values and creates `TRANSFERRED_TO` connections between them
-- **Transaction properties ride on the relationship:** amount, timestamp, and channel are stored directly on the `TRANSFERRED_TO` relationship — no separate edge table
+- **Node properties from columns:** account_id, customer_name, status become properties on each Account node
+- **Nodes first:** Account rows become Account nodes via batched upserts
+- **Relationships second:** the connector matches nodes by property values, creates `TRANSFERRED_TO` edges
+- **Properties on the relationship:** amount, timestamp, channel stored directly on the edge
+
+<!--
+Each row in the accounts Delta table becomes an Account node.
+Batched upserts create if new or update if existing, so the load
+is idempotent. Relationships come second because both endpoints
+must exist before the connector can match them.
+
+The connector matches existing Account nodes by property values
+and creates TRANSFERRED_TO connections between them. Transaction
+details ride on the relationship itself: amount, timestamp, and
+channel are stored directly on the edge. No separate edge table,
+no foreign key resolution at query time.
+-->
+
+---
+
+## Design Decision: Relationship Types vs. Properties
+
+- **Type per connection:** `:TRANSFERRED_TO`, `:SHARED_DEVICE`, indexed lookups, faster traversal
+- **Generic with property:** `:CONNECTED {type: "transfer"}`, simpler schema, slower property filters
+- **Choose type per connection** when traversals follow specific connection types
+- **Directional relationships:** bidirectional flows require writing in both directions
+
+<!--
+The fraud example uses a single relationship type (TRANSFERRED_TO)
+with transaction details as properties. In other domains you may
+face the choice between multiple relationship types or a generic
+type with a property.
+
+Type per connection means each kind of link gets its own
+relationship type. Neo4j indexes relationship types, so type-based
+lookups are fast. The tradeoff is a larger type vocabulary to
+manage.
+
+Generic with property uses a single relationship type and
+distinguishes via a property value. Simpler schema, but property
+filters are slower than type lookups at query time.
+
+Default to type per connection when your traversals need to follow
+specific connection types. Neo4j relationships are directional, so
+bidirectional flows like transfers require writing in both
+directions.
+-->
 
 ---
 
 ## Validation Through Spark Reads
 
-- The connector reads from Neo4j just as easily as it writes — Cypher results come back as **standard DataFrames**
-- Validation runs in the **same Spark environment** that built the graph
+- **Node counts** match source row counts
+- **Relationship counts** fall within expected ranges for transaction volume
+- **High-connectivity nodes** reflect known patterns from source data
 
-**Three checks cover the common failure modes:**
+<!--
+The connector reads from Neo4j just as easily as it writes. Cypher
+results come back as standard DataFrames, so validation runs in
+the same Spark environment that built the graph.
 
-- **Total node counts** should match source row counts
-- **Relationship counts** should fall within expected ranges for the transaction volume
-- **High-connectivity nodes** should reflect known characteristics from the source data (e.g., high-volume accounts with expected transfer counts)
+Three checks cover the common failure modes. Node counts should
+match source row counts exactly. Relationship counts should fall
+within expected ranges for the transaction volume. High-connectivity
+nodes should reflect known characteristics from the source data,
+like high-volume accounts with expected transfer counts.
+
+If counts don't match, the most common causes are failed node loads
+or key value mismatches between DataFrame columns and node
+properties. The connector silently drops relationships when the
+MATCH clause can't find the target node.
+-->
 
 ---
 
 ## Graph Insights Flow Back to the Lakehouse
 
-Graph intelligence flows back as standard DataFrames. Graph-derived metrics become columns in Delta tables — available for dashboards, ML features, and downstream analytics across the entire data intelligence estate.
+- **Cycle Detection:** fraud ring flags in the alerts table
+- **PageRank:** risk scores for investigation prioritization
+- **Community Detection:** fraud ring groupings via Louvain
+- **Degree Centrality:** counterparty counts as ML features
 
-| Graph Algorithm | What It Produces | What It Becomes in Delta Lake |
-|----------------|-----------------|-------------------------------|
-| **Cycle Detection** | Accounts involved in circular transaction chains | A flag in the fraud alerts table |
-| **PageRank** | Influential accounts based on transaction flow patterns | A risk-scoring column for investigation prioritization |
-| **Louvain Community Detection** | Clusters of tightly connected accounts | A grouping dimension for fraud ring identification |
-| **Degree Centrality** | How many counterparties an account transacts with | A feature in fraud-prediction ML models |
+<!--
+Graph intelligence flows back as standard DataFrames. Graph-derived
+metrics become columns in Delta Gold tables, available for
+dashboards, ML features, and downstream analytics.
 
-Once in Delta Lake, these insights are available for **fraud case management**, as **features in ML models**, or joined with operational data like account histories that never left the lakehouse.
+Cycle detection identifies accounts involved in circular
+transaction chains and writes a flag to the fraud alerts table.
+PageRank scores influential accounts based on transaction flow
+patterns, producing a risk-scoring column for investigation
+prioritization. Louvain community detection clusters tightly
+connected accounts into groups for fraud ring identification.
+Degree centrality counts how many counterparties an account
+transacts with, feeding fraud-prediction ML models.
+
+Once in Delta Lake, these insights join with operational data
+like account histories that never left the lakehouse. This is
+the Gold layer in action: graph intelligence enriching data
+intelligence.
+-->
 
 ---
 
-## Other Ways to Connect Neo4j from Databricks
+## The Foundation is in Place
 
-The Spark Connector is optimized for batch reads and writes. But it's one of several connection patterns available from Databricks.
+- **Governed data in Delta:** schema-enforced tables, ACID transactions, time travel
+- **Connection data in the graph:** accounts, transfers, shared attributes as nodes and relationships
+- **Insights flowing both directions:** graph algorithms enrich Gold tables, lakehouse feeds the graph
 
-| Pattern | Best For | How It Works |
-|---------|----------|-------------|
-| **Spark Connector** | Batch ELT pipelines | DataFrame reads/writes through Spark's data source API |
-| **Unity Catalog JDBC** | Governed SQL access, cross-system joins | SQL-to-Cypher translation via the Neo4j JDBC driver |
-| **MCP Server** | Agent-driven, schema-aware querying | Exposes schema inspection and read-only Cypher as agent tools |
+**Next:** enriching the graph with unstructured knowledge through Knowledge Graph Construction
 
-The choice depends on the query shape and the consumer.
+<!--
+At this point the data pipeline stage is complete. Delta Lake
+governs the structured data. The Spark Connector has projected
+connection data into Neo4j. Graph algorithm results flow back
+as columns in Gold tables.
 
----
-
-## What the Dual Architecture Enables
-
-The pattern scales from simple connections to self-reinforcing networks.
-
-| Use Case | Data Intelligence (Databricks) | Graph Intelligence (Neo4j) |
-|----------|------------------------|-------------------|
-| **Fraud detection** | Governs transaction records, case management, regulatory reporting | Cycle detection in payment chains, community detection across shared attributes |
-| **Customer 360** | Purchase histories, CRM records, segmentation, lifetime value | Interaction graph — "who is connected to whom through shared touchpoints?" |
-| **GraphRAG** | Stores documentation with full-text search and versioning, generates embeddings | Adds semantic relationships so traversal finds related content through structural connections, not just vector similarity |
-
-GraphRAG is explored in depth in the next section of this series.
+This is the dual architecture working end to end. But we've
+only loaded structured, tabular data so far. The next stage
+adds unstructured knowledge: AML policy documents, maintenance
+manuals, regulatory text. Knowledge Graph Construction chunks
+those documents, extracts entities, generates embeddings, and
+writes them into the graph. That's where we're headed next.
+-->
 
 ---
 
