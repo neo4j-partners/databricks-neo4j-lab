@@ -29,19 +29,64 @@ ol > li {
 
 # Databricks + Neo4j
 
-Delta Lake Stores the Records, Neo4j Reveals the Connections
+Data Intelligence Meets Graph Intelligence
 
 ---
 
-## Two Data Shapes, Each With a Purpose-Built Engine
+## Data Intelligence Meets Graph Intelligence
 
-- **Databricks** excels at large volumes of structured and unstructured data: financial transactions, sensor readings, log files, clickstreams
-- **Neo4j** excels at understanding **how things connect**: supply chains, social networks, fraud rings, transport networks
-- Most real-world problems have both: data that needs crunching **and** relationships that need navigating
+- **Databricks (Data Intelligence Platform):** structured, semi-structured, unstructured data at scale
+- **Neo4j (Graph Intelligence Platform):** connections between entities, explicit and traversable
+
+<!--
+Databricks is the Data Intelligence Platform. It governs and analyzes
+structured, semi-structured, and unstructured data at scale.
+
+Neo4j is the Graph Intelligence Platform. It makes connections between
+entities explicit and traversable.
+
+This slide sets up the framing for the rest of the deck. The next two
+slides break down what each platform actually does.
+-->
 
 ---
 
-## What the Graph Looks Like
+## Databricks: The Data Intelligence Platform
+
+- **Aggregates** transactions, sensor streams, clickstreams
+- **Governs** documents, images, unstructured files
+- **Databricks SQL** at petabyte scale, real-time streaming, data science
+- **Mosaic AI** (agent systems), **AI/BI Genie** (conversational analytics), **Agent Bricks** (agent control plane)
+
+<!--
+Databricks handles structured, semi-structured, and unstructured data.
+It aggregates transactions and sensor streams, governs documents and
+images through Unity Catalog, runs SQL against Delta Lake at petabyte
+scale, and supports ML pipelines from feature engineering through
+model serving. Schema enforcement, ACID transactions, and time travel
+provide the foundation.
+-->
+
+---
+
+## Neo4j: The Graph Intelligence Platform
+
+- **Traverses** supply chains, fraud networks, knowledge graphs
+- **Cypher** pattern matching on nodes and relationships
+- **Multi-hop traversal** and path finding in milliseconds
+- **Graph Data Science** (graph algorithms), **AuraDB** (managed database), **GraphRAG** (graph-enhanced retrieval)
+
+<!--
+Neo4j makes connections between entities explicit and traversable.
+Cypher is the query language for graph databases, operating over nodes
+and relationships. Multi-hop traversals that would require complex
+recursive SQL run in milliseconds. Pattern matching across connection
+topologies reveals structures invisible in flat tables.
+-->
+
+---
+
+## Neo4j Graph Components
 
 - Graphs model the real world as **nodes** (entities) and **relationships** (connections)
 - `(parentheses)` are nodes, `[:brackets]` are relationships
@@ -54,23 +99,31 @@ Each Account node carries properties (account_id, customer_name, status). Each T
 
 ---
 
-## What Each Platform Answers
+## Different Data, Different Query Patterns
 
-| | Databricks | Neo4j |
-|---|-----------|-------|
-| **Data shape** | Rows and columns | Nodes and relationships |
-| **Answers** | "How much?" and "How often?" | "How is this connected?" and "What's affected?" |
-| **Example** | Total transaction volume by account, average transfer amounts | Which accounts are reachable within three hops of a flagged account? |
-| **Query language** | SQL against Delta Lake | Cypher against the graph |
-| **Strength** | Petabyte-scale analytics, governed tables, ML pipelines | Multi-hop traversal, real-time path finding, connection patterns |
+Most problems need **both**
+
+| Question | Platform |
+|---|---|
+| Total transfer volume by account | Databricks (SQL aggregation) |
+| Accounts within three hops of a flagged account | Neo4j (graph traversal) |
+| Find the fraud ring, compute its total volume | Both |
+
+<!--
+This is the payoff slide for the framing. Each question maps to the
+platform built to answer it. The third row shows why you need both:
+Neo4j detects the fraud ring through cycle traversal, Databricks
+computes transfer totals for the identified accounts. Neither platform
+can answer that question alone.
+-->
 
 ---
 
-## Not All Data Needs a Graph
+## Mapping the Lakehouse to the Graph
 
-- **Most lakehouse data stays in tables.** That's where it belongs
-- **A subset describes how things connect:** which accounts transfer to which, which entities share addresses, which components belong to which systems
-- **Connection data is implicit in foreign keys and join tables.** Extracting it into a graph makes it **explicit and queryable**
+- **Most data stays in the lakehouse:** tables, files, documents, governed by Unity Catalog
+- **Connection data** maps to the graph: transfers between accounts, shared addresses, component hierarchies
+- **Foreign keys become relationships:** implicit joins become explicit, traversable edges
 
 ---
 
@@ -91,11 +144,21 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 
 ## Financial Fraud as a Working Example
 
-- **Money laundering hides in plain sight:** funds move through chains of accounts and return to the origin
-- **Each transfer looks legitimate in isolation.** The **circular pattern** is only visible when you follow the connections
-- **Detecting a cycle of 2–6 hops is a single Cypher query** returning in milliseconds
-- **The equivalent SQL requires complex nested joins (recursive CTEs)** with explicit cycle-detection guards to prevent infinite loops
-- **A small enough model to explain in minutes,** complex enough to reveal patterns invisible in flat tables
+- **Money laundering hides in plain sight:** circular transfers across account chains
+- **Each transfer looks legitimate.** The cycle reveals the fraud
+- **Cypher:** one query detects 2-6 hop cycles in milliseconds
+- **SQL equivalent:** nested SQL joins (CTEs) with cycle-detection guards
+
+<!--
+Funds move through chains of accounts and return to the origin.
+Each individual transfer looks legitimate in isolation. The circular
+pattern is only visible when you follow the connections. Detecting
+a cycle of 2-6 hops is a single Cypher query returning in
+milliseconds. The equivalent SQL requires recursive CTEs with
+explicit cycle-detection guards to prevent infinite loops. This is
+a small enough model to explain in minutes, but complex enough to
+reveal patterns invisible in flat tables.
+-->
 
 ---
 
@@ -108,7 +171,7 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 ## Extracting Connection Data from the Lakehouse
 
 - **Delta Lake** remains the source of truth: schema enforcement, ACID transactions, time travel, access controls
-- **Neo4j** receives the connection subset: only the data with dense relationships projects from the lakehouse into the graph
+- **Neo4j** receives the connected data: only the subset with relationship patterns worth traversing projects from the lakehouse into the graph
 - **The pipeline** has two phases: get clean data into governed Delta tables, then project the connections into the graph
 
 ---
@@ -154,7 +217,7 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 
 ## Bidirectional Flow Through the Medallion Architecture
 
-The **Medallion Architecture** progressively refines raw data into business-ready outputs. The bidirectional flow is where the two systems **compound each other's value**.
+The **Medallion Architecture** progressively refines raw data into business-ready outputs. The bidirectional flow is where data intelligence and graph intelligence **compound each other's value**.
 
 | Layer | Contains | Role |
 |-------|----------|------|
@@ -166,7 +229,7 @@ The **Medallion Architecture** progressively refines raw data into business-read
 
 ## Graph Insights Flow Back to the Lakehouse
 
-The Spark Connector reads Neo4j results as standard DataFrames. Graph-derived metrics become columns in Delta tables, available across the entire analytical estate.
+Graph intelligence flows back as standard DataFrames. Graph-derived metrics become columns in Delta tables — available for dashboards, ML features, and downstream analytics across the entire data intelligence estate.
 
 | Graph Algorithm | What It Produces | What It Becomes in Delta Lake |
 |----------------|-----------------|-------------------------------|
@@ -197,7 +260,7 @@ The choice depends on the query shape and the consumer.
 
 The pattern scales from simple connections to self-reinforcing networks.
 
-| Use Case | What Databricks Handles | What Neo4j Handles |
+| Use Case | Data Intelligence (Databricks) | Graph Intelligence (Neo4j) |
 |----------|------------------------|-------------------|
 | **Fraud detection** | Governs transaction records, case management, regulatory reporting | Cycle detection in payment chains, community detection across shared attributes |
 | **Customer 360** | Purchase histories, CRM records, segmentation, lifetime value | Interaction graph — "who is connected to whom through shared touchpoints?" |
@@ -216,7 +279,7 @@ GraphRAG is explored in depth in the next section of this series.
 - **The Spark Connector bridges both directions.** Lakehouse data becomes a graph, and graph insights flow back to Delta tables.
 - **The Medallion Architecture governs the journey.** Bronze lands raw data, Silver cleans it for the graph, Gold captures graph insights written back to Delta.
 
-Together, you get the analytical power of the Lakehouse **and** the relationship intelligence of the graph, connected through governed pipelines, not siloed in separate platforms.
+Together, data intelligence and graph intelligence compound each other — connected through governed pipelines, not siloed in separate platforms.
 
 ---
 
