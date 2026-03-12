@@ -178,22 +178,25 @@ From data intelligence through graph intelligence to agents that query both
 
 ---
 
-## Three Pipeline Stages
+## Building the Intelligence Platform: The Data Pipeline
 
-- **ETL/Curation:** data intelligence, curated lakehouse tables become graph nodes and relationships
-- **GraphRAG Enrichment:** graph intelligence, AML policy docs become embedded, entity-linked knowledge
-- **Querying/Agent:** both, investigation agents query the graph and the lakehouse together
+- **ETL/Curation:** lakehouse tables → graph nodes and relationships
+- **Knowledge Graph Construction:** AML policy docs → embeddings + entity-linked knowledge → graph enrichment
+- **GraphRAG Retrieval/Agent:** investigation queries → graph + lakehouse results
 
 <!--
-Three distinct stages connect Databricks to Neo4j. ETL runs on
-classic compute using the Spark Connector to batch-load curated
-lakehouse tables as graph nodes and relationships. GraphRAG
-enrichment uses the Python driver to chunk regulatory and AML
-policy documents, generate embeddings, and extract entities back
-into the graph. The agent layer is fully serverless, using
-neo4j-graphrag-python for knowledge retrieval and
-neo4j-agent-memory for conversational state across investigation
-sessions.
+Three distinct stages connect Databricks to Neo4j, each building
+a layer of intelligence. ETL is data intelligence: classic compute
+using the Spark Connector to batch-load curated lakehouse tables
+as graph nodes and relationships. Knowledge Graph Construction
+uses the neo4j-graphrag-python Knowledge Graph Builder
+(SimpleKGPipeline) to chunk regulatory and AML policy documents,
+generate embeddings, extract entities, and write them back into
+Neo4j, enriching the graph with document-derived knowledge.
+GraphRAG Retrieval combines vector search with graph traversal
+via the VectorCypherRetriever, exposed as MCP tools so
+investigation agents can query the graph and the lakehouse
+together.
 -->
 
 ---

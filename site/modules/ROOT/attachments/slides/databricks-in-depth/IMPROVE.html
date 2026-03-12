@@ -172,6 +172,52 @@
 </tr>
 </tbody>
 </table>
+<h3 id="neo4j-pipeline-terminology-neo4j-graphrag-python">Neo4j Pipeline Terminology (neo4j-graphrag-python)</h3>
+<p>The <code>neo4j-graphrag-python</code> package is Neo4j's first-party Python library for building GenAI applications. It separates into three distinct user guides, each mapping to a pipeline stage. Slides should use these official terms to stay aligned with Neo4j's documentation.</p>
+<table>
+<thead>
+<tr>
+<th>Pipeline Stage</th>
+<th>Neo4j Official Term</th>
+<th>Package Component</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ETL/Curation</strong></td>
+<td>No special name (Spark Connector)</td>
+<td><code>org.neo4j.spark.DataSource</code></td>
+<td>Batch reads/writes between DataFrames and Neo4j</td>
+</tr>
+<tr>
+<td><strong>Knowledge Graph Construction</strong></td>
+<td><strong>Knowledge Graph Builder</strong></td>
+<td><code>SimpleKGPipeline</code>, KG Builder pipeline</td>
+<td>Chunks documents, generates embeddings, extracts entities/relationships, writes to Neo4j</td>
+</tr>
+<tr>
+<td><strong>GraphRAG Retrieval</strong></td>
+<td><strong>RAG</strong></td>
+<td><code>VectorCypherRetriever</code>, <code>GraphRAG</code> class</td>
+<td>Combines vector search with graph traversal to retrieve context for LLM answers</td>
+</tr>
+<tr>
+<td><strong>Agent Tooling</strong></td>
+<td><strong>MCP</strong></td>
+<td>Neo4j MCP Server</td>
+<td>Exposes retrievers and Cypher execution as tools for AI agents</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key distinction:</strong> &quot;GraphRAG&quot; in Neo4j's terminology refers specifically to the <em>retrieval</em> pattern (vector search + graph traversal augmenting LLM generation), not the construction/enrichment step. The construction pipeline — chunking, embedding, entity extraction — is officially &quot;Knowledge Graph Construction&quot; or &quot;Knowledge Graph Builder.&quot;</p>
+<p><strong>Sources:</strong></p>
+<ul>
+<li><a href="https://neo4j.com/docs/neo4j-graphrag-python/current/">neo4j-graphrag-python docs</a> — three user guides: RAG, Knowledge Graph Builder, Pipeline</li>
+<li><a href="https://neo4j.com/docs/neo4j-graphrag-python/current/user_guide_kg_builder.html">Knowledge Graph Builder User Guide</a> — pipeline stages: data loader → text splitter → chunk embedder → schema builder → entity extractor → KG writer → entity resolver</li>
+<li><a href="https://neo4j.com/developer/genai-ecosystem/model-context-protocol-mcp/">Neo4j MCP Integration</a> — MCP servers for agent-based graph querying</li>
+<li><a href="https://neo4j.com/docs/spark/current/databricks/">Neo4j Spark Connector Databricks Quickstart</a> — batch ETL via DataSource API</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" lang="en-US">
 <h2 id="slide-by-slide-analysis">Slide-by-Slide Analysis</h2>
