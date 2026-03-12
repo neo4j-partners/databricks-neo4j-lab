@@ -6,9 +6,9 @@
     {
       "id": "title",
       "type": "text",
-      "x": 300,
+      "x": 44.8828125,
       "y": 20,
-      "width": 500,
+      "width": 1008.92578125,
       "height": 40,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -19,7 +19,7 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2001,
-      "version": 2,
+      "version": 235,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
@@ -31,22 +31,22 @@
       "textAlign": "center",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 653008871,
+      "versionNonce": 1277779377,
       "index": "a0",
-      "updated": 1770709566259,
+      "updated": 1773296932335,
       "link": null,
       "locked": false,
       "originalText": "Financial Fraud Detection — Dual Database Architecture",
-      "autoResize": true,
+      "autoResize": false,
       "lineHeight": 1.4285714285714286
     },
     {
       "id": "subtitle",
       "type": "text",
-      "x": 300,
-      "y": 62,
-      "width": 500,
-      "height": 24,
+      "x": 286.22265625,
+      "y": 62.01171875,
+      "width": 513.546875,
+      "height": 48,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -56,25 +56,25 @@
       "roughness": 0,
       "opacity": 80,
       "seed": 2002,
-      "version": 2,
+      "version": 25,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
       "roundness": null,
       "boundElements": [],
-      "text": "50K customers  |  120K accounts  |  5M+ transactions  |  8K merchants  |  Fraud ring detection",
+      "text": "50K customers  |  120K accounts  |  5M+ transactions  |  8K merchants  |  Fraud ring\ndetection",
       "fontSize": 12,
       "fontFamily": 5,
       "textAlign": "center",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 626226697,
+      "versionNonce": 1473053681,
       "index": "a1",
-      "updated": 1770709566259,
+      "updated": 1773296914887,
       "link": null,
       "locked": false,
       "originalText": "50K customers  |  120K accounts  |  5M+ transactions  |  8K merchants  |  Fraud ring detection",
-      "autoResize": true,
+      "autoResize": false,
       "lineHeight": 2
     },
     {
@@ -82,8 +82,8 @@
       "type": "rectangle",
       "x": 20,
       "y": 100,
-      "width": 480,
-      "height": 880,
+      "width": 492.92578125,
+      "height": 672.51171875,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "#a5d8ff",
@@ -93,15 +93,17 @@
       "roughness": 0,
       "opacity": 20,
       "seed": 2003,
-      "version": 2,
+      "version": 130,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [],
-      "versionNonce": 609061639,
+      "versionNonce": 1716867729,
       "index": "a2",
-      "updated": 1770709566259,
+      "updated": 1773296817592,
       "link": null,
       "locked": false
     },
@@ -199,10 +201,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-tbl-customers", "type": "text" },
-        { "id": "arrow-cust-to-acct", "type": "arrow" }
+        {
+          "id": "label-tbl-customers",
+          "type": "text"
+        },
+        {
+          "id": "arrow-cust-to-acct",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 2003286919,
       "index": "a5",
@@ -304,9 +314,14 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-badge-shared-cust", "type": "text" }
+        {
+          "id": "label-badge-shared-cust",
+          "type": "text"
+        }
       ],
       "versionNonce": 573073065,
       "index": "a7",
@@ -371,9 +386,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 30]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
       "startBinding": {
         "elementId": "box-tbl-customers",
         "focus": 0,
@@ -450,11 +476,22 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-tbl-accounts", "type": "text" },
-        { "id": "arrow-cust-to-acct", "type": "arrow" },
-        { "id": "arrow-acct-to-txn", "type": "arrow" }
+        {
+          "id": "label-tbl-accounts",
+          "type": "text"
+        },
+        {
+          "id": "arrow-cust-to-acct",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-acct-to-txn",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 802918505,
       "index": "aB",
@@ -556,9 +593,14 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-badge-shared-acct", "type": "text" }
+        {
+          "id": "label-badge-shared-acct",
+          "type": "text"
+        }
       ],
       "versionNonce": 1153407817,
       "index": "aD",
@@ -623,9 +665,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 30]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
       "startBinding": {
         "elementId": "box-tbl-accounts",
         "focus": 0,
@@ -702,11 +755,22 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-tbl-transactions", "type": "text" },
-        { "id": "arrow-acct-to-txn", "type": "arrow" },
-        { "id": "arrow-txn-to-merch", "type": "arrow" }
+        {
+          "id": "label-tbl-transactions",
+          "type": "text"
+        },
+        {
+          "id": "arrow-acct-to-txn",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-txn-to-merch",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 885550505,
       "index": "aH",
@@ -808,9 +872,14 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-badge-shared-txn", "type": "text" }
+        {
+          "id": "label-badge-shared-txn",
+          "type": "text"
+        }
       ],
       "versionNonce": 1133482985,
       "index": "aJ",
@@ -875,9 +944,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 30]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
       "startBinding": {
         "elementId": "box-tbl-transactions",
         "focus": 0,
@@ -954,10 +1034,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-tbl-merchants", "type": "text" },
-        { "id": "arrow-txn-to-merch", "type": "arrow" }
+        {
+          "id": "label-tbl-merchants",
+          "type": "text"
+        },
+        {
+          "id": "arrow-txn-to-merch",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 2053512457,
       "index": "aN",
@@ -1059,9 +1147,14 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [
-        { "id": "label-badge-shared-merch", "type": "text" }
+        {
+          "id": "label-badge-shared-merch",
+          "type": "text"
+        }
       ],
       "versionNonce": 100000005,
       "index": "aOb",
@@ -1111,8 +1204,8 @@
       "type": "rectangle",
       "x": 50,
       "y": 570,
-      "width": 420,
-      "height": 220,
+      "width": 394.44921875,
+      "height": 176.93750000000006,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "#ffffff",
@@ -1122,15 +1215,17 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2032,
-      "version": 2,
+      "version": 78,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [],
-      "versionNonce": 1788792969,
+      "versionNonce": 1643245247,
       "index": "aP",
-      "updated": 1770709566259,
+      "updated": 1773296810619,
       "link": null,
       "locked": false
     },
@@ -1209,49 +1304,12 @@
       "lineHeight": 1.836734693877551
     },
     {
-      "id": "label-lakehouse-query",
-      "type": "text",
-      "x": 60,
-      "y": 810,
-      "width": 400,
-      "height": 100,
-      "angle": 0,
-      "strokeColor": "#1971c2",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 1,
-      "strokeStyle": "solid",
-      "roughness": 0,
-      "opacity": 70,
-      "seed": 2035,
-      "version": 2,
-      "isDeleted": false,
-      "groupIds": [],
-      "frameId": null,
-      "roundness": null,
-      "boundElements": [],
-      "text": "SELECT from_account, SUM(amount), COUNT(*)\nFROM transactions\nWHERE timestamp > DATEADD(DAY, -30, CURRENT_DATE)\nGROUP BY from_account\nHAVING SUM(amount) > 50000",
-      "fontSize": 12,
-      "fontFamily": 5,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "versionNonce": 1913941927,
-      "index": "aS",
-      "updated": 1770709566259,
-      "link": null,
-      "locked": false,
-      "originalText": "SELECT from_account, SUM(amount), COUNT(*)\nFROM transactions\nWHERE timestamp > DATEADD(DAY, -30, CURRENT_DATE)\nGROUP BY from_account\nHAVING SUM(amount) > 50000",
-      "autoResize": true,
-      "lineHeight": 1.6666666666666667
-    },
-    {
       "id": "panel-neo4j",
       "type": "rectangle",
-      "x": 560,
-      "y": 100,
-      "width": 530,
-      "height": 880,
+      "x": 560.234375,
+      "y": 100.01171875,
+      "width": 523.67578125,
+      "height": 663.17578125,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "#b2f2bb",
@@ -1261,15 +1319,17 @@
       "roughness": 0,
       "opacity": 20,
       "seed": 2036,
-      "version": 2,
+      "version": 302,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [],
-      "versionNonce": 1060977693,
+      "versionNonce": 1656525073,
       "index": "aT",
-      "updated": 1770709566259,
+      "updated": 1773296904129,
       "link": null,
       "locked": false
     },
@@ -1367,12 +1427,26 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-customer", "type": "text" },
-        { "id": "arrow-n-cust-to-acct", "type": "arrow" },
-        { "id": "arrow-n-cust-to-ssn", "type": "arrow" },
-        { "id": "arrow-n-cust-to-phone", "type": "arrow" }
+        {
+          "id": "label-node-customer",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-cust-to-acct",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-cust-to-ssn",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-cust-to-phone",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 100000010,
       "index": "aW",
@@ -1437,10 +1511,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-ssn", "type": "text" },
-        { "id": "arrow-n-cust-to-ssn", "type": "arrow" }
+        {
+          "id": "label-node-ssn",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-cust-to-ssn",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 100000012,
       "index": "aY",
@@ -1505,10 +1587,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-phone", "type": "text" },
-        { "id": "arrow-n-cust-to-phone", "type": "arrow" }
+        {
+          "id": "label-node-phone",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-cust-to-phone",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 100000014,
       "index": "aa",
@@ -1569,21 +1659,42 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2045,
-      "version": 2,
+      "version": 3,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-account", "type": "text" },
-        { "id": "arrow-n-cust-to-acct", "type": "arrow" },
-        { "id": "arrow-n-acct-to-merch", "type": "arrow" },
-        { "id": "arrow-n-acct-to-dev", "type": "arrow" },
-        { "id": "arrow-n-acct-to-addr", "type": "arrow" }
+        {
+          "id": "label-node-account",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-cust-to-acct",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-acct-to-merch",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-acct-to-dev",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-acct-to-addr",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-n-acct-loop",
+          "type": "arrow"
+        }
       ],
-      "versionNonce": 100000016,
+      "versionNonce": 1304198321,
       "index": "ac",
-      "updated": 1770709566259,
+      "updated": 1773296839833,
       "link": null,
       "locked": false
     },
@@ -1644,10 +1755,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-device", "type": "text" },
-        { "id": "arrow-n-acct-to-dev", "type": "arrow" }
+        {
+          "id": "label-node-device",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-acct-to-dev",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 100000018,
       "index": "ae",
@@ -1695,8 +1814,8 @@
     {
       "id": "node-merchant",
       "type": "ellipse",
-      "x": 920,
-      "y": 325,
+      "x": 953.96875,
+      "y": 331.5859375,
       "width": 120,
       "height": 45,
       "angle": 0,
@@ -1708,26 +1827,34 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2049,
-      "version": 2,
+      "version": 71,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-merchant", "type": "text" },
-        { "id": "arrow-n-acct-to-merch", "type": "arrow" }
+        {
+          "id": "label-node-merchant",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-acct-to-merch",
+          "type": "arrow"
+        }
       ],
-      "versionNonce": 100000020,
+      "versionNonce": 42118815,
       "index": "ag",
-      "updated": 1770709566259,
+      "updated": 1773296861594,
       "link": null,
       "locked": false
     },
     {
       "id": "label-node-merchant",
       "type": "text",
-      "x": 940,
-      "y": 335,
+      "x": 973.96875,
+      "y": 341.5859375,
       "width": 80,
       "height": 24,
       "angle": 0,
@@ -1739,7 +1866,7 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2050,
-      "version": 2,
+      "version": 71,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
@@ -1751,9 +1878,9 @@
       "textAlign": "center",
       "verticalAlign": "middle",
       "containerId": "node-merchant",
-      "versionNonce": 100000021,
+      "versionNonce": 2089910975,
       "index": "ah",
-      "updated": 1770709566259,
+      "updated": 1773296861594,
       "link": null,
       "locked": false,
       "originalText": "🏪 Merchant",
@@ -1780,10 +1907,18 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [
-        { "id": "label-node-address", "type": "text" },
-        { "id": "arrow-n-acct-to-addr", "type": "arrow" }
+        {
+          "id": "label-node-address",
+          "type": "text"
+        },
+        {
+          "id": "arrow-n-acct-to-addr",
+          "type": "arrow"
+        }
       ],
       "versionNonce": 100000022,
       "index": "ai",
@@ -1848,9 +1983,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 85]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          85
+        ]
+      ],
       "startBinding": {
         "elementId": "node-customer",
         "focus": 0,
@@ -1910,10 +2056,10 @@
     {
       "id": "arrow-n-acct-loop",
       "type": "arrow",
-      "x": 885,
-      "y": 338,
-      "width": 45,
-      "height": 50,
+      "x": 884.7680658667676,
+      "y": 338.27587196592555,
+      "width": 94.63103877319838,
+      "height": 43.662590715925546,
       "angle": 0,
       "strokeColor": "#e03131",
       "backgroundColor": "transparent",
@@ -1923,29 +2069,52 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2055,
-      "version": 2,
+      "version": 174,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [45, -25], [45, 25]],
-      "startBinding": null,
-      "endBinding": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          36.70849663323236,
+          -43.662590715925546
+        ],
+        [
+          94.63103877319838,
+          -27.099790679010766
+        ]
+      ],
+      "startBinding": {
+        "elementId": "node-account",
+        "focus": 0.6794026135656518,
+        "gap": 4.065200213364933
+      },
+      "endBinding": {
+        "elementId": "label-rel-transferred-props",
+        "focus": 0,
+        "gap": 5.187199963085215
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow",
       "lastCommittedPoint": null,
-      "versionNonce": 100000026,
+      "versionNonce": 316519615,
       "index": "am",
-      "updated": 1770709566259,
+      "updated": 1773296864980,
       "link": null,
       "locked": false
     },
     {
       "id": "label-rel-transferred",
       "type": "text",
-      "x": 935,
-      "y": 298,
+      "x": 892.42578125,
+      "y": 275.30078125,
       "width": 110,
       "height": 14,
       "angle": 0,
@@ -1957,7 +2126,7 @@
       "roughness": 0,
       "opacity": 80,
       "seed": 2056,
-      "version": 2,
+      "version": 173,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
@@ -1969,9 +2138,9 @@
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 100000027,
+      "versionNonce": 587149343,
       "index": "an",
-      "updated": 1770709566259,
+      "updated": 1773296869651,
       "link": null,
       "locked": false,
       "originalText": "TRANSFERRED_TO",
@@ -1981,8 +2150,8 @@
     {
       "id": "label-rel-transferred-props",
       "type": "text",
-      "x": 935,
-      "y": 314,
+      "x": 957.01953125,
+      "y": 316.36328125,
       "width": 130,
       "height": 14,
       "angle": 0,
@@ -1994,21 +2163,26 @@
       "roughness": 0,
       "opacity": 60,
       "seed": 2057,
-      "version": 2,
+      "version": 74,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "boundElements": [],
+      "boundElements": [
+        {
+          "id": "arrow-n-acct-loop",
+          "type": "arrow"
+        }
+      ],
       "text": "{amount, ts, channel}",
       "fontSize": 10,
       "fontFamily": 5,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 100000028,
+      "versionNonce": 1793925279,
       "index": "ao",
-      "updated": 1770709566259,
+      "updated": 1773296864980,
       "link": null,
       "locked": false,
       "originalText": "{amount, ts, channel}",
@@ -2018,10 +2192,10 @@
     {
       "id": "arrow-n-acct-to-merch",
       "type": "arrow",
-      "x": 885,
-      "y": 347,
-      "width": 35,
-      "height": 0,
+      "x": 885.713058337051,
+      "y": 349.68894651054705,
+      "width": 67.50418092732502,
+      "height": 2.2780004299068537,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "transparent",
@@ -2031,13 +2205,24 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2058,
-      "version": 2,
+      "version": 71,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [35, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          67.50418092732502,
+          2.2780004299068537
+        ]
+      ],
       "startBinding": {
         "elementId": "node-account",
         "focus": 0,
@@ -2051,9 +2236,9 @@
       "startArrowhead": null,
       "endArrowhead": "arrow",
       "lastCommittedPoint": null,
-      "versionNonce": 100000029,
+      "versionNonce": 1374737119,
       "index": "ap",
-      "updated": 1770709566259,
+      "updated": 1773296861594,
       "link": null,
       "locked": false
     },
@@ -2073,21 +2258,26 @@
       "roughness": 0,
       "opacity": 70,
       "seed": 2059,
-      "version": 2,
+      "version": 3,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "boundElements": [],
+      "boundElements": [
+        {
+          "id": "arrow-n-acct-loop",
+          "type": "arrow"
+        }
+      ],
       "text": "PURCHASED_AT",
       "fontSize": 10,
       "fontFamily": 5,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 100000030,
+      "versionNonce": 1700250737,
       "index": "aq",
-      "updated": 1770709566259,
+      "updated": 1773296839833,
       "link": null,
       "locked": false,
       "originalText": "PURCHASED_AT",
@@ -2114,9 +2304,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [-55, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -55,
+          0
+        ]
+      ],
       "startBinding": {
         "elementId": "node-account",
         "focus": 0,
@@ -2193,9 +2394,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 70]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          70
+        ]
+      ],
       "startBinding": {
         "elementId": "node-account",
         "focus": 0,
@@ -2272,9 +2484,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [-65, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -65,
+          0
+        ]
+      ],
       "startBinding": {
         "elementId": "node-customer",
         "focus": 0,
@@ -2351,9 +2574,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [35, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          35,
+          0
+        ]
+      ],
       "startBinding": {
         "elementId": "node-customer",
         "focus": 0,
@@ -2430,7 +2664,9 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [],
       "versionNonce": 100000039,
       "index": "az",
@@ -2495,7 +2731,9 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
       "versionNonce": 100000041,
       "index": "b1",
@@ -2560,7 +2798,9 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
       "versionNonce": 100000043,
       "index": "b3",
@@ -2610,8 +2850,8 @@
       "type": "rectangle",
       "x": 590,
       "y": 570,
-      "width": 460,
-      "height": 220,
+      "width": 458.80468750000006,
+      "height": 178.32421875,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "#ffffff",
@@ -2621,15 +2861,17 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2074,
-      "version": 2,
+      "version": 132,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "boundElements": [],
-      "versionNonce": 100000045,
+      "versionNonce": 519393375,
       "index": "b5",
-      "updated": 1770709566259,
+      "updated": 1773296893120,
       "link": null,
       "locked": false
     },
@@ -2675,8 +2917,8 @@
       "type": "text",
       "x": 610,
       "y": 610,
-      "width": 420,
-      "height": 170,
+      "width": 347.8424072265625,
+      "height": 124.3072385204081,
       "angle": 0,
       "strokeColor": "#495057",
       "backgroundColor": "transparent",
@@ -2686,63 +2928,26 @@
       "roughness": 0,
       "opacity": 100,
       "seed": 2076,
-      "version": 2,
+      "version": 88,
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
       "roundness": null,
       "boundElements": [],
       "text": "Circular payment chain detection (cycle queries)\nShared-attribute fraud ring discovery\nMulti-hop account traversal (no JOINs)\nCommunity detection (Louvain) for ring identification\nReal-time path finding for investigation",
-      "fontSize": 14,
+      "fontSize": 13.535677083333326,
       "fontFamily": 5,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "versionNonce": 100000047,
+      "versionNonce": 911182719,
       "index": "b7",
-      "updated": 1770709566259,
+      "updated": 1773296882786,
       "link": null,
       "locked": false,
       "originalText": "Circular payment chain detection (cycle queries)\nShared-attribute fraud ring discovery\nMulti-hop account traversal (no JOINs)\nCommunity detection (Louvain) for ring identification\nReal-time path finding for investigation",
       "autoResize": true,
       "lineHeight": 1.836734693877551
-    },
-    {
-      "id": "label-neo4j-query",
-      "type": "text",
-      "x": 600,
-      "y": 810,
-      "width": 440,
-      "height": 80,
-      "angle": 0,
-      "strokeColor": "#2f9e44",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 1,
-      "strokeStyle": "solid",
-      "roughness": 0,
-      "opacity": 70,
-      "seed": 2077,
-      "version": 2,
-      "isDeleted": false,
-      "groupIds": [],
-      "frameId": null,
-      "roundness": null,
-      "boundElements": [],
-      "text": "MATCH path = (a:Account)-[:TRANSFERRED_TO*2..6]->(a)\nWITH a, [n IN nodes(path) | n.account_id] AS ring\nRETURN DISTINCT a.account_id, ring",
-      "fontSize": 12,
-      "fontFamily": 5,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "versionNonce": 100000048,
-      "index": "b8",
-      "updated": 1770709566259,
-      "link": null,
-      "locked": false,
-      "originalText": "MATCH path = (a:Account)-[:TRANSFERRED_TO*2..6]->(a)\nWITH a, [n IN nodes(path) | n.account_id] AS ring\nRETURN DISTINCT a.account_id, ring",
-      "autoResize": true,
-      "lineHeight": 1.6666666666666667
     },
     {
       "id": "divider-line",
@@ -2764,9 +2969,20 @@
       "isDeleted": false,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "boundElements": [],
-      "points": [[0, 0], [0, 860]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          860
+        ]
+      ],
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
@@ -2781,16 +2997,9 @@
   ],
   "appState": {
     "gridSize": 20,
+    "gridStep": 5,
     "gridModeEnabled": false,
-    "viewBackgroundColor": "#ffffff",
-    "currentItemFontFamily": 5,
-    "currentItemRoughness": 0,
-    "currentItemRoundness": "round",
-    "currentItemArrowType": "round",
-    "currentItemStrokeWidth": 2,
-    "exportBackground": true,
-    "exportScale": 2,
-    "theme": "light"
+    "viewBackgroundColor": "#ffffff"
   },
   "files": {}
 }
