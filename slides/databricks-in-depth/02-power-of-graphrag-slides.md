@@ -289,54 +289,35 @@ coordinate them. That's what we build next.
 
 ---
 
-## What Is Databricks Genie?
+## Databricks Genie: Natural Language to SQL
 
-- **Compound AI system:** multiple components turning natural language into SQL
-- **Unity Catalog awareness:** reads table names, descriptions, key relationships
-- **Column-level context:** relevant metadata filtered before reaching the model
-- **Example SQL queries:** domain experts provide samples Genie selects from
-- **Plain-text instructions:** teach Genie domain terminology and business rules
+- **Compound AI system:** turns natural language into governed SQL
+- **Purpose-built for tabular data:** optimized for SQL generation against rows and columns
+- **Lakehouse and federated sources:** queries any data registered in Unity Catalog
+- **Users ask in English:** "Total transfer volume for account-1234?" becomes SQL and executes
 - **Read-only execution:** generated queries can never modify your data
 
 <!--
 Genie is not a single LLM. It's a compound AI system with multiple
 interacting components specialized for natural language to SQL.
 
-Unity Catalog awareness means Genie reads table names, descriptions,
-and primary/foreign key relationships to understand your data before
-generating a query. Column names and descriptions are intelligently
-filtered so only relevant metadata reaches the model.
+Genie queries any data registered in Unity Catalog: managed tables,
+external tables, foreign tables from federated sources like
+Snowflake, PostgreSQL, and BigQuery, plus views and materialized
+views. Unity Catalog provides the metadata that makes Genie smart:
+table names, column descriptions, primary/foreign key relationships.
+Column-level context is intelligently filtered so only relevant
+metadata reaches the model.
 
-Domain experts provide example SQL queries that Genie selects from
-when they match the user's question, plus plain-text instructions
-that teach domain terminology, business rules, and edge cases.
+Domain experts configure Genie Spaces: curated sets of tables with
+JOIN definitions, up to 100 plain-text instructions teaching domain
+terminology and business rules, and example SQL queries that Genie
+selects from when they match the user's question. When a response
+matches a parameterized example query exactly, Genie marks it as
+"Trusted" so users know the answer came from a verified path.
+
 Every generated query is read-only, so Genie can never modify
 your data.
--->
-
----
-
-## Databricks Genie for Structured Data
-
-- **Genie Spaces:** curated tables, JOIN definitions, up to 100 instructions per space
-- **Connect to your tables:** financial transaction tables from the fraud example
-- **Add domain knowledge:** what "suspicious transfer" means, normal volumes, flagged accounts
-- **Users ask in English:** "Total transfer volume for account-1234?" becomes SQL and executes
-- **Trusted Assets:** verified paths marked when responses match expert-provided queries exactly
-
-<!--
-A Genie Space is a curated environment where domain experts select
-the tables, define JOIN relationships, and add up to 100
-instructions per space. For the fraud example, you connect the
-financial transaction tables and add instructions that teach Genie
-what "suspicious transfer" means, what normal transaction volumes
-look like, and what a flagged account is.
-
-Users ask in English. "What is the total transfer volume for
-account-1234 in the last 90 days?" becomes SQL, executes against
-Delta Lake, and returns the answer. When a response matches a
-parameterized example query or SQL function exactly, Genie marks
-it as "Trusted" so users know the answer came from a verified path.
 -->
 
 ---
