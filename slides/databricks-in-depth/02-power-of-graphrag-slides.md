@@ -322,51 +322,83 @@ your data.
 
 ---
 
-## What Is the Neo4j MCP Agent?
+## Neo4j Graph Agent: Natural Language to Cypher
 
-- **Graph-specialized agent:** purpose-built for Cypher, just as Genie is for SQL
-- **Schema awareness:** inspects every node label, relationship type, and property key
-- **Structure, not guessing:** knows `Account` connects through `TRANSFERRED_TO`, writes precise traversals
-- **Domain instructions:** system prompt teaches traversal patterns and graph-specific terminology
-- **Cypher expertise:** generates Cypher the way Genie generates SQL
+- **Graph-specialized agent:** turns natural language into Cypher traversals
+- **Purpose-built for connected data:** optimized for paths, patterns, and multi-hop relationships
+- **Schema-aware:** inspects every node label, relationship type, and property key before querying
+- **Users ask in English:** "Which accounts are within three hops?" becomes a Cypher traversal
+- **Read-only by default:** generated queries can never modify production data
 
 <!--
-Just as Genie is purpose-built for SQL, this agent is purpose-built
-for Cypher, the query language for graph databases. It inspects the
-graph schema to learn every node label, relationship type, and
-property key before generating a single query.
+Just as Genie is purpose-built for SQL against tabular data, this
+agent is purpose-built for Cypher against connected data. It
+understands graph patterns: paths, multi-hop traversals, cycle
+detection, shared-attribute matching.
 
 Because the agent knows that Account nodes connect through
 TRANSFERRED_TO relationships, it writes precise traversals instead
-of hallucinating table names or join conditions. A system prompt
-teaches it graph-specific terminology, traversal patterns, and what
-questions the graph is designed to answer.
+of hallucinating table names or join conditions. The graph's
+schema becomes a constraint that guides generation, not a
+suggestion to ignore.
+
+Every generated query is read-only, so the agent can never modify
+production graph data.
 -->
 
 ---
 
-## Neo4j MCP Agent for Graph Queries
+## Accessing the Knowledge Graph
 
-- **Schema-first querying:** calls `get-neo4j-schema`, generates Cypher against verified structure
-- **Connect to your graph:** `Account` nodes and `TRANSFERRED_TO` relationships
-- **Add domain context:** flagged accounts, fraud ring structure, appropriate traversal depth
-- **Users ask in English:** "Which accounts are within three hops?" becomes a Cypher traversal
-- **Read-only by default:** only `read-neo4j-cypher`, never modifies production data
+- **MCP (Model Context Protocol):** exposes `get-schema`, `read-cypher`, and `list-gds-procedures` as agent tools
+- **Python driver:** powers GraphRAG retrievers (VectorCypherRetriever) for semantic search
+- **Agent context:** schema discovery + system prompt give the agent graph structure and domain knowledge
 
 <!--
-The agent calls get-neo4j-schema to discover the exact node types
-and relationship types available, then generates Cypher against
-verified structure instead of guessing. You connect it to the fraud
-knowledge graph with Account nodes and TRANSFERRED_TO relationships.
+The agent accesses Neo4j through two paths. MCP exposes graph
+intelligence as standard agent tools: get-schema for structure
+discovery, read-cypher for query execution, and list-gds-procedures
+for graph analytics when GDS is installed.
 
-System prompt instructions teach the agent what a flagged account
-is, how fraud rings are structured, and what traversal depth is
-appropriate. Users ask in English: "Which accounts are within three
-hops of the flagged account?" becomes a Cypher traversal, executes
-against Neo4j, and returns the connected accounts.
+The Python driver provides a separate path for GraphRAG retrievers
+like VectorCypherRetriever, which combines vector similarity search
+with graph traversal in a single query.
 
-Agents in this workshop use only read-neo4j-cypher, so they can
-never modify production graph data.
+Agent context comes from two sources working together. Schema
+discovery via get-schema auto-inspects the graph structure using
+APOC introspection so the agent knows every node label, relationship
+type, and property key. The system prompt adds domain knowledge:
+what a flagged account is, how fraud rings are structured, what
+traversal depth is appropriate. Together they ensure the agent
+queries against verified schema with domain-appropriate patterns.
+-->
+
+---
+
+## Neo4j MCP Tools
+
+- **`get-schema`:** APOC introspection, auto-discovers structure, token-efficient for LLMs
+- **`read-cypher`:** read-only Cypher with parameterized inputs
+- **`list-gds-procedures`:** discovers graph analytics (PageRank, community detection) when GDS is installed
+- **Read-only mode:** `write-cypher` hidden entirely, agents can never modify production data
+
+<!--
+get-schema introspects the live database using APOC, sampling
+nodes and relationships to discover the full graph structure.
+The result is post-processed into a token-efficient JSON
+representation optimized for LLM consumption: property types
+without verbose metadata, relationships reduced to direction
+and target labels, nulls and empties stripped.
+
+read-cypher executes read-only Cypher statements with optional
+parameterized inputs. In read-only mode, write-cypher is hidden
+entirely so agents can never modify production data.
+
+list-gds-procedures discovers available Graph Data Science
+algorithms: centrality, community detection, similarity, path
+finding. Only exposed when the GDS library is installed. This
+lets agents run PageRank, community detection, and other
+analytics directly.
 -->
 
 ---
@@ -396,85 +428,34 @@ agent, then synthesizes a single answer.
 
 ---
 
-## Supervisor Routing in Action
+## The Intelligence Stack Is Complete
 
-**Single-source questions** go to one agent:
-- **"Total transfer volume for account-1234?"** → Genie (SQL aggregation)
-- **"Which accounts share a device with account-1234?"** → Neo4j (graph traversal)
-
-**Multi-source questions** get decomposed:
-- **"Find the fraud ring and compute total transfer volume for its members"**
-  1. Neo4j agent detects the ring via cycle traversal
-  2. Genie agent computes transfer totals for the identified accounts
-  3. Supervisor synthesizes a single answer
+- **Deck 01 built the data layer:** governed Delta tables ↔ graph nodes and relationships via the Spark Connector
+- **This deck built the intelligence layer:** Knowledge Graph Construction enriched the graph with unstructured knowledge; GraphRAG retrieves it; specialized agents query both platforms
+- **A supervisor coordinates:** questions route to the right platform automatically; multi-source questions decompose across both
+- **Next:** the hands-on labs — load data, build the graph, configure Genie Spaces, and wire up the multi-agent supervisor yourself
 
 <!--
-Single-source questions are straightforward. "Total transfer
-volume" signals SQL aggregation, so it routes to Genie. "Which
-accounts share a device" signals graph traversal, so it routes
-to Neo4j.
+The first deck built the data foundation: raw data landed in
+Bronze, got cleaned and governed in Silver, and the Spark
+Connector projected connection data into Neo4j. Graph algorithm
+results flowed back as columns in Gold tables. That gave us the
+pipeline.
 
-Multi-source questions are where the supervisor earns its keep.
-"Find the fraud ring and compute total transfer volume" requires
-both platforms. The supervisor decomposes it: Neo4j detects the
-ring via cycle traversal, Genie computes transfer totals for the
-identified accounts, and the supervisor synthesizes a single
-answer from both results.
--->
+This deck built the intelligence layer on top of that pipeline.
+Knowledge Graph Construction took unstructured AML policy
+documents and turned them into structured graph nodes: chunks
+with embeddings, extracted entities cross-linked to the
+operational graph. GraphRAG combines vector search with graph
+traversal so agents receive richer context than text search
+alone.
 
----
+Specialized agents master one platform each: Genie speaks SQL
+against the lakehouse, the Neo4j MCP agent speaks Cypher against
+the graph. A supervisor routes questions to the right specialist
+and decomposes multi-source questions across both.
 
-## How the Supervisor Decides
-
-- **Agent descriptions:** sub-agents register capabilities, supervisor matches against them
-- **Guidelines:** domain experts add routing rules ("path questions go to the graph agent")
-- **Aggregation signals:** "total," "average," "count" route to Genie
-- **Relationship signals:** "connected to," "within N hops" route to Neo4j
-- **Decomposition:** both signal types present, supervisor splits into sub-tasks
-- **Iterative refinement:** wrong routing, add a guideline, correction applies immediately
-
-<!--
-The supervisor decides routing through several mechanisms. Each
-sub-agent registers a description of what it can do, and the
-supervisor matches incoming questions against those descriptions.
-
-Domain experts add guidelines like "questions about paths belong
-to the graph agent." Keyword signals help too: "total," "average,"
-or "count" imply SQL aggregation and route to Genie. "Connected
-to," "within N hops," or "shared device" imply traversal and
-route to Neo4j.
-
-When both signal types appear in a single question, the supervisor
-decomposes it into sub-tasks for each agent. If routing is wrong,
-experts add a guideline and the correction applies immediately
-without retraining.
--->
-
----
-
-## What Each Platform Brings
-
-**Databricks + Neo4j** connects data intelligence with graph intelligence through governed pipelines and specialized agents:
-
-- **Data stays governed:** Delta Lake is the source of truth, Spark Connector projects connections into Neo4j
-- **Each data shape gets a specialist:** Genie for SQL, Neo4j MCP for Cypher, GraphRAG for semantic search
-- **A supervisor coordinates:** questions route automatically, multi-source questions decompose across both
-- **Intelligence compounds:** graph insights enrich the lakehouse, lakehouse data feeds the graph, agents query both
-
-**Next:** the hands-on labs. Load data via the Spark Connector, query the graph, configure Genie Spaces, and wire up the multi-agent supervisor yourself.
-
-<!--
-This is the synthesis, not a restatement. The key insight is that
-data intelligence and graph intelligence compound each other's
-value when connected through governed pipelines.
-
-Delta Lake stays the source of truth. The Spark Connector projects
-connection data into Neo4j. Each data shape gets a specialist agent
-that masters the right query language for its structure. A supervisor
-coordinates them so users ask questions in English and get answers
-from whichever platform can answer them.
-
-The hands-on labs let you build this yourself: load data via the
-Spark Connector, query the graph with Cypher, configure Genie Spaces
-with domain vocabulary, and wire up the multi-agent supervisor.
+The full stack is now in place: governed data, enriched knowledge
+graph, semantic retrieval, and coordinated agents. The hands-on
+labs let you build this yourself.
 -->
