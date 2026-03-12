@@ -142,7 +142,61 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 
 ---
 
-# A Working Example
+# Building the Pipeline
+
+From data intelligence through graph intelligence to agents that query both
+
+---
+
+## Building the Intelligence Platform: The Data Pipeline
+
+- **ELT/Curation:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
+- **Knowledge Graph Construction:** AML policy docs → chunking → embeddings + entity extraction → graph enrichment
+- **GraphRAG Retrieval/Agent:** investigation queries → vector search + graph traversal + SQL → combined results
+
+<!--
+Three distinct stages connect Databricks to Neo4j, each building
+a layer of intelligence. ELT is data intelligence: data loads into
+cloud storage first, then gets transformed inside the lakehouse.
+Delta Lake enforces schema, cleanses data, and renames columns.
+The Spark Connector then batch-loads curated tables as graph nodes
+and relationships. Knowledge Graph Construction uses the
+neo4j-graphrag-python Knowledge Graph Builder (SimpleKGPipeline)
+to chunk regulatory and AML policy documents, generate embeddings,
+extract entities, and write them back into Neo4j, enriching the
+graph with document-derived knowledge. GraphRAG Retrieval combines
+vector search with graph traversal via the VectorCypherRetriever,
+exposed as MCP tools so investigation agents can query the graph
+and the lakehouse together.
+-->
+
+---
+
+## The Medallion Architecture
+
+- **Bronze:** raw data lands from cloud storage, no transformation
+- **Silver:** cleaned, typed, graph-friendly columns, ready for the Spark Connector
+- **Gold:** graph algorithm results (cycle detection, community scores) written back to Delta
+
+Data flows forward through the layers, graph insights flow back. This is the bidirectional pipeline where data intelligence and graph intelligence **compound each other's value**.
+
+<!--
+The Medallion Architecture is how Databricks organizes data
+engineering pipelines. Bronze is the raw landing zone: files arrive
+from cloud storage as-is. Silver is the curation layer: schema
+enforcement, type casting, column renaming. Customer_ID becomes
+account_id, Txn_Amount becomes amount. This is where data becomes
+ready for the Spark Connector to write into Neo4j.
+
+Gold is where graph insights flow back. Cycle detection flags
+fraud rings, PageRank scores identify influential accounts,
+Louvain community detection clusters tightly connected groups.
+These results write back to Delta as columns in Gold tables,
+available for dashboards, ML features, and case management.
+
+The bidirectional flow is the key insight: Silver feeds the graph,
+Gold captures what the graph discovers.
+-->
 
 ---
 
@@ -172,49 +226,65 @@ reveal patterns invisible in flat tables.
 
 ---
 
-# Building the Pipeline
-
-From data intelligence through graph intelligence to agents that query both
+# ELT: Lakehouse to Graph
 
 ---
 
-## Building the Intelligence Platform: The Data Pipeline
+## From Raw Data to Governed Delta Tables
 
-- **ETL/Curation:** lakehouse tables → graph nodes and relationships
-- **Knowledge Graph Construction:** AML policy docs → embeddings + entity-linked knowledge → graph enrichment
-- **GraphRAG Retrieval/Agent:** investigation queries → graph + lakehouse results
+- **Cloud storage** lands raw files (S3, ADLS Gen2, GCS)
+- **Databricks** processes data into Delta tables via Jobs, Notebooks, or Spark Declarative Pipelines
+- **Delta Lake** enforces schema and rejects bad data at ingestion
+- **Delta tables** become the interchange format for the Spark Connector
 
 <!--
-Three distinct stages connect Databricks to Neo4j, each building
-a layer of intelligence. ETL is data intelligence: classic compute
-using the Spark Connector to batch-load curated lakehouse tables
-as graph nodes and relationships. Knowledge Graph Construction
-uses the neo4j-graphrag-python Knowledge Graph Builder
-(SimpleKGPipeline) to chunk regulatory and AML policy documents,
-generate embeddings, extract entities, and write them back into
-Neo4j, enriching the graph with document-derived knowledge.
-GraphRAG Retrieval combines vector search with graph traversal
-via the VectorCypherRetriever, exposed as MCP tools so
-investigation agents can query the graph and the lakehouse
-together.
+Raw data lands in cloud storage: S3, Azure Data Lake Storage Gen2, or
+GCS. This is the unprocessed landing zone, not a governed catalog yet.
+
+Databricks processes that raw data into Delta tables. The processing
+layer is Jobs, Notebooks, or Spark Declarative Pipelines (formerly
+Delta Live Tables). Auto Loader can incrementally detect and process
+new files as they arrive.
+
+Delta Lake provides the governance layer: schema enforcement catches
+malformed account IDs and invalid amounts here, not during the graph
+load. Column renaming happens at this stage too. Customer_ID becomes
+account_id, Txn_Amount becomes amount, so graph properties are clean
+without extra transformation downstream.
+
+Time travel enables recovery from bad loads. If a pipeline run
+corrupts data, you roll back to the previous version rather than
+re-ingesting from scratch.
+
+The key point: Delta tables are the interchange format. The Neo4j
+Spark Connector reads from these governed tables. Everything upstream
+of this slide is Databricks territory. Everything downstream is the
+Spark Connector projecting connections into the graph.
 -->
 
 ---
 
 ## Extracting Connection Data from the Lakehouse
 
-- **Delta Lake** remains the source of truth: schema enforcement, ACID transactions, time travel, access controls
-- **Neo4j** receives the connected data: only the subset with relationship patterns worth traversing projects from the lakehouse into the graph
-- **The pipeline** has two phases: get clean data into governed Delta tables, then project the connections into the graph
+- **Delta Lake** remains the governed source of truth: schema enforcement, ACID transactions, time travel
+- **Neo4j** receives the connected data: relationship patterns made explicit and traversable
+- **Foreign keys become relationships:** implicit joins become traversable edges
 
----
+<!--
+Delta Lake is the governed foundation. Schema enforcement catches
+bad data at write time. ACID transactions guarantee consistency.
+Time travel lets you recover from bad loads. Unity Catalog adds
+access controls and audit logging. That's the data intelligence
+layer, and it stays in the lakehouse.
 
-## From Raw Data to Governed Delta Tables
+Neo4j receives only the connected data: the subset where
+relationships between entities are worth making explicit. In the
+lakehouse, those connections live in foreign keys and join tables.
+In the graph, they become first-class citizens, directly
+traversable without computing joins at query time.
 
-- **Unity Catalog Volumes** provide the governed landing zone: access controls and audit logging from day one
-- **Delta Lake** catches bad data at the source: malformed account IDs and invalid amounts fail here, not during the graph load
-- **Column renaming** happens at this stage: `Customer_ID` becomes `account_id`, `Txn_Amount` becomes `amount`, so graph properties are clean without extra transformation
-- **Time travel** enables recovery from bad loads; **incremental processing** loads only modified rows
+Not everything moves. Most data stays in Delta.
+-->
 
 ---
 
@@ -245,18 +315,6 @@ together.
 - **Total node counts** should match source row counts
 - **Relationship counts** should fall within expected ranges for the transaction volume
 - **High-connectivity nodes** should reflect known characteristics from the source data (e.g., high-volume accounts with expected transfer counts)
-
----
-
-## Bidirectional Flow Through the Medallion Architecture
-
-The **Medallion Architecture** progressively refines raw data into business-ready outputs. The bidirectional flow is where data intelligence and graph intelligence **compound each other's value**.
-
-| Layer | Contains | Role |
-|-------|----------|------|
-| **Bronze** | Raw transaction and account data as-is | Landing zone |
-| **Silver** | Cleaned accounts and transactions with proper types and graph-friendly column names | Ready for Neo4j ingestion |
-| **Gold** | Graph algorithm results (cycle detection, community scores, centrality) written back to Delta, plus fraud alerts and case management data | Business-ready outputs enriched by graph insights |
 
 ---
 
