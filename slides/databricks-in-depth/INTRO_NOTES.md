@@ -6,13 +6,29 @@ _Title slide — no speaker notes._
 
 ---
 
+## Slide: Databricks & Neo4j: Better Together
+
+Databricks and Neo4j have an official technology partnership. What we wanted to cover today is a quick preview of what that partnership delivers before we get into the technical details.
+
+The foundation is the Spark Connector — Databricks-certified, tested against Databricks runtimes, and supported by Neo4j. It's the primary bridge for moving data between the lakehouse and the graph.
+
+And that data flows both directions. Lakehouse tables map or project into the graph as nodes and relationships. Graph algorithm results — fraud scores, community assignments, centrality metrics — write back to Delta Gold tables for dashboards and ML.
+
+Once the data is in the graph, agent integration is where things get interesting for AI workloads. Neo4j exposes graph queries as MCP tools that Databricks agents can call directly. An investigation agent can route to Genie for SQL analytics and to Neo4j for graph traversal in the same conversation.
+
+Those agents get even more powerful with GraphRAG, which combines vector search with graph traversal. Instead of retrieving isolated text chunks, you retrieve chunks plus their graph neighborhood — the entities, relationships, and context around them. That's what makes answers accurate and grounded.
+
+Tying it all together is graph analytics at scale. Algorithms like PageRank, community detection, and cycle detection run on the graph and surface patterns that are invisible in flat tables — fraud rings, supply chain vulnerabilities, identity clusters.
+
+---
+
 ## Slide: Data Intelligence Meets Graph Intelligence
 
 Databricks is the Data Intelligence Platform. It governs and analyzes structured, semi-structured, and unstructured data at scale.
 
 Neo4j is the Graph Intelligence Platform. It makes connections between entities explicit and traversable.
 
-This slide sets up the framing for the rest of the deck. The next two slides break down what each platform actually does.
+What we wanted to cover today is the framing for the rest of the deck. The next two slides break down what each platform actually does.
 
 ---
 
@@ -28,9 +44,25 @@ Neo4j makes connections between entities explicit and traversable. Cypher is the
 
 ---
 
+## Slide: The Medallion Architecture
+
+The Medallion Architecture is how Databricks organizes the Data Pipeline stage. Bronze is the raw landing zone: files arrive from cloud storage with no transformation. Silver is the general curation layer: schema enforcement, type casting, column renaming. Customer_ID becomes account_id, Txn_Amount becomes amount. Silver tables are governed and ready for downstream consumers, including the Spark Connector writing to Neo4j.
+
+Gold is where all intelligence converges. Graph algorithm results (cycle detection, PageRank, community scores) write back to Delta as columns in Gold tables. These join with operational data that never left the lakehouse to produce fraud alerts, risk scores, and ML feature tables for case management.
+
+Data flows forward through the layers, graph insights flow back. Silver feeds the graph, Gold captures what the graph discovers. This bidirectional flow is where data intelligence and graph intelligence compound each other's value.
+
+---
+
 ## Slide: Building the Intelligence Platform (Four Stages)
 
 Four stages connect Databricks to Neo4j, each building a layer of intelligence. The Data Pipeline is data intelligence: data loads into cloud storage, gets transformed inside the lakehouse, and the Spark Connector batch-loads curated tables as graph nodes and relationships. Knowledge Graph Construction uses the neo4j-graphrag-python Knowledge Graph Builder (SimpleKGPipeline) to chunk regulatory and AML policy documents, generate embeddings, extract entities, and write them back into Neo4j. Data Analytics combines graph insights written back to Delta with lakehouse data for dashboards, reports, and ML features, queried through Unity Catalog JDBC for governed cross-system joins. GraphRAG Retrieval combines vector search with graph traversal via the VectorCypherRetriever, exposed as MCP tools so investigation agents can query the graph and the lakehouse together.
+
+---
+
+## Slide: The Intelligence Platform — Data Flow
+
+The same four stages visualized as a data flow. Stages 1-2 flow left to right (Databricks to Neo4j): Silver tables through the Spark Connector become graph nodes; unstructured docs through the KG Builder become embeddings and entities. Stage 3 reverses: graph insights flow back to Gold tables. Stage 4 spans both: the multi-agent supervisor routes to Genie (SQL) and the Neo4j MCP agent (Cypher).
 
 ---
 
@@ -46,17 +78,7 @@ GraphRAG Retrieval uses the Neo4j MCP Server to expose schema inspection and rea
 
 ---
 
-## Slide: The Medallion Architecture
-
-The Medallion Architecture is how Databricks organizes the Data Pipeline stage. Bronze is the raw landing zone: files arrive from cloud storage with no transformation. Silver is the general curation layer: schema enforcement, type casting, column renaming. Customer_ID becomes account_id, Txn_Amount becomes amount. Silver tables are governed and ready for downstream consumers, including the Spark Connector writing to Neo4j.
-
-Gold is where all intelligence converges. Graph algorithm results (cycle detection, PageRank, community scores) write back to Delta as columns in Gold tables. These join with operational data that never left the lakehouse to produce fraud alerts, risk scores, and ML feature tables for case management.
-
-Data flows forward through the layers, graph insights flow back. Silver feeds the graph, Gold captures what the graph discovers. This bidirectional flow is where data intelligence and graph intelligence compound each other's value.
-
----
-
-## Slide: The Platforms in Action
+## Slide: Two Data Models, Two Query Languages
 
 _Section title slide — no speaker notes._
 
@@ -72,13 +94,23 @@ This is where graph structure pays off. Detecting A transferred to B transferred
 
 ## Slide: Fraud Ring — Dual Database Architecture
 
-_Diagram slide — no speaker notes._
+The lakehouse holds everything: transactions, accounts, devices, addresses. Most of that data stays in Delta. But a subset of it — the accounts, the transfers between them, the shared devices and addresses — forms a network of real-world connections. That's the data you extract into the graph.
+
+This is sometimes called a digital twin: you're representing the real-world connections between entities in a digital model that you can traverse and query. The graph doesn't replace the lakehouse — it's a projection of the connections that matter for investigation. The lakehouse remains the system of record for volumes, aggregates, and history. The graph makes the relationships between entities explicit and traversable.
+
+This diagram shows that dual architecture. Databricks holds the governed tables. Neo4j holds the connected data — the relationships between accounts, devices, and addresses stored explicitly and traversable without joins. Both stay in sync through the Spark Connector.
 
 ---
 
 ## Slide: Neo4j Graph Components
 
-_No speaker notes._
+A graph data schema defines the structure of your graph — the types of nodes, the types of relationships between them, and the properties each carries. Think of it as the equivalent of a relational schema, but instead of tables and foreign keys, you're defining entity types and the named connections between them. In Neo4j, the schema is flexible: you don't have to declare it upfront the way you would with CREATE TABLE, but in practice you design one so your data is consistent and your queries are predictable.
+
+The building blocks are nodes and relationships. A node represents an entity — an account, a person, a device, an address. Nodes carry properties: key-value pairs like account_id, customer_name, or status. In Cypher, you write nodes in parentheses: `(:Account)`. Labels like Account categorize nodes the way table names categorize rows.
+
+A relationship is a named, directed connection between two nodes. It always has a type, a start node, and an end node. Relationships can also carry properties — in the fraud example, a TRANSFERRED_TO relationship holds amount, timestamp, and channel directly on the edge. In Cypher, relationships go in square brackets: `[:TRANSFERRED_TO]`. The arrow gives you direction: `(:Account)-[:TRANSFERRED_TO]->(:Account)`.
+
+The combination of nodes, relationships, and their properties is what makes graph data different from tabular data. The connections aren't implicit in foreign keys that require joins to follow — they're stored directly and traversable in constant time per hop.
 
 ---
 
@@ -92,9 +124,21 @@ Cypher detects the cycle in the graph: a single query finds 2-6 hop loops in mil
 
 ## Slide: From the Lakehouse to the Graph
 
-Not everything moves to the graph. Aggregates, metrics, logs, and documents stay in Delta where they belong. Only the subset with connection patterns worth traversing projects into Neo4j.
+Not everything moves to the graph. Aggregates, metrics, logs, and documents stay in Delta where they belong. Only the subset with connection patterns worth traversing projects into Neo4j. The lakehouse remains the system of record; the graph is a projection of the connections that matter.
 
-Data in Databricks lives in rows and columns. Data in Neo4j lives as nodes and relationships. What was implicit in table joins becomes explicit and traversable in the graph. A row in an Accounts table becomes an Account node. A foreign key linking two accounts becomes a TRANSFERRED_TO relationship. A JOIN across tables becomes a graph traversal.
+Rows become nodes. A row in the accounts table becomes an Account node. Columns like account_id, customer_name, and status become node properties.
+
+Foreign keys become relationships. A column like account.address_id pointing to addresses.id becomes a REGISTERED_AT relationship between the Account node and the Address node. This is the most straightforward mapping: the foreign key that required a JOIN in SQL is now a direct traversal.
+
+Mapping tables dissolve into relationships. A junction table like account_devices doesn't become nodes — the entire table disappears. Each row becomes a USED_DEVICE relationship, with the mapping table's own columns (first_seen, last_seen) as relationship properties. The many-to-many join that required a three-table query in SQL is now a single traversal.
+
+Shared attribute values surface implicit connections. Two accounts with the same SSN have no foreign key between them. Discovering that link in the lakehouse requires a self-join. In the graph, SSN becomes a shared node and both accounts connect to it — the hidden connection is now explicit and traversable without any join. This is often the highest-value mapping because it reveals hidden networks that were invisible in the tabular model.
+
+Self-referential columns become relationship chains. from_account and to_account in the transactions table point to two entities in the same table. In the graph this becomes an Account-to-Account TRANSFERRED_TO relationship. Chains of these are natural traversals in the graph but require recursive CTEs with cycle-detection guards in SQL.
+
+The value compounds as you move down the list. Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace recursive CTEs. The further down you go, the more the graph pays off relative to SQL.
+
+The practical test: if you'd need three or more self-joins to answer a question, that data probably belongs in the graph. If you're counting, summing, or averaging, it stays in the lakehouse.
 
 ---
 
@@ -164,7 +208,7 @@ Once in Delta Lake, these insights join with operational data like account histo
 
 ---
 
-## Slide: The Foundation is in Place
+## Slide: Foundation for Data Intelligence Meets Graph Intelligence
 
 We've walked through the full data pipeline. Raw data landed in Bronze, got cleaned and governed in Silver, and the Spark Connector projected connection data into Neo4j. Graph algorithm results flow back as columns in Gold tables: fraud alerts, risk scores, ML features.
 

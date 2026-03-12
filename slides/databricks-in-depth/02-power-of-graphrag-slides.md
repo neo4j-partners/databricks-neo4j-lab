@@ -27,57 +27,55 @@ ol > li {
 }
 </style>
 
-# Activating the Intelligence Platform
+# Activating the Intelligence Platform with GraphRAG
 
-Knowledge graphs, retrieval, and agents across both platforms
+Knowledge graph construction and graph-enriched retrieval
 
 ---
 
 ## Why Agents? LLM Limitations in the Enterprise
 
-- **Hallucination:** plausible answers with no grounding in your data
-- **No domain context:** no knowledge of your schema, rules, or terminology
-- **No access to private data:** enterprise knowledge behind firewalls is invisible
-- **Non-deterministic:** same question, different answers each time
+- **LLMs alone aren't enough:** they hallucinate, lack domain context, can't reach private data, and produce non-deterministic answers
+- **Context rot:** model performance degrades as the context window fills with irrelevant or conflicting information
 
 <!--
-Each of these is a real problem for enterprise use. Hallucination
-means the model generates confident answers that aren't grounded
-in your actual data. It doesn't know your schema, your business
-rules, or your domain terminology. Enterprise data behind firewalls
-is completely invisible to it. And even with perfect context, the
-same question can produce different answers each time.
+LLMs hallucinate, lack domain context, can't access private data,
+and produce non-deterministic answers. These aren't edge cases —
+they're the default behavior when you point a general-purpose
+model at enterprise data.
 
-RAG and GraphRAG reduce these problems but don't remove them. The
-path forward is agentic systems with specialized, tightly scoped
-context: each agent operates against a known schema, a known query
-language, and clear domain instructions. That's what we'll build
-in this deck.
+This deck shows how GraphRAG and specialized agents address each
+of these gaps. First we build a knowledge graph that gives the
+model grounded context. Then we introduce agents that can reach
+live data across both platforms.
 -->
 
 ---
 
-## The Knowledge Graph Is Built
+## Embeddings and Vector Search
 
-- **Data pipeline complete:** Spark Connector projected Delta tables into graph nodes and relationships
-- **KG construction complete:** AML policy docs chunked, embedded, entity-extracted into the graph
-- **Building the KG is its own topic:** we focus on what it enables, not how it was built
-- **The graph now holds** structured connections and regulatory knowledge
+- **First, encode the meaning:** embedding models read text and produce numerical representations that capture what the text means, not just what it says
+- **"Engine overheating" and "thermal runaway in turbine"** produce similar representations because they mean similar things
+- **This enables semantic similarity search:** given a question, find the stored text whose meaning is most similar
+- **The next step:** split documents into chunks and embed each one so the entire corpus becomes searchable by meaning
 
 <!--
-The previous deck built the data pipeline: governed Delta tables
-projected into Neo4j via the Spark Connector. That gave us account
-nodes, transfer relationships, and shared-attribute connections.
+Embeddings are the foundation that makes semantic retrieval
+possible. An embedding model takes a piece of text and produces
+a fixed-length numeric vector that encodes its meaning. Texts
+with similar meaning produce vectors that are close together
+in this high-dimensional space, even when they use completely
+different words.
 
-Knowledge Graph Construction is the next stage in the intelligence
-platform. It takes unstructured AML policy documents, chunks them,
-generates embeddings, extracts entities, and writes everything into
-the graph. We're not covering the build process here. That's its
-own deep-dive.
+Vector search exploits this property. Given a query, you embed
+it into the same space and find the stored vectors nearest to it.
+This is fundamentally different from keyword search: you match
+by meaning rather than by string overlap.
 
-What matters for this deck: the graph is enriched with both
-structured transaction data and regulatory knowledge. That's the
-foundation we'll query with agents.
+This is what makes RAG work. When a user asks a question, the
+system embeds the question, searches for the closest chunks, and
+feeds those chunks to the LLM as context. The next slide shows
+how documents get prepared for this process.
 -->
 
 ---
@@ -175,29 +173,26 @@ APPLIES_TO relationship bridges them.
 
 ## GraphRAG: Graph-Enriched Retrieval
 
-```
-  User Question
-       |
-       v
-  Vector / Fulltext Search ---> matching (:Chunk) nodes
-       |
-       v
-  Graph Traversal ---> entities, relationships, connected chunks
-       |
-       v
-  Graph-Enriched Context ---> agent / LLM
-```
-
+- **Data pipeline complete:** Spark Connector projected Delta tables into graph nodes and relationships
+- **KG construction complete:** AML policy docs chunked, embedded, entity-extracted into the graph
+- **The graph now holds** structured connections and regulatory knowledge
 - **Search finds the starting points:** chunks closest in meaning to the question
 - **Graph traversal enriches:** follows entities and relationships from those chunks
 - **Agents receive richer context** than text search alone
 
 <!--
-This is the core GraphRAG retrieval pattern. Vector or fulltext
-search finds the chunks most relevant to the user's question.
-That's standard RAG. What GraphRAG adds is the second step:
-graph traversal from those chunks through the entities and
-relationships surrounding them.
+The previous deck built the data pipeline: governed Delta tables
+projected into Neo4j via the Spark Connector. That gave us account
+nodes, transfer relationships, and shared-attribute connections.
+The preceding slides walked through knowledge graph construction:
+chunking, embedding, entity extraction, and cross-linking. The
+graph is now enriched with both structured transaction data and
+regulatory knowledge.
+
+Vector or fulltext search finds the chunks most relevant to the
+user's question. That's standard RAG. What GraphRAG adds is graph
+traversal from those chunks through the entities and relationships
+surrounding them.
 
 When search returns a chunk about "enhanced due diligence for
 high-value transfers," graph traversal follows the extracted

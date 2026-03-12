@@ -33,6 +33,27 @@ Data Intelligence Meets Graph Intelligence
 
 ---
 
+## Databricks & Neo4j: Better Together
+
+- Databricks-Certified Neo4j Spark Connector
+- Bi-directional, scalable data pipelines
+- Effortless Databricks + Neo4j Agent integration
+- Accelerate Innovation with GraphRAG
+- Graph Analytics Unlock Hidden Patterns at Scale
+
+<!--
+Databricks and Neo4j have an official technology partnership. The
+Spark Connector is Databricks-certified and provides the primary
+bridge for moving data between the lakehouse and the graph in both
+directions.
+
+This slide previews the four value pillars the rest of the deck
+walks through: data pipelines, graph analytics, GraphRAG retrieval,
+and agent integration.
+-->
+
+---
+
 ## Data Intelligence Meets Graph Intelligence
 
 - **Databricks (Data Intelligence Platform):** structured, semi-structured, unstructured data at scale
@@ -197,9 +218,9 @@ search with graph traversal in a single query.
 
 ---
 
-# The Platforms in Action
+# Two Data Models, Two Query Languages
 
-From architecture to investigation using financial fraud
+How rows and columns work together with nodes and relationships
 
 ---
 
@@ -275,21 +296,50 @@ question alone.
 ## From the Lakehouse to the Graph
 
 - **Most data stays in Delta:** aggregates, metrics, logs, documents
-- **Connection data moves to the graph:** transfers, shared addresses, shared devices
-- **Rows become nodes:** account_id, customer_name, status become properties
-- **Foreign keys become relationships:** JOINs become traversals
+- **Rows become nodes:** account columns become node properties
+- **Foreign keys become relationships:** `account.address_id` → `(:Account)-[:REGISTERED_AT]->(:Address)`
+- **Mapping tables become relationships:** `account_devices` rows become `[:USED_DEVICE]` edges with properties
+- **Shared attributes become shared nodes:** two accounts with the same SSN connect through one `(:SSN)` node
+- **Self-referential columns become chains:** `from_account` → `to_account` becomes `(:Account)-[:TRANSFERRED_TO]->(:Account)`
 
 <!--
 Not everything moves to the graph. Aggregates, metrics, logs, and
 documents stay in Delta where they belong. Only the subset with
-connection patterns worth traversing projects into Neo4j.
+connection patterns worth traversing projects into Neo4j. The
+lakehouse remains the system of record; the graph is a projection
+of the connections that matter.
 
-Data in Databricks lives in rows and columns. Data in Neo4j lives
-as nodes and relationships. What was implicit in table joins
-becomes explicit and traversable in the graph. A row in an
-Accounts table becomes an Account node. A foreign key linking two
-accounts becomes a TRANSFERRED_TO relationship. A JOIN across
-tables becomes a graph traversal.
+Rows become nodes: a row in the accounts table becomes an Account
+node, with columns like account_id, customer_name, and status as
+node properties.
+
+Foreign keys become relationships. A column like
+account.address_id pointing to addresses.id becomes a
+REGISTERED_AT relationship. This is the most straightforward
+mapping: one-hop lookups that SQL also handles well.
+
+Mapping tables dissolve into relationships. A junction table like
+account_devices doesn't become nodes. Each row becomes a
+USED_DEVICE relationship with first_seen and last_seen as
+relationship properties. The mapping table disappears entirely.
+
+Shared attribute values surface implicit connections. Two accounts
+sharing the same SSN have no foreign key between them. Discovering
+that link in the lakehouse requires a self-join. In the graph, SSN
+becomes a shared node and both accounts connect to it, making the
+hidden connection explicit and traversable.
+
+Self-referential columns become relationship chains. from_account
+and to_account in the transactions table point to two entities in
+the same table. In the graph this becomes a TRANSFERRED_TO
+relationship. Chains of these are natural traversals in the graph
+but require recursive CTEs in SQL.
+
+The value compounds as you move down the list. Foreign keys are
+simple one-hop lookups. Mapping tables eliminate multi-table joins.
+Shared attributes reveal hidden networks. Self-referential chains
+replace recursive CTEs. The further down you go, the more the
+graph pays off relative to SQL.
 -->
 
 ---
