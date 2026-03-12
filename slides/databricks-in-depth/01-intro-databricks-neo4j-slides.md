@@ -142,6 +142,10 @@ What was implicit in table joins becomes **explicit and traversable** in the gra
 
 ---
 
+# A Working Example
+
+---
+
 ## Financial Fraud as a Working Example
 
 - **Money laundering hides in plain sight:** circular transfers across account chains
@@ -165,6 +169,32 @@ reveal patterns invisible in flat tables.
 ## Fraud Ring — Dual Database Architecture
 
 ![Fraud Ring Dual Database Architecture](fraud-ring-dual-architecture.png)
+
+---
+
+# Building the Pipeline
+
+From data intelligence through graph intelligence to agents that query both
+
+---
+
+## Three Pipeline Stages
+
+- **ETL/Curation:** data intelligence, curated lakehouse tables become graph nodes and relationships
+- **GraphRAG Enrichment:** graph intelligence, AML policy docs become embedded, entity-linked knowledge
+- **Querying/Agent:** both, investigation agents query the graph and the lakehouse together
+
+<!--
+Three distinct stages connect Databricks to Neo4j. ETL runs on
+classic compute using the Spark Connector to batch-load curated
+lakehouse tables as graph nodes and relationships. GraphRAG
+enrichment uses the Python driver to chunk regulatory and AML
+policy documents, generate embeddings, and extract entities back
+into the graph. The agent layer is fully serverless, using
+neo4j-graphrag-python for knowledge retrieval and
+neo4j-agent-memory for conversational state across investigation
+sessions.
+-->
 
 ---
 
