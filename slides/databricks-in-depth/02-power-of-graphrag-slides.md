@@ -147,16 +147,16 @@ Without entity extraction, there's nothing to traverse.
 ## What the Knowledge Graph Contains
 
 ```
-  (:Document) ---> (:Chunk {embedding}) ---> [Vector Index]
-                          |
-                    entity extraction
-                          |
-                          v
-            (:Regulation)   (:Threshold)   (:Procedure)
-                                 |
-                           [:APPLIES_TO]
-                                 v
-            (:Account) --[:TRANSFERRED_TO]--> (:Account)
+(:Document)--[:FROM_DOCUMENT]-->(:Chunk {text, embedding})--[:NEXT_CHUNK]-->(:Chunk)
+                                         |
+                                   [:FROM_CHUNK]
+                                         |
+                                         v
+                          (:Regulation)  (:Threshold)  (:Procedure)
+                                              |
+                                        [:APPLIES_TO]
+                                              v
+                          (:Account)--[:TRANSFERRED_TO]-->(:Account)
 ```
 
 <!--
@@ -237,12 +237,12 @@ platforms, we need agents.
 
 ---
 
-## GraphRAG + Agents
+## Specialized Agents for Different Data Structures
 
-- **Databricks Lakehouse:** structured data, queried with SQL by a dedicated agent
-- **Neo4j:** graph data and document chunks, queried with Cypher by a dedicated agent
-- **Each platform has its own query language,** schema, and structure
-- **One agent per platform.** A supervisor to coordinate them.
+- **Context window pollution:** two schemas, two query languages, and two sets of conventions in one prompt dilutes focus
+- **Narrowed scope:** an agent that only knows about graph structure writes graph queries; an agent that knows about both starts mixing them up
+- **Different reasoning patterns:** SQL thinks in rows, filters, and aggregations; Cypher thinks in paths, patterns, and traversals
+- **Reliability:** a generalist agent produces queries that mix idioms, like trying a JOIN where a traversal belongs
 
 <!--
 GraphRAG handles graph retrieval. But the lakehouse needs its own
@@ -322,10 +322,12 @@ production graph data.
 
 ---
 
-## Accessing the Knowledge Graph
+## How the Graph Agent Reaches Neo4j
 
 - **MCP (Model Context Protocol):** exposes `get-schema`, `read-cypher`, and `list-gds-procedures` as agent tools
-- **Python driver:** powers GraphRAG retrievers (VectorCypherRetriever) for semantic search
+- **GraphRAG library:** retriever components for vector search, hybrid search, and graph-enriched retrieval over the knowledge graph
+- **Agent memory:** graph-native memory that stores conversations, extracts entities, and captures reasoning traces across sessions
+- **Python driver:** powers both libraries with direct Neo4j connectivity for queries, vector search, and transaction management
 - **Agent context:** schema discovery + system prompt give the agent graph structure and domain knowledge
 
 <!--
@@ -402,34 +404,29 @@ agent, then synthesizes a single answer.
 
 ---
 
-## The Intelligence Stack Is Complete
+## The Intelligence Platform Is Active
 
-- **Deck 01 built the data layer:** governed Delta tables ↔ graph nodes and relationships via the Spark Connector
-- **This deck built the intelligence layer:** Knowledge Graph Construction enriched the graph with unstructured knowledge; GraphRAG retrieves it; specialized agents query both platforms
-- **A supervisor coordinates:** questions route to the right platform automatically; multi-source questions decompose across both
-- **Next:** the hands-on labs — load data, build the graph, configure Genie Spaces, and wire up the multi-agent supervisor yourself
+- **Data layer (Deck 01):** governed Delta tables ↔ graph nodes via the Spark Connector
+- **Knowledge layer:** unstructured docs → chunks, embeddings, entities in the graph
+- **Retrieval layer:** vector search + graph traversal = GraphRAG
+- **Agent layer:** Genie (SQL) + Neo4j MCP (Cypher), supervisor routes between them
+- **Next:** hands-on labs — build the graph, configure agents, query both platforms
 
 <!--
-The first deck built the data foundation: raw data landed in
-Bronze, got cleaned and governed in Silver, and the Spark
-Connector projected connection data into Neo4j. Graph algorithm
-results flowed back as columns in Gold tables. That gave us the
-pipeline.
+Deck 01 built the data foundation: Bronze landing, Silver
+governance, Spark Connector projection into Neo4j, Gold tables
+enriched with graph algorithm results.
 
-This deck built the intelligence layer on top of that pipeline.
-Knowledge Graph Construction took unstructured AML policy
-documents and turned them into structured graph nodes: chunks
-with embeddings, extracted entities cross-linked to the
-operational graph. GraphRAG combines vector search with graph
-traversal so agents receive richer context than text search
-alone.
+This deck added three layers on top. Knowledge Graph Construction
+turned unstructured AML policy documents into chunks with
+embeddings and extracted entities cross-linked to the operational
+graph. GraphRAG combines vector search with graph traversal so
+agents receive richer context than text search alone. Specialized
+agents master one platform each: Genie for SQL, the Neo4j MCP
+agent for Cypher. A supervisor routes questions to the right
+specialist and decomposes multi-source questions across both.
 
-Specialized agents master one platform each: Genie speaks SQL
-against the lakehouse, the Neo4j MCP agent speaks Cypher against
-the graph. A supervisor routes questions to the right specialist
-and decomposes multi-source questions across both.
-
-The full stack is now in place: governed data, enriched knowledge
-graph, semantic retrieval, and coordinated agents. The hands-on
-labs let you build this yourself.
+The full intelligence platform is now active: governed data,
+enriched knowledge graph, semantic retrieval, and coordinated
+agents. The hands-on labs let you build this yourself.
 -->
