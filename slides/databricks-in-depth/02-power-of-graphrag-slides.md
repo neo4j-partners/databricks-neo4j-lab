@@ -214,6 +214,12 @@ just have text search.
 
 ---
 
+# From Retrieval to Agents
+
+Specialized agents for graph and lakehouse
+
+---
+
 ## Beyond GraphRAG: Reaching the Lakehouse
 
 - **GraphRAG reaches graph data:** grounded answers with entities and relationships from the knowledge graph
