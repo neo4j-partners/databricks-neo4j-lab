@@ -27,7 +27,7 @@ ol > li {
 }
 </style>
 
-# Databricks + Neo4j
+# Building the Intelligence Platform
 
 Data Intelligence Meets Graph Intelligence
 
@@ -86,71 +86,9 @@ topologies reveals structures invisible in flat tables.
 
 ---
 
-## Neo4j Graph Components
+## Building the Intelligence Platform
 
-- Graphs model the real world as **nodes** (entities) and **relationships** (connections)
-- `(parentheses)` are nodes, `[:brackets]` are relationships
-
-```
-(:Account)-[:TRANSFERRED_TO {amount, timestamp, channel}]->(:Account)
-```
-
-Each Account node carries properties (account_id, customer_name, status). Each TRANSFERRED_TO relationship carries transaction details (amount, timestamp, channel).
-
----
-
-## Different Data, Different Query Patterns
-
-Most problems need **both**
-
-| Question | Platform |
-|---|---|
-| Total transfer volume by account | Databricks (SQL aggregation) |
-| Accounts within three hops of a flagged account | Neo4j (graph traversal) |
-| Find the fraud ring, compute its total volume | Both |
-
-<!--
-This is the payoff slide for the framing. Each question maps to the
-platform built to answer it. The third row shows why you need both:
-Neo4j detects the fraud ring through cycle traversal, Databricks
-computes transfer totals for the identified accounts. Neither platform
-can answer that question alone.
--->
-
----
-
-## Mapping the Lakehouse to the Graph
-
-- **Most data stays in the lakehouse:** tables, files, documents, governed by Unity Catalog
-- **Connection data** maps to the graph: transfers between accounts, shared addresses, component hierarchies
-- **Foreign keys become relationships:** implicit joins become explicit, traversable edges
-
----
-
-## Tables Become Graphs
-
-Data in Databricks lives in **rows and columns**. Data in Neo4j lives as **nodes and relationships**.
-
-| Lakehouse (Databricks) | Knowledge Graph (Neo4j) |
-|------------------------|------------------------|
-| A row in an Accounts table | An Account node |
-| Columns like account_id, customer_name, status | Properties on that node |
-| A foreign key linking two accounts in a transaction | A `TRANSFERRED_TO` relationship |
-| A JOIN across tables | A graph traversal |
-
-What was implicit in table joins becomes **explicit and traversable** in the graph.
-
----
-
-# Building the Intelligence Platform
-
-From data intelligence through graph intelligence to agents that query both
-
----
-
-## The Intelligence Platform
-
-- **Data Pipeline:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
+- **ELT Data Pipeline:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
 - **Knowledge Graph Construction:** AML policy docs → chunking → embeddings + entity extraction → graph enrichment
 - **Data Analytics:** graph insights + lakehouse data → dashboards, reports, ML features
 - **GraphRAG Retrieval/Agent:** investigation queries → vector search + graph traversal + SQL → combined results
@@ -174,7 +112,7 @@ agents can query the graph and the lakehouse together.
 
 ---
 
-## Connection Patterns by Platform Stage
+## Neo4j Connection Patterns by Platform Stage
 
 - **Data Pipeline:** Neo4j Spark Connector (batch writes)
 - **Knowledge Graph Construction:** Neo4j Python driver via neo4j-graphrag-python
@@ -241,12 +179,18 @@ intelligence compound each other's value.
 
 ---
 
+# The Platforms in Action
+
+From architecture to investigation using financial fraud
+
+---
+
 ## Financial Fraud as a Working Example
 
 - **The use case:** money laundering through circular transfers across account chains
 - **Each transfer looks legitimate.** The cycle reveals the fraud
-- **Cypher in the graph:** one query detects 2-6 hop cycles in milliseconds
-- **SQL in the lakehouse:** nested SQL joins (CTEs) with cycle-detection guards
+- **Why graph:** `(ACC-1001)-[:REGISTERED_AT]->(742 Evergreen)-[:REGISTERED_AT]-(ACC-2047)` is one traversal, not a self-join
+- **The question:** "which accounts share an address with a flagged account?" is a single hop in the graph
 
 <!--
 We'll use financial fraud to walk through each pipeline stage.
@@ -255,11 +199,12 @@ to the origin. Each individual transfer looks legitimate in
 isolation. The circular pattern is only visible when you follow
 the connections.
 
-This is where the dual platform pays off. Cypher detects the
-cycle in the graph: a single query finds 2-6 hop loops in
-milliseconds. The equivalent SQL in the lakehouse requires
-recursive CTEs with explicit cycle-detection guards. Both
-platforms contribute, neither can answer alone.
+This is where graph structure pays off. Detecting A transferred
+to B transferred to C transferred back to A is a single Cypher
+pattern match. In SQL, the same detection requires recursive CTEs
+that self-join the transactions table at each hop, with explicit
+visited-node tracking to prevent infinite loops. The graph
+represents the cycle directly; the table has to reconstruct it.
 -->
 
 ---
@@ -267,6 +212,68 @@ platforms contribute, neither can answer alone.
 ## Fraud Ring — Dual Database Architecture
 
 ![Fraud Ring Dual Database Architecture](fraud-ring-dual-architecture.png)
+
+---
+
+## Neo4j Graph Components
+
+- Graphs model the real world as **nodes** (entities) and **relationships** (connections)
+- `(parentheses)` are nodes, `[:brackets]` are relationships
+
+```
+(:Account)-[:TRANSFERRED_TO {amount, timestamp, channel}]->(:Account)
+```
+
+Each Account node carries properties (account_id, customer_name, status). Each TRANSFERRED_TO relationship carries transaction details (amount, timestamp, channel).
+
+---
+
+## Data Intelligence, Graph Intelligence, or Both?
+
+Most investigations need **both**
+
+| Question | Platform |
+|---|---|
+| Total transfer volume by account | Databricks (SQL aggregation) |
+| Accounts within three hops of a flagged account | Neo4j (graph traversal) |
+| Find the fraud ring, compute its total volume | Both |
+
+- **Cypher in the graph:** one query detects 2-6 hop cycles in milliseconds
+- **SQL in the lakehouse:** recursive CTEs with cycle-detection guards
+
+<!--
+Each question maps to the platform built to answer it. The third
+row shows why you need both: Neo4j detects the fraud ring through
+cycle traversal, Databricks computes transfer totals for the
+identified accounts. Neither platform can answer that question alone.
+
+Cypher detects the cycle in the graph: a single query finds 2-6
+hop loops in milliseconds. The equivalent SQL in the lakehouse
+requires recursive CTEs with explicit cycle-detection guards.
+Both platforms contribute, neither can answer alone.
+-->
+
+---
+
+## From the Lakehouse to the Graph
+
+- **Most data stays in Delta:** aggregates, metrics, logs, documents
+- **Connection data moves to the graph:** transfers, shared addresses, shared devices
+- **Rows become nodes:** account_id, customer_name, status become properties
+- **Foreign keys become relationships:** JOINs become traversals
+
+<!--
+Not everything moves to the graph. Aggregates, metrics, logs, and
+documents stay in Delta where they belong. Only the subset with
+connection patterns worth traversing projects into Neo4j.
+
+Data in Databricks lives in rows and columns. Data in Neo4j lives
+as nodes and relationships. What was implicit in table joins
+becomes explicit and traversable in the graph. A row in an
+Accounts table becomes an Account node. A foreign key linking two
+accounts becomes a TRANSFERRED_TO relationship. A JOIN across
+tables becomes a graph traversal.
+-->
 
 ---
 
@@ -304,30 +311,6 @@ The key point: Delta tables are the interchange format. The Neo4j
 Spark Connector reads from these governed tables. Everything upstream
 of this slide is Databricks territory. Everything downstream is the
 Spark Connector projecting connections into the graph.
--->
-
----
-
-## Extracting Connection Data from the Lakehouse
-
-- **Most data stays in Delta:** aggregates, metrics, logs, documents
-- **Connection data moves to the graph:** which accounts transfer to which, which entities share addresses
-- **Foreign keys become relationships:** `from_account` and `to_account` columns become `TRANSFERRED_TO` edges
-
-<!--
-Not everything moves to the graph. Aggregates, metrics, logs, and
-documents stay in Delta where they belong. Only the subset with
-connection patterns worth traversing projects into Neo4j.
-
-The signal for what moves: if the question is "who is connected to
-whom," that data belongs in the graph. Account-to-account transfers,
-shared devices, shared addresses, shared SSNs. In the lakehouse
-these connections are buried in foreign keys and join tables. In
-the graph they become first-class citizens, directly traversable
-without computing joins at query time.
-
-Delta Lake remains the governed source of truth. The graph receives
-a projection of connection data, not a copy of the lakehouse.
 -->
 
 ---
@@ -449,55 +432,37 @@ intelligence.
 
 ## The Foundation is in Place
 
-- **Governed data in Delta:** schema-enforced tables, ACID transactions, time travel
-- **Connection data in the graph:** accounts, transfers, shared attributes as nodes and relationships
-- **Insights flowing both directions:** graph algorithms enrich Gold tables, lakehouse feeds the graph
+- **Bronze:** raw data landed from cloud storage
+- **Silver:** cleaned, governed tables fed the Spark Connector
+- **Gold:** graph insights flowing back as fraud alerts, risk scores, ML features
+
+The initial Medallion Architecture is built. Data intelligence and graph intelligence are connected.
 
 **Next:** enriching the graph with unstructured knowledge through Knowledge Graph Construction
 
 <!--
-At this point the data pipeline stage is complete. Delta Lake
-governs the structured data. The Spark Connector has projected
-connection data into Neo4j. Graph algorithm results flow back
-as columns in Gold tables.
+We've walked through the full data pipeline. Raw data landed in
+Bronze, got cleaned and governed in Silver, and the Spark
+Connector projected connection data into Neo4j. Graph algorithm
+results flow back as columns in Gold tables: fraud alerts, risk
+scores, ML features.
 
-This is the dual architecture working end to end. But we've
-only loaded structured, tabular data so far. The next stage
-adds unstructured knowledge: AML policy documents, maintenance
-manuals, regulatory text. Knowledge Graph Construction chunks
-those documents, extracts entities, generates embeddings, and
-writes them into the graph. That's where we're headed next.
+That's the initial Medallion Architecture end to end. Delta Lake
+governs the data, Neo4j reveals the connections, and the Spark
+Connector bridges both directions.
+
+So far we've only loaded structured, tabular data. The foundation
+handles rows and columns well, but the graph can hold more than
+that. The next stage adds unstructured knowledge: AML policy
+documents, maintenance manuals, regulatory text. Knowledge Graph
+Construction chunks those documents, extracts entities, generates
+embeddings, and writes them into the graph. That's where we're
+headed next.
 -->
 
 ---
 
-## Summary
-
-**Databricks + Neo4j** is a natural pairing:
-
-- **Delta Lake governs the data.** Schema enforcement, ACID transactions, and time travel provide the source of truth.
-- **Neo4j reveals the connections.** Relationship queries, graph algorithms, and path finding run against the connection topology.
-- **The Spark Connector bridges both directions.** Lakehouse data becomes a graph, and graph insights flow back to Delta tables.
-- **The Medallion Architecture governs the journey.** Bronze lands raw data, Silver cleans it for the graph, Gold captures graph insights written back to Delta.
-
-Together, data intelligence and graph intelligence compound each other — connected through governed pipelines, not siloed in separate platforms.
-
----
-
 ## Appendix: Implementation Details
-
----
-
-## Design Decision: Relationship Types vs. Properties
-
-The fraud example uses a single **relationship type** (`TRANSFERRED_TO`) with transaction details as properties. In other domains you may face the choice between multiple relationship types or a generic type with a property.
-
-| Approach | Example | Tradeoff |
-|----------|---------|----------|
-| **Type per connection** | `:TRANSFERRED_TO`, `:SHARED_DEVICE` | Relationship type lookups are indexed and faster; larger type vocabulary |
-| **Generic with property** | `:CONNECTED {type: "transfer"}` | Simpler schema; property filters are slower than type lookups |
-
-Choose **type per connection** when traversals need to follow specific connection types. Neo4j relationships are directional, so bidirectional flows require writing in **both directions**.
 
 ---
 
