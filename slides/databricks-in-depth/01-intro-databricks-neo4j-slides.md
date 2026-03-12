@@ -56,6 +56,7 @@ slides break down what each platform actually does.
 - **Aggregates** transactions, sensor streams, clickstreams
 - **Governs** documents, images, unstructured files
 - **Databricks SQL** at petabyte scale, real-time streaming, data science
+- **Unity Catalog** (unified governance across data and AI), **Delta Lake** (open lakehouse storage), **Lakebase** (integrated OLTP)
 - **Mosaic AI** (agent systems), **AI/BI Genie** (conversational analytics), **Agent Bricks** (agent control plane)
 
 <!--
@@ -74,7 +75,7 @@ provide the foundation.
 - **Traverses** supply chains, fraud networks, knowledge graphs
 - **Cypher** pattern matching on nodes and relationships
 - **Multi-hop traversal** and path finding in milliseconds
-- **Graph Data Science** (graph algorithms), **AuraDB** (managed database), **GraphRAG** (graph-enhanced retrieval)
+- **Graph Data Science** (graph algorithms), **AuraDB** (managed database), **GraphRAG** (graph-enhanced retrieval), **Aura Agent** (agent creation from knowledge graphs)
 
 <!--
 Neo4j makes connections between entities explicit and traversable.
@@ -86,28 +87,75 @@ topologies reveals structures invisible in flat tables.
 
 ---
 
-## Building the Intelligence Platform
+## The Medallion Architecture
 
-- **ELT Data Pipeline:** cloud storage → lakehouse tables → data cleansing → graph nodes and relationships
-- **Knowledge Graph Construction:** AML policy docs → chunking → embeddings + entity extraction → graph enrichment
-- **Data Analytics:** graph insights + lakehouse data → dashboards, reports, ML features
-- **GraphRAG Retrieval/Agent:** investigation queries → vector search + graph traversal + SQL → combined results
+- **Bronze:** raw data lands from cloud storage; no transformation
+- **Silver:** cleaned, typed, governed tables; the Spark Connector reads from here
+- **Gold:** business-ready outputs enriched by graph insights (fraud alerts, risk scores, ML features)
+- **Bidirectional flow:** data flows forward through the layers, graph insights flow back
 
 <!--
-Four stages connect Databricks to Neo4j, each building a layer
-of intelligence. The Data Pipeline is data intelligence: data
-loads into cloud storage, gets transformed inside the lakehouse,
-and the Spark Connector batch-loads curated tables as graph nodes
-and relationships. Knowledge Graph Construction uses the
+The Medallion Architecture is how Databricks organizes data
+through progressive refinement. Bronze is the raw landing zone:
+files arrive from cloud storage with no transformation. Silver
+is the general curation layer: schema enforcement, type casting,
+column renaming. Customer_ID becomes account_id, Txn_Amount
+becomes amount. Silver tables are governed and ready for
+downstream consumers, including the Spark Connector writing to
+Neo4j.
+
+Gold is where all intelligence converges. Graph algorithm results
+(cycle detection, PageRank, community scores) write back to Delta
+as columns in Gold tables. These join with operational data that
+never left the lakehouse to produce fraud alerts, risk scores,
+and ML feature tables for case management.
+
+Data flows forward through the layers, graph insights flow back.
+Silver feeds the graph, Gold captures what the graph discovers.
+This bidirectional flow is where data intelligence and graph
+intelligence compound each other's value.
+-->
+
+---
+
+## Building the Intelligence Platform
+
+- **ELT Data Pipeline:** Governed Delta tables projected into graph nodes and relationships
+- **Knowledge Graph Construction:** Unstructured docs enriched into embeddings and extracted entities
+- **Data Analytics:** Graph insights written back to Gold tables for dashboards and ML
+- **GraphRAG Retrieval/Agent:** Agents query both platforms through vector search, Cypher, and SQL
+
+<!--
+Four stages connect Databricks to Neo4j, each building on the
+Medallion Architecture. The Data Pipeline takes curated Silver
+tables and batch-loads them as graph nodes and relationships via
+the Spark Connector. Knowledge Graph Construction uses the
 neo4j-graphrag-python Knowledge Graph Builder (SimpleKGPipeline)
 to chunk regulatory and AML policy documents, generate embeddings,
 extract entities, and write them back into Neo4j. Data Analytics
-combines graph insights written back to Delta with lakehouse data
-for dashboards, reports, and ML features, queried through Unity
-Catalog JDBC for governed cross-system joins. GraphRAG Retrieval
-combines vector search with graph traversal via the
-VectorCypherRetriever, exposed as MCP tools so investigation
-agents can query the graph and the lakehouse together.
+combines graph insights written back to Gold Delta tables with
+lakehouse data for dashboards, reports, and ML features, queried
+through Unity Catalog JDBC for governed cross-system joins.
+GraphRAG Retrieval combines vector search with graph traversal
+via the VectorCypherRetriever, exposed as MCP tools so
+investigation agents can query the graph and the lakehouse
+together.
+-->
+
+---
+
+## The Intelligence Platform — Data Flow
+
+![Intelligence Platform Data Flow](intelligence-platform-flow.png)
+
+<!--
+The same four stages visualized as a data flow. Stages 1-2 flow
+left to right (Databricks to Neo4j): Silver tables through the
+Spark Connector become graph nodes; unstructured docs through the
+KG Builder become embeddings and entities. Stage 3 reverses: graph
+insights flow back to Gold tables. Stage 4 spans both: the
+multi-agent supervisor routes to Genie (SQL) and the Neo4j MCP
+agent (Cypher).
 -->
 
 ---
@@ -115,9 +163,9 @@ agents can query the graph and the lakehouse together.
 ## Neo4j Connection Patterns by Platform Stage
 
 - **Data Pipeline:** Neo4j Spark Connector (batch writes)
-- **Knowledge Graph Construction:** Neo4j Python driver via neo4j-graphrag-python
+- **Knowledge Graph Construction:** neo4j-graphrag-python (uses Neo4j Python driver)
 - **Data Analytics:** Spark Connector (Graph Data Science reads) + Unity Catalog JDBC (governed SQL, BI tools)
-- **GraphRAG Retrieval/Agent:** Neo4j MCP Server + Python driver
+- **GraphRAG Retrieval/Agent:** Neo4j MCP Server + Python driver + Aura Agent
 
 <!--
 Each platform stage uses a different connector optimized for its
@@ -145,36 +193,6 @@ GraphRAG Retrieval uses the Neo4j MCP Server to expose schema
 inspection and read-only Cypher as agent tools. The Python driver
 powers the VectorCypherRetriever underneath, combining vector
 search with graph traversal in a single query.
--->
-
----
-
-## The Medallion Architecture
-
-- **Bronze:** raw data lands from cloud storage; no transformation
-- **Silver:** cleaned, typed, governed tables; the Spark Connector reads from here
-- **Gold:** business-ready outputs enriched by graph insights (fraud alerts, risk scores, ML features)
-- **Bidirectional flow:** data flows forward through the layers, graph insights flow back
-
-<!--
-The Medallion Architecture is how Databricks organizes the Data
-Pipeline stage. Bronze is the raw landing zone: files arrive from
-cloud storage with no transformation. Silver is the general
-curation layer: schema enforcement, type casting, column renaming.
-Customer_ID becomes account_id, Txn_Amount becomes amount. Silver
-tables are governed and ready for downstream consumers, including
-the Spark Connector writing to Neo4j.
-
-Gold is where all intelligence converges. Graph algorithm results
-(cycle detection, PageRank, community scores) write back to Delta
-as columns in Gold tables. These join with operational data that
-never left the lakehouse to produce fraud alerts, risk scores,
-and ML feature tables for case management.
-
-Data flows forward through the layers, graph insights flow back.
-Silver feeds the graph, Gold captures what the graph discovers.
-This bidirectional flow is where data intelligence and graph
-intelligence compound each other's value.
 -->
 
 ---
@@ -230,6 +248,9 @@ Each Account node carries properties (account_id, customer_name, status). Each T
 
 ## Data Intelligence, Graph Intelligence, or Both?
 
+- **SQL:** total transfer volume by account — a single GROUP BY aggregation
+- **Cypher:** accounts within three hops of a flagged account — a single traversal query
+
 Most investigations need **both**
 
 | Question | Platform |
@@ -238,19 +259,15 @@ Most investigations need **both**
 | Accounts within three hops of a flagged account | Neo4j (graph traversal) |
 | Find the fraud ring, compute its total volume | Both |
 
-- **Cypher in the graph:** one query detects 2-6 hop cycles in milliseconds
-- **SQL in the lakehouse:** recursive CTEs with cycle-detection guards
-
 <!--
-Each question maps to the platform built to answer it. The third
-row shows why you need both: Neo4j detects the fraud ring through
-cycle traversal, Databricks computes transfer totals for the
-identified accounts. Neither platform can answer that question alone.
+Each question maps to the platform built to answer it. SQL is
+built for aggregation: totals, averages, counts. Cypher is built
+for traversal: following connections across multiple hops.
 
-Cypher detects the cycle in the graph: a single query finds 2-6
-hop loops in milliseconds. The equivalent SQL in the lakehouse
-requires recursive CTEs with explicit cycle-detection guards.
-Both platforms contribute, neither can answer alone.
+The third row shows why you need both: Neo4j detects the fraud
+ring through cycle traversal, Databricks computes transfer totals
+for the identified accounts. Neither platform can answer that
+question alone.
 -->
 
 ---
@@ -430,13 +447,12 @@ intelligence.
 
 ---
 
-## The Foundation is in Place
+## Foundation for Data Intelligence Meets Graph Intelligence
 
+- **The Medallion Architecture is built.** Data intelligence and graph intelligence are connected
 - **Bronze:** raw data landed from cloud storage
 - **Silver:** cleaned, governed tables fed the Spark Connector
 - **Gold:** graph insights flowing back as fraud alerts, risk scores, ML features
-
-The initial Medallion Architecture is built. Data intelligence and graph intelligence are connected.
 
 **Next:** enriching the graph with unstructured knowledge through Knowledge Graph Construction
 

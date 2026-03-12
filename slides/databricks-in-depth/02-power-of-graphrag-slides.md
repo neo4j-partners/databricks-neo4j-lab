@@ -27,18 +27,18 @@ ol > li {
 }
 </style>
 
-# Beyond the Graph
+# Activating the Intelligence Platform
 
-Querying Across Both Platforms with AI
+Knowledge graphs, retrieval, and agents across both platforms
 
 ---
 
-## LLM Limitations and the Case for Multi-Agent Systems
+## Why Agents? LLM Limitations in the Enterprise
 
-- **LLMs hallucinate:** plausible answers with no grounding in your data
-- **LLMs lack domain context:** no knowledge of your schema, rules, or terminology
-- **LLMs cannot access private data:** enterprise knowledge behind firewalls is invisible
-- **LLMs are non-deterministic:** same question, different answers each time
+- **Hallucination:** plausible answers with no grounding in your data
+- **No domain context:** no knowledge of your schema, rules, or terminology
+- **No access to private data:** enterprise knowledge behind firewalls is invisible
+- **Non-deterministic:** same question, different answers each time
 
 <!--
 Each of these is a real problem for enterprise use. Hallucination
@@ -82,68 +82,41 @@ foundation we'll query with agents.
 
 ---
 
-## Document Chunking
+## From Documents to Searchable Chunks
 
-- **Documents are too large to search:** a 50-page AML policy manual is not a useful result
-- **Split into fixed-size chunks** with overlap to preserve context at boundaries
-- **Each chunk becomes a graph node** linked to its source document
-- **Chunk size is a tradeoff:** too small loses context, too large loses precision
+- **Documents split into Chunk nodes** with raw text, linked to source via `FROM_DOCUMENT`
+- **Chunks link to each other** via `NEXT_CHUNK` to preserve document order
+- **Embedding models** convert chunk text into vectors that capture semantic meaning
+- **"Circular transfer" matches "round-trip fund movement"** — same meaning, different words
+- **Vector index** searches by semantic similarity, not keyword matching
 
 <!--
-When a user asks "What AML procedures apply to circular transfers?"
-the system doesn't search whole documents. It searches chunks and
-returns the most relevant sections.
+The first half of Knowledge Graph Construction turns unstructured
+documents into searchable graph nodes. Documents get split into
+fixed-size pieces, typically 500 to 1000 characters, with overlap
+so context isn't lost at boundaries. Each chunk becomes a Chunk
+node storing the raw text as a property, linked back to its
+Document node via FROM_DOCUMENT and to adjacent chunks via
+NEXT_CHUNK.
 
-Documents get split into fixed-size pieces, typically 500 to 1000
-characters, with overlap so context isn't lost at the boundaries.
-Each chunk becomes a Chunk node in the graph, linked back to its
-source Document node. Chunks also link to each other in sequence,
-so you can walk forward and backward through the original document
-from any search result.
+An embedding model converts each chunk's text into a vector. Chunks
+with similar meaning end up close together in vector space,
+regardless of the exact words used. A vector index enables fast
+similarity search: "circular transfer pattern" and "round-trip
+fund movement" match by meaning even though they share no keywords.
 
-Chunk size is a real tradeoff. Too small and each chunk lacks
-enough context to be useful on its own. Too large and search
-results are imprecise, returning pages of text when you only
-needed a paragraph.
+At this point the graph has searchable text but no structure to
+traverse. The next step adds that.
 -->
 
 ---
 
-## Embeddings: Searching by Meaning
+## From Chunks to Graph Structure
 
-- **Keyword search fails on synonyms:** "circular transfer" won't match "round-trip fund movement"
-- **Embedding models** convert text to vectors; similar meaning = close in vector space
-- **Each chunk gets a vector** stored on its node, indexed for similarity search
-- **Semantic search:** find chunks closest in meaning to the question, not matching keywords
-
-<!--
-Keyword search breaks down when the question and the answer use
-different words. "Circular transfer pattern" and "round-trip fund
-movement" describe the same thing, but keyword search won't
-connect them.
-
-An embedding model converts each chunk's text into a vector, a
-list of numbers representing its meaning. Chunks with similar
-meaning end up close together in this vector space, regardless
-of the exact words used. The same model converts the user's
-question into the same space, so similarity search finds the
-closest chunks by meaning.
-
-Each chunk node gets its embedding vector stored as a property,
-and a vector index enables fast similarity search across all
-chunks. This is the "vector search" half of GraphRAG. It's how
-the system finds relevant content without requiring exact keyword
-matches.
--->
-
----
-
-## Entity Extraction: Structure from Text
-
-- **Chunks are unstructured text.** The graph needs structured nodes to traverse
 - **An LLM reads each chunk** and extracts entities: regulations, thresholds, procedures
-- **Entities become graph nodes** linked to source chunks and cross-linked to existing graph
+- **Entities become graph nodes** linked to source chunks via `FROM_CHUNK`
 - **Entity resolution** deduplicates: same regulation in 5 chunks = 1 node, 5 links
+- **Cross-linking** connects extracted entities to the existing operational graph
 
 <!--
 Chunks give you searchable text, but the graph needs structured
@@ -152,8 +125,9 @@ nodes to traverse. Entity extraction bridges that gap.
 An LLM reads each chunk and identifies structured entities:
 regulations, monetary thresholds, compliance procedures. These
 become graph nodes with typed properties, linked back to the
-chunks they were extracted from. That link is provenance: you
-can always trace an entity back to the text it came from.
+chunks they were extracted from via FROM_CHUNK. That link is
+provenance: you can always trace an entity back to the text it
+came from.
 
 Entity resolution handles deduplication. The same regulation
 mentioned across five different chunks becomes one node with
