@@ -41,7 +41,7 @@ The supervisor you'll build in this lab routes each question to the right data s
 
 Before starting, ensure you have:
 - Completed **Part A** (Genie space for sensor analytics)
-- Access to the Unity Catalog: `databricks-neo4j-lab.lakehouse` (tables) and `databricks-neo4j-lab.lab-schema` (volume)
+- Access to the Unity Catalog: `neo4j_ibm_catalog.lakehouse` (tables) and `neo4j_ibm_catalog.lab-schema` (volume)
 
 > **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 5 notebooks they completed.
 
@@ -123,7 +123,7 @@ BEST FOR:
 - Relationship patterns: "Which airports does ExampleAir fly to?"
 - Graph traversals: "Show the path from aircraft to sensor"
 
-DATA AVAILABLE (loaded from /Volumes/databricks-neo4j-lab/lab-schema/lab-volume/):
+DATA AVAILABLE (loaded from /Volumes/neo4j_ibm_catalog/lab_schema/lab_volume/):
 - Aircraft (20): Fleet inventory with tail numbers, models, operators
 - Systems (~80): Engines, Avionics, Hydraulics per aircraft
 - Components (320): Turbines, Compressors, Pumps, etc.
@@ -168,7 +168,7 @@ DO NOT USE FOR:
 Analyzes aircraft sensor telemetry data using SQL queries over Unity Catalog tables.
 
 DATA LOCATION:
-- Catalog: databricks-neo4j-lab
+- Catalog: neo4j_ibm_catalog
 - Schema: lakehouse
 - Tables: sensor_readings, sensors, systems, aircraft
 
@@ -425,7 +425,7 @@ User Question
 Multi-Agent Supervisor
      |
      +---> "sensor readings?" ---> Genie Space ---> Unity Catalog (Lakehouse)
-     |        time-series              SQL           databricks-neo4j-lab.lakehouse
+     |        time-series              SQL           neo4j_ibm_catalog.lakehouse
      |        aggregations                           345,600+ sensor readings
      |        trend analysis
      |
@@ -444,10 +444,10 @@ Multi-Agent Supervisor
 
 | Source | Location | Query Language | Best For |
 |--------|----------|----------------|----------|
-| Sensor Telemetry | `databricks-neo4j-lab.lakehouse.sensor_readings` | SQL | Time-series analytics, trends, aggregations |
-| Aircraft Metadata | `databricks-neo4j-lab.lakehouse.aircraft` | SQL | Fleet-wide comparisons, filtering |
+| Sensor Telemetry | `neo4j_ibm_catalog.lakehouse.sensor_readings` | SQL | Time-series analytics, trends, aggregations |
+| Aircraft Metadata | `neo4j_ibm_catalog.lakehouse.aircraft` | SQL | Fleet-wide comparisons, filtering |
 | Knowledge Graph | Neo4j Aura (admin instance, via MCP) | Cypher | Relationships, topology, graph traversals |
-| Graph Data Origin | `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/` | - | - |
+| Graph Data Origin | `/Volumes/neo4j_ibm_catalog/lab_schema/lab_volume/` | - | - |
 
 ---
 
@@ -471,7 +471,7 @@ Multi-Agent Supervisor
 - Test queries directly in Neo4j Aura console first
 
 ### "SQL query failed"
-- Verify table names in Unity Catalog: `databricks-neo4j-lab.lakehouse`
+- Verify table names in Unity Catalog: `neo4j_ibm_catalog.lakehouse`
 - Check column names match documentation
 - Ensure Genie space has access to all required tables
 - Test queries directly in SQL Editor first

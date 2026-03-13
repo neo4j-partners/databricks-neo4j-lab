@@ -248,7 +248,7 @@ class Neo4jConnection:
 # =============================================================================
 
 # Default Volume path for workshop data
-DEFAULT_VOLUME_PATH = "/Volumes/databricks-neo4j-lab/lab-schema/lab-volume"
+DEFAULT_VOLUME_PATH = "/Volumes/neo4j_ibm_catalog/lab_schema/lab_volume"
 
 
 class DataLoader:
