@@ -163,9 +163,6 @@ cp lab_setup/.env.example lab_setup/.env
 Edit `.env` and set at minimum:
 
 ```bash
-# Cloud provider: "aws" or "azure"
-CLOUD_PROVIDER="aws"
-
 # Databricks CLI profile (optional - uses default if empty)
 DATABRICKS_PROFILE=""
 

@@ -173,15 +173,19 @@ The `.env` configuration is unchanged from Lab 5 validation. Both scripts use th
 
 ## Phased Implementation Plan
 
-### Phase 1: Core Embedding Pipeline
+### Phase 1: Core Embedding Pipeline — COMPLETE
 
-Build `run_lab7_03.py` with Stages 1-3: Document-Chunk graph creation, embedding generation via `databricks-bge-large-en`, vector and fulltext index creation, and basic search validation.
+Built `run_lab7_03.py` with Stages 1-3: Document-Chunk graph creation, embedding generation via `databricks-bge-large-en`, vector and fulltext index creation, and basic search validation.
 
-**Deliverables:**
-- `run_lab7_03.py` with argument parsing, graph structure creation, embedding generation, index creation with 5-minute polling, and vector/fulltext search checks
-- Upload `data_utils.py` from Lab 7 alongside the script
-- PASS/FAIL reporting matching `run_lab5_02.py` pattern
-- Midrange search score threshold (0.80) with keyword presence checks
+**Deliverables (all complete):**
+- [x] `run_lab7_03.py` — 310-line standalone script with argument parsing, 3-stage pipeline, 16 PASS/FAIL checks
+- [x] `data_utils.py` — copied from `Lab_7_Semantic_Search/` into notebook_validation
+- [x] PASS/FAIL reporting matching `run_lab5_02.py` pattern (same `record()` helper, summary table, exit codes)
+- [x] Midrange search score threshold (0.80) with keyword presence checks
+
+**Stage 1 checks (5):** Document metadata, FROM_DOCUMENT on all chunks, NEXT_CHUNK chain integrity, chunk count match, chunk text non-empty
+**Stage 2 checks (5):** All chunks have embeddings, all 1024 dims, no zero vectors, distinct chunks differentiated, adjacent more similar than distant
+**Stage 3 checks (6):** Vector index ONLINE, fulltext index ONLINE, search score above 0.80, keyword relevance, fulltext EGT results, semantic rephrased-query overlap
 
 **Depends on:** `run_lab5_02.py` executing successfully (clean structural graph in place)
 

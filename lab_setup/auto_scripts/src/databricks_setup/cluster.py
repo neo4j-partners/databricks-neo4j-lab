@@ -76,7 +76,6 @@ def create_cluster(
         autotermination_minutes=config.autotermination_minutes,
         spark_conf=spark_conf,
         custom_tags=custom_tags,
-        aws_attributes=aws_attributes,
     )
 
     if not response.cluster_id:
@@ -142,10 +141,6 @@ def get_or_create_cluster(
     Returns:
         The cluster ID.
     """
-    # Ensure the instance profile is registered before creating/starting a cluster
-    if config.instance_profile_arn and config.cloud_provider != "azure":
-        ensure_instance_profile_registered(client, config.instance_profile_arn)
-
     log(f"Looking for existing cluster \"{config.name}\"...")
 
     info = find_cluster(client, config.name)

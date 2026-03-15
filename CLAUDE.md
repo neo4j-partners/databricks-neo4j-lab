@@ -70,7 +70,7 @@ User Question → Multi-Agent Supervisor (AgentBricks)
   └→ Neo4j MCP Agent → Neo4j Aura (LangGraph + MCP tools: get-schema, read-cypher)
 ```
 
-The MCP agent (`lab_setup/neo4j_mcp_connection/neo4j_mcp_agent.py`) uses OAuth2 M2M auth via Unity Catalog HTTP connection, deployed on AWS AppRunner.
+The MCP agent (`lab_setup/neo4j_mcp_connection/neo4j_mcp_agent.py`) uses OAuth2 M2M auth via Unity Catalog HTTP connection to an external MCP server.
 
 ### Lab Progression
 Lab 0 (sign-in) → Lab 1 (Neo4j Aura setup) → Lab 5 (ETL via Spark Connector notebooks) → Lab 6 (multi-agent supervisor) → Lab 7 (GraphRAG semantic search over maintenance manuals)
@@ -80,7 +80,7 @@ Lab 0 (sign-in) → Lab 1 (Neo4j Aura setup) → Lab 5 (ETL via Spark Connector 
 Each tool reads from `.env` files (see `.env.example` in each directory). Key variables:
 - **Neo4j**: `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`
 - **LLM**: `LLM_PROVIDER` (openai/anthropic/azure), `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
-- **Databricks**: `CLOUD_PROVIDER` (aws/azure), `DATABRICKS_PROFILE`, `DATABRICKS_ACCOUNT_ID`, `CATALOG_NAME`
+- **Databricks**: `DATABRICKS_PROFILE`, `DATABRICKS_ACCOUNT_ID`, `CATALOG_NAME`
 
 All config uses Pydantic `BaseSettings` with `SecretStr` for passwords.
 
