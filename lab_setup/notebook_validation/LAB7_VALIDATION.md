@@ -178,7 +178,7 @@ The `.env` configuration is unchanged from Lab 5 validation. Both scripts use th
 Built `run_lab7_03.py` with Stages 1-3: Document-Chunk graph creation, embedding generation via `databricks-bge-large-en`, vector and fulltext index creation, and basic search validation.
 
 **Deliverables (all complete):**
-- [x] `run_lab7_03.py` — 310-line standalone script with argument parsing, 3-stage pipeline, 16 PASS/FAIL checks
+- [x] `run_lab7_03.py` — 320-line standalone script with argument parsing, 3-stage pipeline, 16 PASS/FAIL checks
 - [x] `data_utils.py` — copied from `Lab_7_Semantic_Search/` into notebook_validation
 - [x] PASS/FAIL reporting matching `run_lab5_02.py` pattern (same `record()` helper, summary table, exit codes)
 - [x] Midrange search score threshold (0.80) with keyword presence checks
@@ -186,6 +186,16 @@ Built `run_lab7_03.py` with Stages 1-3: Document-Chunk graph creation, embedding
 **Stage 1 checks (5):** Document metadata, FROM_DOCUMENT on all chunks, NEXT_CHUNK chain integrity, chunk count match, chunk text non-empty
 **Stage 2 checks (5):** All chunks have embeddings, all 1024 dims, no zero vectors, distinct chunks differentiated, adjacent more similar than distant
 **Stage 3 checks (6):** Vector index ONLINE, fulltext index ONLINE, search score above 0.80, keyword relevance, fulltext EGT results, semantic rephrased-query overlap
+
+**Test Results (2026-03-15, clean Neo4j database):**
+- 16/16 PASS on first run against freshly reset database
+- 43 chunks created from MAINTENANCE_A320.md (29,652 chars, 800-char chunks, 100 overlap)
+- Embeddings: 1024-dim vectors, adjacent similarity 0.84 > distant 0.78, distinct chunks cosine_sim 0.66
+- Indexes: Both ONLINE in 0.1s on Aura
+- Vector search: top score 0.85 for "engine vibration" query (threshold 0.80), all 3 keywords found
+- Fulltext search: 3 results for "EGT limits", all containing EGT
+- Semantic overlap: rephrased query ("vibration exceedance diagnosis procedure") matched chunks {19, 31} with original query
+- Execution time: 107s (excluding cluster setup)
 
 **Depends on:** `run_lab5_02.py` executing successfully (clean structural graph in place)
 

@@ -31,7 +31,7 @@ def main():
     args = parser.parse_args()
 
     from neo4j import GraphDatabase
-    from neo4j_graphrag.indexes import create_vector_index, create_fulltext_index, upsert_vectors
+    from neo4j_graphrag.indexes import upsert_vectors
     from data_utils import (
         VolumeDataLoader, split_text, get_embedder,
         EMBEDDING_DIMENSIONS,
@@ -86,13 +86,17 @@ def main():
     # -- Clear existing Document/Chunk nodes --------------------------------
 
     print("Clearing existing Document and Chunk nodes...")
-    # Drop existing indexes first to avoid conflicts
+    # Drop existing indexes first to avoid conflicts.
+    # Schema operations require auto-commit transactions (session.run)
+    # and the Result must be consumed before the session closes.
     for idx_name in [VECTOR_INDEX_NAME, FULLTEXT_INDEX_NAME]:
         try:
-            driver.execute_query(f"DROP INDEX {idx_name} IF EXISTS")
+            with driver.session() as session:
+                result = session.run(f"DROP INDEX {idx_name} IF EXISTS")
+                result.consume()
             print(f"  Dropped index: {idx_name}")
         except Exception as e:
-            print(f"  Index {idx_name} not found or already dropped: {e}")
+            print(f"  Index {idx_name} drop note: {e}")
 
     records_del, _, _ = driver.execute_query("""
         MATCH (n) WHERE n:Document OR n:Chunk
@@ -389,26 +393,73 @@ def main():
     print("=" * 70)
 
     # -- Create indexes ----------------------------------------------------
+    # Schema operations (CREATE INDEX) require auto-commit transactions.
+    # driver.execute_query() uses managed transactions which silently fail
+    # for schema ops. Use session.run() which runs in auto-commit mode.
+
+    # Create indexes via session.run() (schema ops need auto-commit transactions).
+    # If an equivalent index on the same label+property exists under a different
+    # name (e.g., from another project), the script detects and reuses it.
 
     print(f"Creating vector index: {VECTOR_INDEX_NAME}...")
-    create_vector_index(
-        driver=driver,
-        name=VECTOR_INDEX_NAME,
-        label="Chunk",
-        embedding_property="embedding",
-        dimensions=EMBEDDING_DIMENSIONS,
-        similarity_fn="cosine",
-    )
-    print(f"  Created ({EMBEDDING_DIMENSIONS} dimensions, cosine similarity)")
+    try:
+        with driver.session() as session:
+            result = session.run(f"""
+                CREATE VECTOR INDEX {VECTOR_INDEX_NAME} IF NOT EXISTS
+                FOR (c:Chunk) ON (c.embedding)
+                OPTIONS {{
+                    indexConfig: {{
+                        `vector.dimensions`: {EMBEDDING_DIMENSIONS},
+                        `vector.similarity_function`: 'cosine'
+                    }}
+                }}
+            """)
+            result.consume()
+        print(f"  Created ({EMBEDDING_DIMENSIONS} dimensions, cosine similarity)")
+    except Exception as e:
+        print(f"  Note: {e}")
 
     print(f"Creating fulltext index: {FULLTEXT_INDEX_NAME}...")
-    create_fulltext_index(
-        driver=driver,
-        name=FULLTEXT_INDEX_NAME,
-        label="Chunk",
-        node_properties=["text"],
-    )
-    print("  Created\n")
+    try:
+        with driver.session() as session:
+            result = session.run(f"""
+                CREATE FULLTEXT INDEX {FULLTEXT_INDEX_NAME} IF NOT EXISTS
+                FOR (c:Chunk) ON EACH [c.text]
+            """)
+            result.consume()
+        print(f"  Created")
+    except Exception as e:
+        print(f"  Note: {e}")
+
+    # Check which indexes actually cover Chunk.embedding and Chunk.text,
+    # regardless of name. An equivalent index from another project counts.
+    print("\n  Resolving actual index names for Chunk label:")
+    actual_vector_idx = VECTOR_INDEX_NAME
+    actual_fulltext_idx = FULLTEXT_INDEX_NAME
+    with driver.session() as session:
+        result = session.run("""
+            SHOW INDEXES
+            YIELD name, state, type, labelsOrTypes, properties
+            WHERE type IN ['VECTOR', 'FULLTEXT']
+            RETURN name, state, type, labelsOrTypes, properties
+        """)
+        for idx_rec in result:
+            labels = idx_rec["labelsOrTypes"]
+            props = idx_rec["properties"]
+            print(f"    {idx_rec['name']}: {idx_rec['state']} ({idx_rec['type']}) "
+                  f"labels={labels} props={props}")
+            if "Chunk" in labels and "embedding" in props and idx_rec["type"] == "VECTOR":
+                actual_vector_idx = idx_rec["name"]
+            if "Chunk" in labels and "text" in props and idx_rec["type"] == "FULLTEXT":
+                actual_fulltext_idx = idx_rec["name"]
+
+    if actual_vector_idx != VECTOR_INDEX_NAME:
+        print(f"  Using existing vector index: {actual_vector_idx} (instead of {VECTOR_INDEX_NAME})")
+        VECTOR_INDEX_NAME = actual_vector_idx
+    if actual_fulltext_idx != FULLTEXT_INDEX_NAME:
+        print(f"  Using existing fulltext index: {actual_fulltext_idx} (instead of {FULLTEXT_INDEX_NAME})")
+        FULLTEXT_INDEX_NAME = actual_fulltext_idx
+    print()
 
     # -- Poll for ONLINE status --------------------------------------------
 
