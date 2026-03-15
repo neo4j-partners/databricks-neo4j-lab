@@ -111,10 +111,21 @@ def main():
 
     if not args.skip_clear:
         print("Clearing database...")
-        run_script(
-            "CALL { MATCH (n) WITH n LIMIT 10000 DETACH DELETE n } IN TRANSACTIONS OF 10000 ROWS"
-        )
-        remaining = run_cypher("MATCH (n) RETURN count(n) AS remaining").collect()[0]["remaining"]
+        MAX_CLEAR_PASSES = 20
+        for pass_num in range(1, MAX_CLEAR_PASSES + 1):
+            # Delete batch via script, count via query — combined in one read.
+            # No IN TRANSACTIONS (works in explicit tx). Comment busts Spark cache.
+            result = (spark.read
+                .format("org.neo4j.spark.DataSource")
+                .option("script",
+                    "MATCH (n) WITH n LIMIT 10000 DETACH DELETE n")
+                .option("query",
+                    f"MATCH (n) RETURN count(n) AS remaining // pass {pass_num}")
+                .load())
+            remaining = result.collect()[0]["remaining"]
+            print(f"  Clear pass {pass_num}: {remaining} nodes remaining")
+            if remaining == 0:
+                break
         record("Clear database", remaining == 0, f"remaining={remaining}")
     else:
         print("Skipping database clear (--skip-clear)")
@@ -190,8 +201,11 @@ def main():
     # Removal
     df = (read_csv("nodes_removals.csv")
         .withColumnRenamed(":ID(RemovalEvent)", "removal_id")
-        .withColumn("time_since_install", col("time_since_install").cast("double"))
-        .withColumn("flight_cycles_at_removal", col("flight_cycles_at_removal").cast("integer")))
+        .withColumnRenamed("RMV_REA_TX", "reason")
+        .withColumnRenamed("time_since_install", "tsn")
+        .withColumnRenamed("flight_cycles_at_removal", "csn")
+        .withColumn("tsn", col("tsn").cast("double"))
+        .withColumn("csn", col("csn").cast("integer")))
     expected_nodes["Removal"] = write_nodes(df, "Removal", "removal_id")
 
     # ── Section 4: Load Relationships ────────────────────────────────────────
@@ -345,13 +359,16 @@ def main():
 
     # Critical maintenance
     critical = run_cypher("""
-        MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System)-[:HAS_COMPONENT]->(c:Component)
-              -[:HAS_EVENT]->(m:MaintenanceEvent)
-        WHERE m.severity = 'CRITICAL' AND m.reported_at IS NOT NULL
-        RETURN a.tail_number AS TailNumber, s.name AS System, c.name AS Component,
-               m.fault AS Fault, m.reported_at AS ReportedAt
-        ORDER BY m.reported_at DESC
-        LIMIT 10
+        CALL {
+            MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System)-[:HAS_COMPONENT]->(c:Component)
+                  -[:HAS_EVENT]->(m:MaintenanceEvent)
+            WHERE m.severity = 'CRITICAL' AND m.reported_at IS NOT NULL
+            RETURN a.tail_number AS TailNumber, s.name AS System, c.name AS Component,
+                   m.fault AS Fault, m.reported_at AS ReportedAt
+            ORDER BY m.reported_at DESC
+            LIMIT 10
+        }
+        RETURN TailNumber, System, Component, Fault, ReportedAt
     """)
     critical.show(truncate=False)
     record("Critical maintenance query", critical.count() > 0,
@@ -359,9 +376,12 @@ def main():
 
     # Flight delays by cause
     delays = run_cypher("""
-        MATCH (f:Flight)-[:HAS_DELAY]->(d:Delay)
-        RETURN d.cause AS Cause, count(*) AS Count, avg(d.minutes) AS AvgMinutes
-        ORDER BY Count DESC
+        CALL {
+            MATCH (f:Flight)-[:HAS_DELAY]->(d:Delay)
+            RETURN d.cause AS Cause, count(*) AS Count, avg(d.minutes) AS AvgMinutes
+            ORDER BY Count DESC
+        }
+        RETURN Cause, Count, AvgMinutes
     """)
     delays.show(truncate=False)
     record("Flight delays query", delays.count() > 0,
@@ -369,12 +389,15 @@ def main():
 
     # Component removal history
     removals = run_cypher("""
-        MATCH (a:Aircraft)-[:HAS_REMOVAL]->(r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
-        WHERE r.removal_date IS NOT NULL
-        RETURN a.tail_number AS TailNumber, c.name AS Component, r.reason AS Reason,
-               r.removal_date AS RemovalDate
-        ORDER BY r.removal_date DESC
-        LIMIT 20
+        CALL {
+            MATCH (a:Aircraft)-[:HAS_REMOVAL]->(r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
+            WHERE r.removal_date IS NOT NULL
+            RETURN a.tail_number AS TailNumber, c.name AS Component, r.reason AS Reason,
+                   r.removal_date AS RemovalDate
+            ORDER BY r.removal_date DESC
+            LIMIT 20
+        }
+        RETURN TailNumber, Component, Reason, RemovalDate
     """)
     removals.show(truncate=False)
     record("Component removal query", removals.count() > 0,
@@ -382,12 +405,15 @@ def main():
 
     # Aircraft hierarchy for N95040A
     hierarchy = run_cypher("""
-        MATCH (a:Aircraft {tail_number: 'N95040A'})-[:HAS_SYSTEM]->(s:System)
-              -[:HAS_COMPONENT]->(c:Component)
-        WHERE s.type IS NOT NULL AND s.name IS NOT NULL AND c.name IS NOT NULL
-        RETURN a.tail_number AS Aircraft, s.name AS System, s.type AS SystemType,
-               c.name AS Component, c.type AS ComponentType
-        ORDER BY s.type, s.name, c.name
+        CALL {
+            MATCH (a:Aircraft {tail_number: 'N95040A'})-[:HAS_SYSTEM]->(s:System)
+                  -[:HAS_COMPONENT]->(c:Component)
+            WHERE s.type IS NOT NULL AND s.name IS NOT NULL AND c.name IS NOT NULL
+            RETURN a.tail_number AS Aircraft, s.name AS System, s.type AS SystemType,
+                   c.name AS Component, c.type AS ComponentType
+            ORDER BY s.type, s.name, c.name
+        }
+        RETURN Aircraft, System, SystemType, Component, ComponentType
     """)
     hierarchy.show(truncate=False)
     record("Aircraft hierarchy query", hierarchy.count() > 0,

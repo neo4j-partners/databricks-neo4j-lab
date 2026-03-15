@@ -28,16 +28,16 @@ ol > li {
 </style>
 
 
-# Neo4j, AWS, and Databricks Workshop
+# Neo4j and Databricks Workshop
 
-Build AI Agents and Knowledge Graphs with Neo4j, AWS Bedrock, and Databricks
+Build AI Agents and Knowledge Graphs with Neo4j and Databricks
 
 ---
 
 ## What You'll Build
 
 - **Load** aircraft fleet data into a Neo4j knowledge graph using the Spark Connector
-- **Explore** a pre-deployed AWS AgentCore agent that queries Neo4j via MCP
+- **Explore** a pre-deployed agent that queries Neo4j via MCP
 - **Build** a multi-agent supervisor combining Databricks Genie (sensor analytics) with Neo4j MCP (graph queries)
 - **Add** semantic search with vector embeddings and GraphRAG retrievers
 - **Create** a no-code Aura Agent with Cypher Templates, Text2Cypher, and Similarity Search
@@ -122,8 +122,8 @@ Shared resources are pre-configured by administrators so participants can focus 
 | Resource | Description |
 |----------|-------------|
 | **Reference Aura Instance** | Fully populated Neo4j database with the complete Aircraft Digital Twin — all node types, relationships, embeddings |
-| **Neo4j MCP Server** | Deployed to AWS AgentCore, connected to the Reference Aura Instance |
-| **AgentCore Sample Agent** | Pre-deployed agent that calls Neo4j MCP for natural language graph queries |
+| **Neo4j MCP Server** | External MCP server connected to the Reference Aura Instance |
+| **Sample MCP Agent** | Pre-deployed agent that calls Neo4j MCP for natural language graph queries |
 | **Databricks Data & Tables** | CSV files in Unity Catalog Volume and pre-created Lakehouse tables |
 | **Databricks MCP Connection** | External MCP server registered in Unity Catalog |
 
@@ -138,7 +138,7 @@ Each participant gets their own environment to work in:
 | **Personal Aura Instance** | Your own Neo4j database to load data into during ETL labs and explore independently |
 | **Databricks Workspace** | Clone notebooks and run them on a shared cluster to build your graph and agents |
 
-Labs using the **MCP server** (AgentCore, AgentBricks) connect to the **shared** Reference Aura Instance — so every participant works with the full graph regardless of their personal instance's state.
+Labs using the **MCP server** (AgentBricks) connect to the **shared** Reference Aura Instance — so every participant works with the full graph regardless of their personal instance's state.
 
 Labs doing **ETL and GraphRAG** (Labs 5, 7) load data into your **personal** instance.
 

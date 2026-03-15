@@ -124,18 +124,40 @@ These files existed solely to provision or manage AWS infrastructure. None were 
 | `lab_setup/auto_scripts/README.md` | Simplified cluster defaults table to single node type | DONE |
 | `lab_setup/auto_scripts/README.md` | Removed `CLOUD_PROVIDER` from minimum config example | DONE |
 
+### Additional files (caught in review pass)
+
+| File | Change | Status |
+|------|--------|--------|
+| `README.md` (root) | Removed "runs on AWS AppRunner" from Lab Architecture description | DONE |
+| `slides/docs/overview-and-genai-foundations.md` | Removed "AWS AgentCore" from What You'll Build, infrastructure table, and lab notes | DONE |
+| `slides/overview-knowledge-graph/01-workshop-over.md` | Removed "AWS" and "AWS Bedrock" from title/subtitle, "AWS AgentCore" from What You'll Build, infrastructure table, and lab notes | DONE |
+
 ---
 
 ## Verification Results
 
 | Check | Result |
 |-------|--------|
-| Grep sweep for AWS references in `lab_setup/` | Zero hits |
-| Grep sweep for AWS references in `CLAUDE.md` | Zero hits |
+| Grep sweep for AWS infrastructure refs in `lab_setup/` | Zero hits |
+| Grep sweep for AWS infrastructure refs in `CLAUDE.md` | Zero hits |
+| Grep sweep for "AgentCore" in all `.md`, `.py`, `.ipynb` files | Zero hits (outside AWS_CLEANUP.md) |
+| Grep sweep for "AWS AppRunner", "AWS Bedrock", "aws-starter" repo-wide | Zero hits (outside AWS_CLEANUP.md) |
 | Python import test (`cluster.py`, `config.py`) | PASS |
 | `ruff check` on modified files | PASS (0 errors) |
 | `mypy` on modified files | PASS (0 issues) |
 | Pre-existing lint errors in other files | Unchanged (4 pre-existing issues in `log.py`, `main.py`, `permissions.py`) |
+
+### Remaining "AWS" references (legitimate, not infrastructure)
+
+These references to "AWS" remain in the repo and are correct — they describe Neo4j Aura's cloud hosting options, not Databricks infrastructure:
+
+- `Lab_1_Aura_Setup/Aura_Free_Trial.md` — "Cloud provider: AWS" (Neo4j Aura instance setup)
+- `slides/overview-knowledge-graph/01-neo4j-aura-overview-slides.md` — "Deploy in AWS, GCP, or Azure" (Neo4j Aura availability)
+- `Lab_1_Aura_Setup/slides/04-neo4j-aura.md` — "Cloud-native - Deploy in AWS, GCP, or Azure"
+
+### Note: `lab_setup/.env` catalog name
+
+`CATALOG_NAME="aws-databricks-neo4j-lab"` retains the "aws-" prefix. This is the name of an existing deployed catalog in the Databricks workspace. Changing it here would cause the setup CLI to target a non-existent catalog. If the catalog is recreated, the name should be updated to `databricks-neo4j-lab` to match `.env.example`.
 
 ---
 
