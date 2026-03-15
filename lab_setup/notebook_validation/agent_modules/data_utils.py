@@ -14,17 +14,18 @@ the MLflow deployments client when running in Databricks.
 import asyncio
 import concurrent.futures
 from pathlib import Path
-from typing import Any, List, Optional, Type, Union
+from typing import Any
 
 import mlflow.deployments
 from neo4j import GraphDatabase
-from pydantic import BaseModel
 from neo4j_graphrag.embeddings.base import Embedder
-from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import FixedSizeSplitter
+from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import (
+    FixedSizeSplitter,
+)
 from neo4j_graphrag.llm.base import LLMInterfaceV2
 from neo4j_graphrag.llm.types import LLMResponse
 from neo4j_graphrag.types import LLMMessage
-
+from pydantic import BaseModel
 
 # =============================================================================
 # Default Model Configuration
@@ -118,8 +119,8 @@ class DatabricksLLM(LLMInterfaceV2):
 
     def invoke(
         self,
-        input: List[LLMMessage],
-        response_format: Optional[Union[Type[BaseModel], dict[str, Any]]] = None,
+        input: list[LLMMessage],
+        response_format: type[BaseModel] | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> LLMResponse:
         """Generate a response from the LLM.
@@ -145,8 +146,8 @@ class DatabricksLLM(LLMInterfaceV2):
 
     async def ainvoke(
         self,
-        input: List[LLMMessage],
-        response_format: Optional[Union[Type[BaseModel], dict[str, Any]]] = None,
+        input: list[LLMMessage],
+        response_format: type[BaseModel] | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> LLMResponse:
         """Async version of invoke (runs synchronously)."""

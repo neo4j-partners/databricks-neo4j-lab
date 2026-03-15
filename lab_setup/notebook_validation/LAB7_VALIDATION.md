@@ -261,7 +261,7 @@ All open questions from the initial proposal and subsequent review have been res
 
 1. **Index readiness:** Poll `SHOW INDEXES` every 10 seconds, 5-minute timeout, error on failure.
 2. **Idempotency:** Lab 7 always clears Document/Chunk nodes before running. Lab 5 runs first and provides the clean structural graph.
-3. **data_utils.py:** Copy into notebook_validation directory; upload alongside the script via `./upload.sh --all`.
+3. **data_utils.py:** Lives in `agent_modules/` alongside the script; upload via `./upload.sh --all`.
 4. **Expected chunk count:** Skip count validation for now.
 5. **Embedding rate limits:** Runs on dedicated admin cluster; rate limits not a concern. Batch embedding API exists but deferred to Phase 4.
 6. **Search quality thresholds:** 0.80 midrange initial target; calibrate in Phase 3 against known-good runs.

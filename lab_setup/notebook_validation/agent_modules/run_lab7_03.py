@@ -30,12 +30,14 @@ def main():
     )
     args = parser.parse_args()
 
+    from data_utils import (
+        EMBEDDING_DIMENSIONS,
+        VolumeDataLoader,
+        get_embedder,
+        split_text,
+    )
     from neo4j import GraphDatabase
     from neo4j_graphrag.indexes import upsert_vectors
-    from data_utils import (
-        VolumeDataLoader, split_text, get_embedder,
-        EMBEDDING_DIMENSIONS,
-    )
 
     # ── Configuration ────────────────────────────────────────────────────────
 
@@ -427,7 +429,7 @@ def main():
                 FOR (c:Chunk) ON EACH [c.text]
             """)
             result.consume()
-        print(f"  Created")
+        print("  Created")
     except Exception as e:
         print(f"  Note: {e}")
 

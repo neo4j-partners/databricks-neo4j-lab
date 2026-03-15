@@ -1,0 +1,132 @@
+# notebook_validation
+
+Automated test suite for verifying the Aircraft Digital Twin workshop labs on a Databricks cluster. Replaces `verify_labs` with cluster-native validation that exercises the same code paths participants use.
+
+## Prerequisites
+
+- Databricks CLI configured with a profile (`databricks configure --profile <name>`)
+- A running (or auto-startable) all-purpose cluster with:
+  - Neo4j Spark Connector jar installed
+  - Python 3.11+
+- Neo4j Aura instance provisioned for the workshop
+
+## Setup
+
+```bash
+cd lab_setup/notebook_validation
+cp .env.example .env
+```
+
+Edit `.env` with your values:
+
+| Variable | Description |
+|----------|-------------|
+| `DATABRICKS_PROFILE` | CLI profile name |
+| `DATABRICKS_CLUSTER_ID` | All-purpose cluster ID |
+| `WORKSPACE_DIR` | Remote path for uploaded scripts (e.g., `/Workspace/Users/you@example.com/notebook_validation`) |
+| `NEO4J_URI` | Neo4j Aura connection URI |
+| `NEO4J_USERNAME` | Neo4j username (default: `neo4j`) |
+| `NEO4J_PASSWORD` | Neo4j password |
+| `DATA_PATH` | Unity Catalog Volume path (default: `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume`) |
+
+## Full Validation Flow
+
+### Step 1: Upload all scripts
+
+```bash
+./upload.sh --all
+```
+
+Verify the upload:
+
+```bash
+./validate.sh
+```
+
+### Step 2: Smoke test the cluster
+
+Confirms Python, Spark, and the Neo4j Spark Connector are available:
+
+```bash
+./submit.sh test_hello.py
+```
+
+### Step 3: Neo4j connectivity check
+
+Quick check that Neo4j is reachable and contains data:
+
+```bash
+./submit.sh check_neo4j.py
+```
+
+### Step 4: Load Lab 5 data
+
+Clears the database, creates constraints/indexes, loads all 9 node types and 11 relationship types from CSV, then runs 19 PASS/FAIL checks:
+
+```bash
+./submit.sh run_lab5_02.py
+```
+
+> To skip the database clear: participants can pass `--skip-clear`, but `submit.sh` does not inject this flag by default.
+
+### Step 5: Verify Lab 5 data (read-only)
+
+Runs 13 read-only Cypher queries against the existing data without modifying anything. Use this to re-verify data at any point without reloading:
+
+```bash
+./submit.sh verify_lab5.py
+```
+
+### Step 6: Build and verify Lab 7 embedding pipeline
+
+Loads the A320 maintenance manual, chunks it, generates embeddings, creates vector and fulltext indexes, then runs 16 PASS/FAIL checks:
+
+```bash
+./submit.sh run_lab7_03.py
+```
+
+> Requires `data_utils.py` on the cluster (included when you run `./upload.sh --all`).
+
+## Scripts Reference
+
+| Script | Purpose | Destructive | Needs Spark |
+|--------|---------|-------------|-------------|
+| `test_hello.py` | Cluster smoke test (Python, Spark, Connector) | No | Yes |
+| `check_neo4j.py` | Neo4j connectivity and data presence check | No | No |
+| `run_lab5_02.py` | Load Lab 5 data + validate (19 checks) | **Yes** — clears DB | Yes |
+| `verify_lab5.py` | Read-only Lab 5 verification (13 queries) | No | No |
+| `run_lab7_03.py` | Build Lab 7 embedding pipeline + validate (16 checks) | **Yes** — clears Document/Chunk nodes | No |
+| `data_utils.py` | Shared utilities (embeddings, Neo4j connection, text splitting) | — | — |
+
+## Shell Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `upload.sh` | Upload scripts to Databricks workspace |
+| `submit.sh` | Submit a script as a one-time job run on the cluster |
+| `validate.sh` | List remote workspace contents and verify uploads |
+
+### upload.sh
+
+```bash
+./upload.sh                     # uploads test_hello.py (default)
+./upload.sh run_lab5_02.py      # uploads a specific file
+./upload.sh --all               # uploads all agent_modules/*.py files
+```
+
+### submit.sh
+
+```bash
+./submit.sh                     # runs test_hello.py (default)
+./submit.sh verify_lab5.py      # runs a specific script
+./submit.sh run_lab5_02.py --no-wait   # submit without waiting for completion
+```
+
+Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as command-line arguments.
+
+### validate.sh
+
+```bash
+./validate.sh                   # list all remote files
+./validate.sh run_lab5_02.py    # check if a specific file exists
+```

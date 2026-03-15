@@ -6,6 +6,7 @@
 #   ./submit.sh run_lab5_02.py              # runs the Lab 5 notebook
 #   ./submit.sh run_lab5_02.py --no-wait    # submit without waiting
 #
+# Scripts live in agent_modules/ on the remote workspace.
 # Neo4j credentials from .env are automatically injected as script parameters.
 # Scripts that don't use argparse (like test_hello.py) safely ignore them.
 
@@ -28,7 +29,7 @@ if [[ "${2:-}" == "--no-wait" ]]; then
     NO_WAIT="--no-wait"
 fi
 
-REMOTE_PATH="$REMOTE_DIR/$SCRIPT_NAME"
+REMOTE_PATH="$REMOTE_DIR/agent_modules/$SCRIPT_NAME"
 RUN_NAME="notebook_validation: $SCRIPT_NAME"
 
 echo "Submitting job (profile: $PROFILE)"

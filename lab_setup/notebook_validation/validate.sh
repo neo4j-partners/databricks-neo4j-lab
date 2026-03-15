@@ -26,11 +26,16 @@ if ! databricks workspace list --profile "$PROFILE" "$REMOTE_DIR" 2>/dev/null; t
     exit 1
 fi
 
-# If a specific file was requested, check it exists
+echo ""
+echo "Listing: $REMOTE_DIR/agent_modules"
+echo "---"
+databricks workspace list --profile "$PROFILE" "$REMOTE_DIR/agent_modules" 2>/dev/null || true
+
+# If a specific file was requested, check it exists in agent_modules/
 if [[ -n "${1:-}" ]]; then
     echo ""
-    echo "Checking: $REMOTE_DIR/$1"
-    if databricks workspace get-status --profile "$PROFILE" "$REMOTE_DIR/$1" 2>/dev/null; then
+    echo "Checking: $REMOTE_DIR/agent_modules/$1"
+    if databricks workspace get-status --profile "$PROFILE" "$REMOTE_DIR/agent_modules/$1" 2>/dev/null; then
         echo "  Found."
     else
         echo "  Not found."

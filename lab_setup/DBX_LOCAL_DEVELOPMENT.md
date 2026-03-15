@@ -35,10 +35,10 @@ The `upload.sh` script pushes Python files to the Databricks workspace using `da
 
 ```bash
 ./upload.sh test_hello.py       # Single file
-./upload.sh --all               # All .py files in the directory
+./upload.sh --all               # All .py files in agent_modules/
 ```
 
-Files land at `$WORKSPACE_DIR/<filename>`. The script creates the remote directory if it doesn't exist. Use `--all` when iterating on shared utilities like `data_utils.py` that other scripts import.
+Files land at `$WORKSPACE_DIR/agent_modules/<filename>`. The script creates the remote directory if it doesn't exist. Use `--all` when iterating on shared utilities like `data_utils.py` that other scripts import.
 
 ### 3. Submit
 
