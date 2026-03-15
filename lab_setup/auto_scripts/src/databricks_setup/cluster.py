@@ -10,10 +10,7 @@ from dataclasses import dataclass, replace
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.compute import (
-    AwsAttributes,
-    AwsAvailability,
     DataSecurityMode,
-    EbsVolumeType,
     RuntimeEngine,
     State,
 )
