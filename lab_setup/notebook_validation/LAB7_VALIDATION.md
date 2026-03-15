@@ -46,9 +46,11 @@ Validation checks:
 
 ### Stage 3: Index Creation and Search
 
-Create the vector index `maintenanceChunkEmbeddings` on the Chunk label's `embedding` property (1024 dimensions, cosine similarity). Create the fulltext index `maintenanceChunkText` on the Chunk label's `text` property. Both use `create_vector_index` and `create_fulltext_index` from the `neo4j-graphrag` library, matching Lab 7 exactly.
+Create the vector index `maintenanceChunkEmbeddings` on the Chunk label's `embedding` property (1024 dimensions, cosine similarity). Create the fulltext index `maintenanceChunkText` on the Chunk label's `text` property. Both use raw Cypher `CREATE VECTOR INDEX` and `CREATE FULLTEXT INDEX` statements executed via `session.run()` with `result.consume()`, which runs in auto-commit mode. The `neo4j-graphrag` library's `create_vector_index` and `create_fulltext_index` functions use `driver.execute_query()` internally, which runs in managed transactions that silently fail for schema operations (see "Neo4j Schema Operations" in `DBX_LOCAL_DEVELOPMENT.md`).
 
-After index creation, the script polls `SHOW INDEXES` every 10 seconds for up to 5 minutes, waiting for both indexes to reach ONLINE status. If either index is not ONLINE after 5 minutes, the script fails with an error.
+After creation, the script resolves the actual index names by querying `SHOW INDEXES` and matching on label and property rather than name. This handles the case where an equivalent index already exists under a different name from a prior run or another tool.
+
+The script then polls `SHOW INDEXES` every 10 seconds for up to 5 minutes, waiting for both indexes to reach ONLINE status. If either index is not ONLINE after 5 minutes, the script fails with an error.
 
 Validation checks:
 - Vector index `maintenanceChunkEmbeddings` exists and is ONLINE
@@ -125,19 +127,16 @@ run_lab7_03.py
 │   ├── Store via upsert_vectors
 │   └── Verify embeddings (5 checks)
 ├── Stage 3: Indexes and search
-│   ├── Create vector index
-│   ├── Create fulltext index
+│   ├── Create vector index (session.run, auto-commit)
+│   ├── Create fulltext index (session.run, auto-commit)
+│   ├── Resolve actual index names (handles pre-existing equivalents)
 │   ├── Poll for ONLINE status (5 min timeout)
 │   ├── Run vector and fulltext test queries
 │   └── Verify search quality (6 checks)
-├── Stage 4: Retrievers
-│   ├── VectorRetriever + LLM
-│   ├── VectorCypherRetriever + LLM
-│   ├── HybridRetriever + LLM
-│   ├── HybridCypherRetriever + LLM
-│   └── Verify retriever responses (7 checks)
 ├── Summary (total PASS/FAIL counts)
 └── Exit code (0 if all pass, 1 if any fail)
+
+Stage 4 (Retrievers) is Phase 2 work — not yet implemented.
 ```
 
 A copy of Lab 7's `data_utils.py` lives in the notebook_validation directory and is uploaded alongside the script. The script imports `DatabricksEmbeddings`, `DatabricksLLM`, `Neo4jConnection`, `VolumeDataLoader`, `split_text`, and the model constants directly. This keeps the validation aligned with the lab code. The file is copied rather than symlinked because `data_utils.py` is stable and unlikely to change frequently.
@@ -178,7 +177,7 @@ The `.env` configuration is unchanged from Lab 5 validation. Both scripts use th
 Built `run_lab7_03.py` with Stages 1-3: Document-Chunk graph creation, embedding generation via `databricks-bge-large-en`, vector and fulltext index creation, and basic search validation.
 
 **Deliverables (all complete):**
-- [x] `run_lab7_03.py` — 320-line standalone script with argument parsing, 3-stage pipeline, 16 PASS/FAIL checks
+- [x] `run_lab7_03.py` — ~620-line standalone script with argument parsing, 3-stage pipeline, 16 PASS/FAIL checks
 - [x] `data_utils.py` — copied from `Lab_7_Semantic_Search/` into notebook_validation
 - [x] PASS/FAIL reporting matching `run_lab5_02.py` pattern (same `record()` helper, summary table, exit codes)
 - [x] Midrange search score threshold (0.80) with keyword presence checks

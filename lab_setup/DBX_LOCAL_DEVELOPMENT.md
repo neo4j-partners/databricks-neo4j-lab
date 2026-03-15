@@ -262,6 +262,70 @@ Run this check whenever CSV data is regenerated. The cost of catching a dangling
 
 ---
 
+## Neo4j Schema Operations and Auto-Commit Transactions
+
+Schema operations in Neo4j (`CREATE INDEX`, `DROP INDEX`, `CREATE CONSTRAINT`) require auto-commit transactions. The Neo4j Python driver offers two execution paths, and they handle transactions differently.
+
+`driver.execute_query()` runs statements inside managed transactions. For data operations (CRUD on nodes and relationships) this is correct and convenient. For schema operations, managed transactions silently succeed without actually creating the index. No error is raised, no exception is thrown, and `SHOW INDEXES` reveals nothing was created. This failure mode cost six debugging runs during Lab 7 validation development.
+
+`session.run()` runs statements in auto-commit mode, which is what schema operations require. The result must be consumed before the session closes:
+
+```python
+# Fails silently — managed transaction, index never created
+driver.execute_query("""
+    CREATE VECTOR INDEX myIndex IF NOT EXISTS
+    FOR (c:Chunk) ON (c.embedding)
+    OPTIONS { indexConfig: { `vector.dimensions`: 1024, `vector.similarity_function`: 'cosine' } }
+""")
+
+# Works — auto-commit transaction
+with driver.session() as session:
+    result = session.run("""
+        CREATE VECTOR INDEX myIndex IF NOT EXISTS
+        FOR (c:Chunk) ON (c.embedding)
+        OPTIONS { indexConfig: { `vector.dimensions`: 1024, `vector.similarity_function`: 'cosine' } }
+    """)
+    result.consume()
+```
+
+The `result.consume()` call is essential. Without it, the session may close before the server finishes processing the statement. The same pattern applies to `DROP INDEX ... IF EXISTS`.
+
+The `neo4j-graphrag` library's `create_vector_index` and `create_fulltext_index` functions use `driver.execute_query()` internally, which means they silently fail for the same reason. Use raw Cypher via `session.run()` instead.
+
+---
+
+## Neo4j Index Equivalence
+
+Neo4j enforces index uniqueness by label and property, not by name. Attempting to create a second index on the same label+property combination under a different name returns `An equivalent index already exists`, even with `IF NOT EXISTS`.
+
+This surfaces when multiple tools create indexes on the same schema. For example, if `populate_aircraft_db` creates an index named `requirement_embeddings` on `Chunk.embedding`, then `run_lab7_03.py` attempts to create `maintenanceChunkEmbeddings` on the same `Chunk.embedding`. The second creation fails because Neo4j sees the label and property are already indexed.
+
+Two approaches handle this:
+
+**Clean database (recommended for validation).** Reset the Neo4j database before running the validation suite. This eliminates any pre-existing indexes and ensures the script creates exactly the indexes it expects. The validation workflow is: reset database, run Lab 5 (structural graph), run Lab 7 (semantic layer).
+
+**Detect and reuse.** Query `SHOW INDEXES` after the creation attempt and find the actual index name covering the target label+property. The validation script does this as a fallback:
+
+```python
+actual_vector_idx = VECTOR_INDEX_NAME
+with driver.session() as session:
+    result = session.run("""
+        SHOW INDEXES
+        YIELD name, state, type, labelsOrTypes, properties
+        WHERE type IN ['VECTOR', 'FULLTEXT']
+        RETURN name, state, type, labelsOrTypes, properties
+    """)
+    for rec in result:
+        labels = rec["labelsOrTypes"]
+        props = rec["properties"]
+        if "Chunk" in labels and "embedding" in props and rec["type"] == "VECTOR":
+            actual_vector_idx = rec["name"]
+```
+
+The index name returned by `SHOW INDEXES` is the one that must be passed to `db.index.vector.queryNodes` and `db.index.fulltext.queryNodes` for search queries.
+
+---
+
 ## Quick Reference
 
 | Task | Command |
