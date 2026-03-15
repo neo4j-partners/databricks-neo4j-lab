@@ -16,8 +16,17 @@ set +a
 
 PROFILE="$DATABRICKS_PROFILE"
 REMOTE_DIR="$WORKSPACE_DIR"
+CLUSTER_ID="$DATABRICKS_CLUSTER_ID"
 
-echo "Listing workspace: $REMOTE_DIR (profile: $PROFILE)"
+# shellcheck source=cluster_utils.sh
+source "$SCRIPT_DIR/cluster_utils.sh"
+
+echo "Checking cluster and workspace (profile: $PROFILE)"
+echo "---"
+ensure_cluster_running "$PROFILE" "$CLUSTER_ID"
+
+echo ""
+echo "Listing workspace: $REMOTE_DIR"
 echo "---"
 
 if ! databricks workspace list --profile "$PROFILE" "$REMOTE_DIR" 2>/dev/null; then

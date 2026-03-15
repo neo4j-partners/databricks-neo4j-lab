@@ -32,9 +32,12 @@ fi
 REMOTE_PATH="$REMOTE_DIR/agent_modules/$SCRIPT_NAME"
 RUN_NAME="notebook_validation: $SCRIPT_NAME"
 
+# shellcheck source=cluster_utils.sh
+source "$SCRIPT_DIR/cluster_utils.sh"
+
 echo "Submitting job (profile: $PROFILE)"
 echo "  Script:   $REMOTE_PATH"
-echo "  Cluster:  $CLUSTER_ID"
+ensure_cluster_running "$PROFILE" "$CLUSTER_ID"
 echo "  Run name: $RUN_NAME"
 
 # Build parameters: inject Neo4j credentials if available in .env.
@@ -59,7 +62,7 @@ fi
 echo "---"
 
 # Build the job JSON.
-# Uses an existing all-purpose cluster for fast iteration (no startup wait).
+# Uses an existing all-purpose cluster (started automatically if terminated).
 JOB_JSON=$(cat <<EOF
 {
   "run_name": "$RUN_NAME",

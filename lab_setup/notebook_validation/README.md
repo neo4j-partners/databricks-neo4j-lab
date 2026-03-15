@@ -5,9 +5,7 @@ Automated test suite for verifying the Aircraft Digital Twin workshop labs on a 
 ## Prerequisites
 
 - Databricks CLI configured with a profile (`databricks configure --profile <name>`)
-- A running (or auto-startable) all-purpose cluster with:
-  - Neo4j Spark Connector jar installed
-  - Python 3.11+
+- An all-purpose cluster with the Neo4j Spark Connector jar installed and Python 3.11+ (does not need to be running — scripts auto-start it if terminated)
 - Neo4j Aura instance provisioned for the workshop
 
 ## Setup
@@ -103,9 +101,10 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 | Script | Purpose |
 |--------|---------|
 | `upload.sh` | Upload scripts to Databricks workspace |
-| `submit.sh` | Submit a script as a one-time job run on the cluster |
-| `validate.sh` | List remote workspace contents and verify uploads |
+| `submit.sh` | Check cluster, then submit a script as a one-time job run |
+| `validate.sh` | Check cluster, then list remote workspace contents and verify uploads |
 | `clean.sh` | Delete remote workspace and notebook_validation job runs |
+| `cluster_utils.sh` | Shared helper — checks cluster state and auto-starts if terminated |
 
 ### upload.sh
 
@@ -123,7 +122,7 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 ./submit.sh run_lab5_02.py --no-wait   # submit without waiting for completion
 ```
 
-Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as command-line arguments.
+Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as command-line arguments. The cluster is auto-started if terminated (polls up to 10 minutes).
 
 ### validate.sh
 
