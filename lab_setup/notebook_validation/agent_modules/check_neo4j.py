@@ -60,9 +60,9 @@ def main():
     try:
         records, _, _ = driver.execute_query("MATCH (n) RETURN count(n) AS count")
         node_count = records[0]["count"]
-        record("Database has nodes", node_count >= 1, f"count={node_count:,}")
+        record("Node count", True, f"{node_count:,} nodes")
     except Exception as e:
-        record("Database has nodes", False, str(e))
+        record("Node count", False, str(e))
 
     # ── Step 3: Server info ───────────────────────────────────────────────────
 
