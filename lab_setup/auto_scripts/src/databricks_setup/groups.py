@@ -20,7 +20,8 @@ from .log import log
 
 # Account-level group name — must be created manually in the Databricks
 # Account Admin console before running Track C.
-WORKSHOP_GROUP = "aircraft_workshop_group"
+# Override via GROUP_NAME env var in lab_setup/.env.
+WORKSHOP_GROUP = os.getenv("GROUP_NAME", "aircraft_workshop_group")
 
 _BATCH_SIZE = 50
 

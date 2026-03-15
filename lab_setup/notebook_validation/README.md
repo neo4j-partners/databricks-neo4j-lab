@@ -105,6 +105,7 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 | `upload.sh` | Upload scripts to Databricks workspace |
 | `submit.sh` | Submit a script as a one-time job run on the cluster |
 | `validate.sh` | List remote workspace contents and verify uploads |
+| `clean.sh` | Delete remote workspace and notebook_validation job runs |
 
 ### upload.sh
 
@@ -129,4 +130,23 @@ Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as comm
 ```bash
 ./validate.sh                   # list all remote files
 ./validate.sh run_lab5_02.py    # check if a specific file exists
+```
+
+### clean.sh
+
+Deletes the remote workspace directory and all `notebook_validation:*` one-time job runs. Prompts for confirmation before proceeding.
+
+```bash
+./clean.sh              # clean workspace + job runs (with confirmation)
+./clean.sh --workspace  # clean only remote workspace
+./clean.sh --runs       # clean only job runs
+./clean.sh --yes        # skip confirmation prompt
+```
+
+For a full reset and re-run:
+
+```bash
+./clean.sh --yes
+./upload.sh --all
+./submit.sh test_hello.py
 ```
