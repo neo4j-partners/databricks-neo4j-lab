@@ -417,13 +417,23 @@ def main():
     vector_online = False
     fulltext_online = False
 
+    # First poll: dump all indexes for diagnostics
+    first_poll = True
+
     while time.time() - start_time < INDEX_POLL_TIMEOUT:
+        # Use simple SHOW INDEXES without parameters — some Neo4j/Aura
+        # versions don't support parameterized YIELD WHERE clauses.
         idx_records, _, _ = driver.execute_query("""
             SHOW INDEXES
-            YIELD name, state
-            WHERE name IN [$vec_idx, $ft_idx]
-            RETURN name, state
-        """, vec_idx=VECTOR_INDEX_NAME, ft_idx=FULLTEXT_INDEX_NAME)
+            YIELD name, state, type
+            RETURN name, state, type
+        """)
+
+        if first_poll:
+            print(f"  All indexes found ({len(idx_records)}):")
+            for rec in idx_records:
+                print(f"    {rec['name']}: {rec['state']} ({rec['type']})")
+            first_poll = False
 
         for rec in idx_records:
             if rec["name"] == VECTOR_INDEX_NAME and rec["state"] == "ONLINE":
