@@ -8,9 +8,9 @@ Track C of the setup process:
 3.  Grant read-only Unity Catalog privileges on the lab catalog.
 4.  Grant ``CAN_READ`` on the shared notebook folder.
 5.  Grant ``CAN_USE`` on the SQL warehouse (required for Genie + SQL).
-6.  Grant ``USE_CONNECTION`` on the Neo4j MCP connection (for AgentBricks).
+6.  Grant ``USE_CONNECTION`` on the Neo4j MCP connection (for Supervisor Agent).
 7.  Verify Foundation Model API endpoints are accessible.
-8.  Verify AgentBricks prerequisites (preview flags, budget policy).
+8.  Verify Agent Bricks prerequisites (preview flags, budget policy).
 
 Note: Cluster CAN_ATTACH_TO is no longer needed — per-user SINGLE_USER
 clusters give the assigned user implicit access.
@@ -86,10 +86,10 @@ _CATALOG_PRIVILEGES = (
     Privilege.BROWSE,
 )
 
-# Name of the Unity Catalog connection for the Neo4j MCP server (Lab 7B).
+# Name of the Unity Catalog connection for the Neo4j MCP server (Lab 5 Part B).
 _MCP_CONNECTION_NAME = "neo4j_agentcore_mcp"
 
-# Foundation Model API endpoints used by Labs 6.3–6.5.
+# Foundation Model API endpoints used by Lab 4 (notebooks 03–05).
 _FOUNDATION_MODEL_ENDPOINTS = (
     "databricks-bge-large-en",
     "databricks-meta-llama-3-3-70b-instruct",
@@ -545,7 +545,7 @@ def grant_warehouse_access(
 
     CAN_USE is the minimum permission level — users can start the warehouse,
     see its details, and run queries, but cannot stop, edit, or delete it.
-    Required for Genie Space creation (Lab 7A) and general SQL access.
+    Required for Genie Space creation (Lab 5 Part A) and general SQL access.
 
     Args:
         client: Databricks workspace client.
@@ -615,7 +615,7 @@ def grant_connection_access(
 ) -> bool:
     """Grant USE_CONNECTION on a Unity Catalog connection to a group.
 
-    Required for the AgentBricks Neo4j MCP sub-agent (Lab 7B).  Non-fatal
+    Required for the Supervisor Agent's Neo4j MCP subagent (Lab 5 Part B).  Non-fatal
     if the connection does not yet exist — the admin can create it later.
 
     Args:
@@ -712,11 +712,11 @@ def verify_foundation_model_access(client: WorkspaceClient) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Step 8: AgentBricks prerequisites verification
+# Step 8: Agent Bricks prerequisites verification
 # ---------------------------------------------------------------------------
 
 def verify_agentbricks_prerequisites(client: WorkspaceClient) -> None:
-    """Verify workspace prerequisites for AgentBricks (Lab 7B).
+    """Verify workspace prerequisites for Agent Bricks (Lab 5 Part B).
 
     Reminds the admin to check preview flags and serverless budget
     policies.  These are workspace/account-level settings that must be
@@ -725,7 +725,7 @@ def verify_agentbricks_prerequisites(client: WorkspaceClient) -> None:
 
     This is a non-fatal verification step — it only logs reminders.
     """
-    log("Step 8: Verifying AgentBricks prerequisites...")
+    log("Step 8: Verifying Agent Bricks prerequisites...")
     log()
     log("  [yellow]The following must be verified manually by a workspace admin:[/yellow]")
     log()
@@ -810,7 +810,7 @@ def run_permissions_lockdown(
     verify_foundation_model_access(client)
     log()
 
-    # Step 8: AgentBricks prerequisites verification (non-fatal — warn only)
+    # Step 8: Agent Bricks prerequisites verification (non-fatal — warn only)
     verify_agentbricks_prerequisites(client)
     log()
 

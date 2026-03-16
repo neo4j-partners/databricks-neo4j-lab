@@ -6,7 +6,7 @@ complete Aircraft Digital Twin dataset into Neo4j, then runs verification
 queries with PASS/FAIL assertions.
 
 Usage:
-    ./upload.sh run_lab5_02.py && ./submit.sh run_lab5_02.py
+    ./upload.sh run_lab3_02.py && ./submit.sh run_lab3_02.py
 """
 
 import argparse
@@ -14,7 +14,7 @@ import sys
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lab 5 Notebook 02: Full Data Load to Neo4j")
+    parser = argparse.ArgumentParser(description="Lab 3 Notebook 02: Full Data Load to Neo4j")
     parser.add_argument("--neo4j-uri", required=True, help="Neo4j Aura URI")
     parser.add_argument("--neo4j-username", default="neo4j", help="Neo4j username")
     parser.add_argument("--neo4j-password", required=True, help="Neo4j password")
@@ -32,7 +32,7 @@ def main():
     spark = SparkSession.builder.getOrCreate()
 
     print("=" * 60)
-    print("Lab 5 Notebook 02: Full Data Load to Neo4j")
+    print("Lab 3 Notebook 02: Full Data Load to Neo4j")
     print("=" * 60)
     print(f"Neo4j URI:    {args.neo4j_uri}")
     print(f"Data Path:    {args.data_path}")

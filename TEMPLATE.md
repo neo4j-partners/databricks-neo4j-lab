@@ -14,7 +14,7 @@ Through a series of guided exercises, attendees will:
 
 - Deploy and explore Neo4j Aura, the fully managed cloud graph platform
 - Load data into Neo4j using the Spark Connector
-- Build multi-agent systems with Databricks AgentBricks that coordinate across SQL and graph data sources
+- Build compound AI agent systems with Databricks Agent Bricks that coordinate across SQL and graph data sources
 - Connect to Neo4j using the Model Context Protocol (MCP) server for standardized graph access
 - Build GraphRAG pipelines using Databricks Foundation Model APIs
 - Add semantic search capabilities with vector embeddings
@@ -49,11 +49,11 @@ Load aircraft data into Neo4j, then add semantic search capabilities — chunk m
 
 #### Labs
 
-- **Lab 5 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector
+- **Lab 3 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector
   - Load core aircraft topology (Aircraft, System, Component) via Spark Connector
   - Load full dataset (Sensors, Airports, Flights, Delays, Maintenance Events, Removals) via Spark Connector
   - Validate with Cypher queries and explore in Neo4j Aura
-- **Lab 6 – Semantic Search**: Build GraphRAG pipelines over maintenance documentation
+- **Lab 4 – Semantic Search**: Build GraphRAG pipelines over maintenance documentation
   - Load the A320-200 Maintenance Manual into Neo4j as Document/Chunk nodes
   - Generate embeddings using Databricks Foundation Model APIs (BGE-large)
   - Create a vector index for similarity search
@@ -68,16 +68,16 @@ Load aircraft data into Neo4j, then add semantic search capabilities — chunk m
 
 Build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph — two purpose-built systems for two fundamentally different types of data.
 
-#### Lecture — Databricks AgentBricks and Multi-Agent Systems
+#### Lecture — Databricks Agent Bricks and Compound AI Agents
 
 - Databricks AI/BI Genie: Natural language to SQL for business users
-- AgentBricks Multi-Agent Supervisor: Orchestrating specialized agents for complex tasks
+- Agent Bricks: Supervisor Agent — orchestrating specialized subagents for complex tasks
 - Model Context Protocol (MCP): The open standard for connecting AI agents to external tools and data sources
 - Multi-Source Coordination: Combining structured data (Unity Catalog) with graph relationships (Neo4j) in agent systems
 
 #### Labs
 
-- **Lab 7 – AgentBricks Multi-Agent**: Build a multi-agent system with Databricks AgentBricks
+- **Lab 5 – Compound AI Agents**: Build a Supervisor Agent with Databricks Agent Bricks
   - Create a Databricks AI/BI Genie space for natural language sensor analytics
   - Connect to Neo4j via external MCP server for graph queries
   - Build a Multi-Agent Supervisor that routes questions to the appropriate data source

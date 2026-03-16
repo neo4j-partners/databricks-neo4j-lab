@@ -1,6 +1,6 @@
 """Minimal smoke test to verify remote execution on Databricks.
 
-Confirms the cluster has the prerequisites for Lab 5 notebook validation:
+Confirms the cluster has the prerequisites for Lab 3 notebook validation:
 1. Python and Spark are available
 2. Neo4j Spark Connector jar is on the classpath
 3. Output is captured in the job run

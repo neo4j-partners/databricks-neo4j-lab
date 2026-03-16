@@ -1,4 +1,4 @@
-# Lab 6: Sample Cypher Queries
+# Lab 3: Sample Cypher Queries
 
 Copy and paste these queries into the [Neo4j Aura Query interface](https://console.neo4j.io) to explore the Document-Chunk graph and semantic search capabilities built in this lab.
 
@@ -251,7 +251,7 @@ RETURN score,
 ORDER BY score DESC
 ```
 
-> **Concepts**: Combines vector search with graph traversal to connect maintenance documentation to the aircraft topology from Lab 5. `OPTIONAL MATCH` ensures chunks are returned even if no system keyword matches. `collect(DISTINCT ...)` gathers unique system names and tail numbers per chunk.
+> **Concepts**: Combines vector search with graph traversal to connect maintenance documentation to the aircraft topology from Lab 2. `OPTIONAL MATCH` ensures chunks are returned even if no system keyword matches. `collect(DISTINCT ...)` gathers unique system names and tail numbers per chunk.
 
 ---
 
@@ -293,4 +293,4 @@ RETURN name, labelsOrTypes, properties
 CALL db.schema.visualization()
 ```
 
-> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 6, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 5.
+> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 3, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 2.

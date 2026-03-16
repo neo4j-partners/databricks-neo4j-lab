@@ -177,7 +177,7 @@ This structure enables three retrieval patterns:
 2. **Vector + Graph**: Find similar content, then traverse to related entities
 3. **Text2Cypher**: Query the graph structure directly
 
-You'll learn these patterns in detail in Lab 6.
+You'll learn these patterns in detail in Lab 4.
 
 ---
 
@@ -192,4 +192,4 @@ In this lesson, you learned:
 - **Semantic search** finds relevant chunks by meaning, not keywords
 - **Vector + Graph** combines semantic search with relationship traversal
 
-**Your knowledge graph is complete.** In Lab 6, you'll learn how to retrieve context using Vector, Vector Cypher, and Text2Cypher retrievers.
+**Your knowledge graph is complete.** In Lab 4, you'll learn how to retrieve context using Vector, Vector Cypher, and Text2Cypher retrievers.

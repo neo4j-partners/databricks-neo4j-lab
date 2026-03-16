@@ -214,7 +214,7 @@ class Neo4jConnection:
         return self
 
     def clear_chunks(self):
-        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 5)."""
+        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 3)."""
         records, _, _ = self.driver.execute_query("""
             MATCH (n) WHERE n:Document OR n:Chunk
             DETACH DELETE n

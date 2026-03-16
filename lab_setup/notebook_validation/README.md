@@ -57,30 +57,30 @@ Quick check that Neo4j is reachable and contains data:
 ./submit.sh check_neo4j.py
 ```
 
-### Step 4: Load Lab 5 data
+### Step 4: Load Lab 3 data
 
 Clears the database, creates constraints/indexes, loads all 9 node types and 11 relationship types from CSV, then runs 19 PASS/FAIL checks:
 
 ```bash
-./submit.sh run_lab5_02.py
+./submit.sh run_lab3_02.py
 ```
 
 > To skip the database clear: participants can pass `--skip-clear`, but `submit.sh` does not inject this flag by default.
 
-### Step 5: Verify Lab 5 data (read-only)
+### Step 5: Verify Lab 3 data (read-only)
 
 Runs 13 read-only Cypher queries against the existing data without modifying anything. Use this to re-verify data at any point without reloading:
 
 ```bash
-./submit.sh verify_lab5.py
+./submit.sh verify_lab3.py
 ```
 
-### Step 6: Build and verify Lab 6 embedding pipeline
+### Step 6: Build and verify Lab 4 embedding pipeline
 
 Loads the A320 maintenance manual, chunks it, generates embeddings, creates vector and fulltext indexes, then runs 16 PASS/FAIL checks:
 
 ```bash
-./submit.sh run_lab6_03.py
+./submit.sh run_lab4_03.py
 ```
 
 > Requires `data_utils.py` on the cluster (included when you run `./upload.sh --all`).
@@ -91,9 +91,9 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 |--------|---------|-------------|-------------|
 | `test_hello.py` | Cluster smoke test (Python, Spark, Connector) | No | Yes |
 | `check_neo4j.py` | Neo4j connectivity and data presence check | No | No |
-| `run_lab5_02.py` | Load Lab 5 data + validate (19 checks) | **Yes** — clears DB | Yes |
-| `verify_lab5.py` | Read-only Lab 5 verification (13 queries) | No | No |
-| `run_lab6_03.py` | Build Lab 6 embedding pipeline + validate (16 checks) | **Yes** — clears Document/Chunk nodes | No |
+| `run_lab3_02.py` | Load Lab 3 data + validate (19 checks) | **Yes** — clears DB | Yes |
+| `verify_lab3.py` | Read-only Lab 3 verification (13 queries) | No | No |
+| `run_lab4_03.py` | Build Lab 4 embedding pipeline + validate (16 checks) | **Yes** — clears Document/Chunk nodes | No |
 | `data_utils.py` | Shared utilities (embeddings, Neo4j connection, text splitting) | — | — |
 
 ## Shell Scripts
@@ -110,7 +110,7 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 
 ```bash
 ./upload.sh                     # uploads test_hello.py (default)
-./upload.sh run_lab5_02.py      # uploads a specific file
+./upload.sh run_lab3_02.py      # uploads a specific file
 ./upload.sh --all               # uploads all agent_modules/*.py files
 ```
 
@@ -118,8 +118,8 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 
 ```bash
 ./submit.sh                     # runs test_hello.py (default)
-./submit.sh verify_lab5.py      # runs a specific script
-./submit.sh run_lab5_02.py --no-wait   # submit without waiting for completion
+./submit.sh verify_lab3.py      # runs a specific script
+./submit.sh run_lab3_02.py --no-wait   # submit without waiting for completion
 ```
 
 Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as command-line arguments. The cluster is auto-started if terminated (polls up to 10 minutes).
@@ -128,7 +128,7 @@ Neo4j credentials and `DATA_PATH` from `.env` are automatically injected as comm
 
 ```bash
 ./validate.sh                   # list all remote files
-./validate.sh run_lab5_02.py    # check if a specific file exists
+./validate.sh run_lab3_02.py    # check if a specific file exists
 ```
 
 ### clean.sh

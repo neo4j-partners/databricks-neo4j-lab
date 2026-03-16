@@ -14,7 +14,7 @@ Together, the two platforms provide a complete Aircraft Digital Twin: Databricks
 
 ## Lab Architecture
 
-The end-to-end lab architecture centers on a **Multi-Agent Supervisor** built with Databricks AgentBricks. When a user asks a question, the supervisor routes it to the right agent: a **Genie Agent** for sensor telemetry analytics over Unity Catalog tables, or a **Neo4j MCP Agent** for graph-powered queries over the knowledge graph. The Neo4j MCP Server exposes the graph database through the Model Context Protocol so agents can query it with natural language. Neo4j Aura provides the graph database, while Databricks handles notebooks, model serving, and vector search.
+The end-to-end lab architecture centers on a **Supervisor Agent** built with Databricks Agent Bricks. When a user asks a question, the supervisor routes it to the right agent: a **Genie Agent** for sensor telemetry analytics over Unity Catalog tables, or a **Neo4j MCP Agent** for graph-powered queries over the knowledge graph. The Neo4j MCP Server exposes the graph database through the Model Context Protocol so agents can query it with natural language. Neo4j Aura provides the graph database, while Databricks handles notebooks, model serving, and vector search.
 
 ![Lab Architecture Overview](images/lab-architecture-overview.png)
 
@@ -47,7 +47,7 @@ Together the dataset includes:
 | **Neo4j Aura** | Graph database for storing aircraft relationships |
 | **Databricks** | Notebooks, Unity Catalog |
 | **AI/BI Genie** | Natural language analytics over Unity Catalog tables |
-| **AgentBricks** | No-code multi-agent supervisor combining multiple data sources |
+| **Agent Bricks: Supervisor Agent** | No-code multi-agent supervisor combining multiple data sources |
 | **GraphRAG** | Graph-enhanced retrieval combining vector search with graph traversal |
 | **Neo4j Spark Connector** | ETL from Databricks to Neo4j |
 | **Model Context Protocol (MCP)** | Standard for connecting AI models to data sources |
@@ -73,8 +73,8 @@ Together the dataset includes:
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 5 - Databricks ETL to Neo4j](./Lab_5_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
-| [Lab 6 - Semantic Search](./Lab_6_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
+| [Lab 3 - Databricks ETL to Neo4j](./Lab_3_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
+| [Lab 4 - Semantic Search](./Lab_4_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
 
 ---
 
@@ -84,7 +84,7 @@ Together the dataset includes:
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 7 - AgentBricks](./Lab_7_AgentBricks) | Build a multi-agent supervisor combining Genie Space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+| [Lab 5 - Compound AI Agents](./Lab_5_Compound_AI_Agents) | Build a Supervisor Agent combining Genie space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
 
 ---
 
@@ -141,7 +141,7 @@ The Aircraft Digital Twin dataset includes:
 | Embeddings | Databricks BGE-large (databricks-bge-large-en) |
 | LLM | Databricks Llama 3.3 70B |
 | Vector Search | Neo4j Vector Index |
-| Multi-Agent | Databricks AgentBricks |
+| Multi-Agent | Databricks Agent Bricks: Supervisor Agent |
 | ETL | Neo4j Spark Connector |
 
 ## Configuration
@@ -168,7 +168,7 @@ Databricks notebooks use Foundation Model APIs (MLflow deployments client) which
 ### Databricks
 - [Foundation Model APIs](https://docs.databricks.com/aws/en/machine-learning/foundation-model-apis/)
 - [AI/BI Genie](https://docs.databricks.com/aws/en/genie/)
-- [AgentBricks Multi-Agent Supervisor](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor)
+- [Agent Bricks: Supervisor Agent](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor)
 - [Databricks Unity Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/)
 
 ## Feedback

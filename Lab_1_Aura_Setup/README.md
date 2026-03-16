@@ -4,7 +4,6 @@ In this lab, you will set up your Neo4j Aura database and save your connection c
 
 ## Prerequisites
 
-- Completed **Lab 0** (environment setup)
 - For **Workshop SSO Login**: Access to OneBlink credentials page (provided by your organizer)
 - For **Free Trial Signup**: A valid email address
 
@@ -68,4 +67,4 @@ NEO4J_PASSWORD = "<your-password>"
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 5 - Databricks ETL to Neo4j](../Lab_5_Databricks_ETL_Neo4j) to load the Aircraft Digital Twin dataset into your Neo4j Aura instance.
+After completing this lab, continue to [Lab 2 - Databricks ETL to Neo4j](../Lab_2_Databricks_ETL_Neo4j) to load the Aircraft Digital Twin dataset into your Neo4j Aura instance.

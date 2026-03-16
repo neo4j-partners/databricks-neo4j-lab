@@ -312,13 +312,13 @@ There is another way to build this. Instead of connecting Neo4j as an MCP server
 
 ## Combining the Deployed Agent with Genie
 
-Once the Neo4j agent is running as a serving endpoint, you combine it with a Genie Space agent using the **Databricks AgentBricks supervisor** — built entirely through the workspace UI, no custom orchestration code required.
+Once the Neo4j agent is running as a serving endpoint, you combine it with a Genie space subagent using the **Databricks Agent Bricks: Supervisor Agent** — built entirely through the workspace UI, no custom orchestration code required.
 
 ```
                     User Question
                          |
                          v
-            ┌─── AgentBricks Supervisor ───┐
+            ┌─── Supervisor Agent ───┐
             |           (no code)          |
             v                              v
    Neo4j Agent Endpoint          Genie Space Agent

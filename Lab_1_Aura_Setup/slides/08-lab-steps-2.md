@@ -2,7 +2,7 @@
 
 ## Part 2: Load the Knowledge Graph
 
-Data loading is handled in **Lab 5 - Databricks ETL to Neo4j** using:
+Data loading is handled in **Lab 2 - Databricks ETL to Neo4j** using:
 
 ### Notebook 01: Spark Connector ETL
 - Loads Aircraft, System, and Component nodes from CSV files in Unity Catalog

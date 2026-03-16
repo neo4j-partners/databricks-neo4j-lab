@@ -1,13 +1,14 @@
-# Lab 2: Aura Agents
+# Lab 5: Aura Agents
 
 Neo4j Aura Agents combine semantic search, graph traversal, and natural language queries into a single conversational interface. In this lab, you will use the "Create with AI" workflow to build an agent that analyzes aircraft maintenance and operations data. Neo4j inspects your knowledge graph schema and automatically generates the tools the agent needs, so there is no code to write and no Cypher templates to configure manually.
 
 ## Prerequisites
 
-- Completed **Lab 0** (Azure sign-in)
-- Completed **Lab 1** (Neo4j Aura setup with backup restored)
+- Completed **Lab 1** (Neo4j Aura setup)
+- Completed **Lab 2** (Databricks ETL — both notebooks)
+- Completed **Lab 3** (Semantic Search — embeddings and vector index)
 
-The pre-built backup you restored in Lab 1 already contains the complete knowledge graph with embeddings, so you can start building agents immediately.
+The knowledge graph you built in Labs 2 and 3 contains the aircraft topology, operational data, and maintenance manual embeddings that the agent tools will use.
 
 ## Step 1: Navigate to Agents
 
@@ -159,10 +160,8 @@ The "Create with AI" workflow generated an agent with three retrieval patterns, 
 | **Similarity Search** | Semantic retrieval over maintenance manuals | Finding troubleshooting procedures by meaning |
 | **Text2Cypher** | Flexible natural language to Cypher | Ad-hoc questions, aggregations, and cross-entity queries |
 
-These same patterns are implemented programmatically in Labs 6 and 7 using Python and the Neo4j GraphRAG package.
+These same patterns are implemented programmatically in Labs 3 and 4 using Python and the Neo4j GraphRAG package.
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 3 - Foundry Setup](../Lab_3_Foundry_Setup) to set up your Microsoft Foundry project.
-
-**This completes Part 1 (No-Code Track) of the workshop.** To continue with the coding labs, proceed to [Lab 4 - Start Codespace](../Lab_4_Start_Codespace).
+Congratulations! You have completed the workshop. You can optionally [connect your agent as an MCP Server](mcp_setup.md) for use with Claude Code, VS Code, or other MCP-compatible clients.

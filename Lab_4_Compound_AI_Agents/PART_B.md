@@ -43,7 +43,7 @@ Before starting, ensure you have:
 - Completed **Part A** (Genie space for sensor analytics)
 - Access to the Unity Catalog: `databricks-neo4j-lab.lakehouse` (tables) and `databricks-neo4j-lab.lab-schema` (volume)
 
-> **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 5 notebooks they completed.
+> **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 2 notebooks they completed.
 
 ---
 
@@ -158,7 +158,7 @@ DO NOT USE FOR:
 2. From the **Type** dropdown, select **Genie Space**
 3. Select your Genie space from Part A: `Aircraft Sensor Analyst [YOUR_INITIALS]`
 
-### 4.2 Configure Agent Settings
+### 4.2 Configure the Genie Subagent
 
 1. **Agent Name:** `sensor_data_agent`
    - Edit the auto-populated name if needed
@@ -465,7 +465,7 @@ Multi-Agent Supervisor
 - Use the Examples tab to add labeled training questions
 
 ### "Cypher query failed"
-- Check that Neo4j data was loaded correctly (Lab 5)
+- Check that Neo4j data was loaded correctly (Lab 2)
 - Verify node labels and relationship types match documentation
 - Review Cypher syntax for errors
 - Test queries directly in Neo4j Aura console first

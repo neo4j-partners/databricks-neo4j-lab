@@ -1,4 +1,4 @@
-# Lab 5: Databricks ETL to Neo4j
+# Lab 2: Databricks ETL to Neo4j
 
 Load aircraft data from Databricks into Neo4j using the Spark Connector.
 
@@ -14,10 +14,10 @@ This lab has two notebooks:
 
 | Notebook | Description | Required For |
 |----------|-------------|--------------|
-| [`01_aircraft_etl_to_neo4j.ipynb`](01_aircraft_etl_to_neo4j.ipynb) | Core ETL — loads Aircraft, System, and Component nodes using the Spark Connector | Labs 6, 7 |
-| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 7** |
+| [`01_aircraft_etl_to_neo4j.ipynb`](01_aircraft_etl_to_neo4j.ipynb) | Core ETL — loads Aircraft, System, and Component nodes using the Spark Connector | Labs 3, 4 |
+| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 4** |
 
-> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 7 (AgentBricks).
+> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 4 (Compound AI Agents).
 
 ---
 
@@ -103,8 +103,8 @@ The lab notebooks are stored in a shared folder that all participants can see. Y
 
 1. Click **Workspace** in the left sidebar.
 2. Expand **Shared > databricks-neo4j-lab**.
-3. Click on the **Lab_5_Databricks_ETL_Neo4j** folder.
-4. Right-click on the `Lab_5_Databricks_ETL_Neo4j` folder and select **Clone**.
+3. Click on the **Lab_2_Databricks_ETL_Neo4j** folder.
+4. Right-click on the `Lab_2_Databricks_ETL_Neo4j` folder and select **Clone**.
 
 ![Right-click the folder and select Clone](images/03_clone.png)
 
@@ -172,7 +172,7 @@ Open `02_load_neo4j_full` from your cloned folder and run the complete dataset l
 3. Set `CLEAR_DATABASE = True` for a clean load (recommended)
 4. Click **Run All**
 
-This loads additional node types and relationships required by Lab 7:
+This loads additional node types and relationships required by Lab 4:
 
 | Node Type | Count | Description |
 |-----------|-------|-------------|
@@ -284,8 +284,8 @@ This loads additional node types and relationships required by Lab 7:
 ## Next Steps
 
 After completing this lab:
-- Continue to [Lab 6 - Semantic Search](../Lab_6_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
-- Continue to [Lab 7 - AgentBricks](../Lab_7_AgentBricks) to build multi-agent systems with Genie and Neo4j MCP
+- Continue to [Lab 3 - Semantic Search](../Lab_3_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
+- Continue to [Lab 4 - Compound AI Agents](../Lab_4_Compound_AI_Agents) to build a Supervisor Agent with Genie space and Neo4j MCP
 - The data you loaded will be queried by AI agents in later labs
 
 ---

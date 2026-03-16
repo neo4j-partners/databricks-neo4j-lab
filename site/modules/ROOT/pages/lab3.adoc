@@ -1,0 +1,70 @@
+= Lab 3: Semantic Search for Aircraft Maintenance
+
+In this lab you will add semantic search capabilities to your aircraft knowledge graph. Building on the aircraft topology loaded in Lab 2, you will create a Document-Chunk structure for the A320-200 Maintenance Manual and enable AI-powered retrieval of maintenance procedures.
+
+**Duration:** ~45 minutes
+
+== Prerequisites
+
+* Completed **Lab 2** (Databricks ETL) -- aircraft graph loaded in Neo4j
+* Neo4j Aura credentials from Lab 1
+* Running in a **Databricks notebook environment**
+
+== Notebooks
+
+This lab has two notebooks:
+
+[cols="2,4"]
+|===
+| Notebook | Description
+
+| `03_data_and_embeddings.ipynb`
+| Load the A320-200 Maintenance Manual, create Document and Chunk nodes, generate embeddings using Databricks Foundation Model APIs (BGE-large), create a vector index, and perform similarity search.
+
+| `04_graphrag_retrievers.ipynb`
+| Set up a VectorRetriever, use GraphRAG to combine vector search with LLM-generated answers, create custom Cypher queries with VectorCypherRetriever, and compare standard vs. graph-enhanced retrieval.
+|===
+
+== Knowledge Graph Structure
+
+After completing this lab, your graph combines structured and unstructured data:
+
+**From Lab 2 (Structured Data):**
+----
+(:Aircraft)-[:HAS_SYSTEM]->(:System)-[:HAS_COMPONENT]->(:Component)
+----
+
+**From Lab 3 (Unstructured Data):**
+----
+(:Document) <-[:FROM_DOCUMENT]- (:Chunk) -[:NEXT_CHUNK]-> (:Chunk)
+----
+
+== Getting Started
+
+1. Open `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` from your cloned workspace folder
+2. Attach your personal compute cluster
+3. Enter your Neo4j credentials in the Configuration cell
+4. Run all cells sequentially
+5. Open `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` and repeat
+
+== Sample Queries
+
+After completing this lab, you can ask questions like:
+
+* "How do I troubleshoot engine vibration?"
+* "What are the EGT limits during takeoff?"
+* "What causes hydraulic pressure loss?"
+* "When should I replace the fuel filter?"
+
+== Key Concepts
+
+* **Chunks** -- smaller pieces of text split from the maintenance manual for efficient retrieval
+* **Embeddings** -- 1024-dimensional vectors (BGE-large) that capture semantic meaning
+* **Vector Index** -- enables fast similarity search across embeddings
+* **VectorRetriever** -- simple semantic search over embedded chunks
+* **VectorCypherRetriever** -- graph-enhanced retrieval using custom Cypher queries
+* **GraphRAG** -- combining retrieval with LLM generation for context-aware answers
+
+== Next Steps
+
+Continue to xref:lab4.adoc[Lab 4: Compound AI Agents] to build a multi-agent system that combines Genie sensor analytics with Neo4j graph queries.

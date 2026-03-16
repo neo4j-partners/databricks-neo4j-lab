@@ -1,10 +1,10 @@
 # Aura Agent MCP Server Setup
 
-Connect the Neo4j Aura Agent you created in Lab 2 to any MCP-compatible client (Claude Code, Claude Desktop, VS Code, Cursor, etc.) as a remote MCP server. This gives your client direct access to all the agent tools (Cypher Templates, Similarity Search, Text2Cypher) configured on the Aura Agent.
+Connect the Neo4j Aura Agent you created in Lab 5 to any MCP-compatible client (Claude Code, Claude Desktop, VS Code, Cursor, etc.) as a remote MCP server. This gives your client direct access to all the agent tools (Cypher Templates, Similarity Search, Text2Cypher) configured on the Aura Agent.
 
 ## Prerequisites
 
-- A deployed Neo4j Aura Agent from Lab 2
+- A deployed Neo4j Aura Agent from Lab 5
 - An MCP-compatible client installed
 
 ## Step 1: Enable External Access and MCP Server
@@ -49,7 +49,7 @@ Claude Code resolves `${VAR}` references in `.mcp.json` from your **shell enviro
 1. Copy `.env.example` to a `.env` file and fill in your values:
 
 ```bash
-cp Lab_2_Aura_Agents/.env.example Lab_2_Aura_Agents/.env
+cp Lab_5_Aura_Agents/.env.example Lab_5_Aura_Agents/.env
 ```
 
 2. Export the MCP server URL before launching Claude Code:
@@ -61,14 +61,14 @@ export AURA_AGENT_MCP_SERVER="https://mcp.neo4j.io/agent?project_id=YOUR_PROJECT
 To persist this, add the export to your shell profile (`~/.zshrc` or `~/.bashrc`), or source the `.env` file before starting Claude Code:
 
 ```bash
-set -a && source Lab_2_Aura_Agents/.env && set +a
+set -a && source Lab_5_Aura_Agents/.env && set +a
 claude
 ```
 
 3. Copy `.mcp.json.template` to `.mcp.json` in your project root:
 
 ```bash
-cp Lab_2_Aura_Agents/.mcp.json.template .mcp.json
+cp Lab_5_Aura_Agents/.mcp.json.template .mcp.json
 ```
 
 This is project-scoped — it only applies when Claude Code is run from this repository.

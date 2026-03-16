@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A hands-on workshop teaching production-ready AI agents combining **Neo4j graph databases** with **Databricks AI/ML**. Demonstrates a dual-database architecture for aircraft digital twins where Neo4j handles relationship-rich data (topology, maintenance, flights) and Databricks Lakehouse handles high-volume time-series sensor telemetry.
 
-The workshop culminates in a **Multi-Agent Supervisor** (Databricks AgentBricks) that routes questions to specialized agents: Genie (sensor analytics via SQL) and Neo4j MCP (graph relationships via Cypher).
+The workshop culminates in a **Supervisor Agent** (Databricks Agent Bricks) that routes questions to specialized agents: a Genie space (sensor analytics via SQL) and Neo4j MCP (graph relationships via Cypher).
 
 ## Build & Run Commands
 
@@ -38,8 +38,8 @@ uv run databricks-setup list-users         # Show group members
 cd lab_setup/verify_labs
 uv sync
 uv run verify-labs check                   # Connectivity test
-uv run verify-labs lab5                    # All Lab 5 verification queries
-uv run verify-labs lab5 --notebook 01      # Notebook 1 only
+uv run verify-labs lab2                    # All Lab 2 verification queries
+uv run verify-labs lab2 --notebook 01      # Notebook 1 only
 ```
 
 ### Linting (auto_scripts only)
@@ -56,24 +56,24 @@ Each under `lab_setup/` is a standalone Python package with its own `pyproject.t
 
 - **`populate_aircraft_db/`** — Loads aircraft CSV data into Neo4j Aura, runs GraphRAG enrichment (doc chunking, embeddings via BGE-large, entity extraction via SimpleKGPipeline)
 - **`auto_scripts/`** (databricks_setup) — Automates Databricks workspace provisioning: cluster creation, Spark Connector install, Delta table creation, UC permissions, user management via SCIM
-- **`verify_labs/`** — Verifies Neo4j data loaded correctly in Lab 5
+- **`verify_labs/`** — Verifies Neo4j data loaded correctly in Lab 2
 
 ### Dual-Database Strategy
 - **Neo4j**: `(Aircraft)-[:HAS_SYSTEM]->(System)-[:HAS_COMPONENT]->(Component)`, plus Sensors, Flights, Delays, MaintenanceEvents
 - **Databricks**: Delta tables for `sensor_readings` (345K+ rows), `sensors`, `systems`, `aircraft`
 - Aircraft/Systems/Sensors exist in **both** databases as join points
 
-### Multi-Agent Architecture (Lab 7)
+### Multi-Agent Architecture (Lab 4)
 ```
-User Question → Multi-Agent Supervisor (AgentBricks)
-  ├→ Genie Agent → Databricks Lakehouse (natural language → SQL)
+User Question → Supervisor Agent (Agent Bricks)
+  ├→ Genie space → Databricks Lakehouse (natural language → SQL)
   └→ Neo4j MCP Agent → Neo4j Aura (LangGraph + MCP tools: get-schema, read-cypher)
 ```
 
 The MCP agent (`lab_setup/neo4j_mcp_connection/neo4j_mcp_agent.py`) uses OAuth2 M2M auth via Unity Catalog HTTP connection to an external MCP server.
 
 ### Lab Progression
-Lab 0 (sign-in) → Lab 1 (Neo4j Aura setup) → Lab 5 (ETL via Spark Connector notebooks) → Lab 6 (GraphRAG semantic search over maintenance manuals) → Lab 7 (multi-agent supervisor)
+Lab 1 (Neo4j Aura setup + Cypher intro) → Lab 2 (ETL via Spark Connector notebooks) → Lab 3 (GraphRAG semantic search over maintenance manuals) → Lab 4 (compound AI agents: Genie space + Supervisor Agent) → Lab 5 (Aura Agents: Create with AI)
 
 ## Configuration
 

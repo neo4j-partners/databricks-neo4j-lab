@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./validate.sh                  # lists all files in the remote directory
-#   ./validate.sh run_lab5_02.py   # checks a specific file exists
+#   ./validate.sh run_lab3_02.py   # checks a specific file exists
 
 set -euo pipefail
 
