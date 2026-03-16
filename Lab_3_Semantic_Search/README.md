@@ -61,8 +61,7 @@ This lab uses Databricks-hosted embedding and LLM models:
 | Model | Description |
 |-------|-------------|
 | `databricks-meta-llama-3-3-70b-instruct` | Llama 3.3 70B (default) |
-| `databricks-dbrx-instruct` | DBRX Instruct |
-| `databricks-mixtral-8x7b-instruct` | Mixtral 8x7B |
+| `databricks-llama-4-maverick` | Llama 4 Maverick |
 
 These models are pre-deployed and ready to use via the MLflow deployments client.
 

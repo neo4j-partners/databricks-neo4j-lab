@@ -86,10 +86,10 @@ _CATALOG_PRIVILEGES = (
     Privilege.BROWSE,
 )
 
-# Name of the Unity Catalog connection for the Neo4j MCP server (Lab 5 Part B).
+# Name of the Unity Catalog connection for the Neo4j MCP server (Lab 4 Part B).
 _MCP_CONNECTION_NAME = "neo4j_agentcore_mcp"
 
-# Foundation Model API endpoints used by Lab 4 (notebooks 03–05).
+# Foundation Model API endpoints used by Lab 3 (notebooks 03–05).
 _FOUNDATION_MODEL_ENDPOINTS = (
     "databricks-bge-large-en",
     "databricks-meta-llama-3-3-70b-instruct",
@@ -545,7 +545,7 @@ def grant_warehouse_access(
 
     CAN_USE is the minimum permission level — users can start the warehouse,
     see its details, and run queries, but cannot stop, edit, or delete it.
-    Required for Genie Space creation (Lab 5 Part A) and general SQL access.
+    Required for Genie Space creation (Lab 4 Part A) and general SQL access.
 
     Args:
         client: Databricks workspace client.
@@ -615,7 +615,7 @@ def grant_connection_access(
 ) -> bool:
     """Grant USE_CONNECTION on a Unity Catalog connection to a group.
 
-    Required for the Supervisor Agent's Neo4j MCP subagent (Lab 5 Part B).  Non-fatal
+    Required for the Supervisor Agent's Neo4j MCP subagent (Lab 4 Part B).  Non-fatal
     if the connection does not yet exist — the admin can create it later.
 
     Args:
@@ -716,7 +716,7 @@ def verify_foundation_model_access(client: WorkspaceClient) -> None:
 # ---------------------------------------------------------------------------
 
 def verify_agentbricks_prerequisites(client: WorkspaceClient) -> None:
-    """Verify workspace prerequisites for Agent Bricks (Lab 5 Part B).
+    """Verify workspace prerequisites for Agent Bricks (Lab 4 Part B).
 
     Reminds the admin to check preview flags and serverless budget
     policies.  These are workspace/account-level settings that must be

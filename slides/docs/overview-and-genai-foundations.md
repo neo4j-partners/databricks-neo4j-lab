@@ -88,7 +88,7 @@ A multi-agent supervisor routes questions to the right database automatically.
 | Personal Aura Instance | Your own Neo4j database to load data into during ETL labs |
 | Databricks Workspace | Clone notebooks and run them on a shared cluster |
 
-Labs using the MCP server (Supervisor Agent) connect to the shared Reference Aura Instance. Labs doing ETL and GraphRAG (Labs 5, 7) load data into your personal instance.
+Labs using the MCP server (Supervisor Agent) connect to the shared Reference Aura Instance. Labs doing ETL and GraphRAG (Labs 2, 3) load data into your personal instance.
 
 ![Workshop Infrastructure](../images/workshop-infrastructure.png)
 

@@ -1,6 +1,6 @@
-"""Automated validation of Lab 4: Embedding and Semantic Translation Pipeline.
+"""Automated validation of Lab 3: Embedding and Semantic Translation Pipeline.
 
-Replicates the exact Lab 4 notebook process (03_data_and_embeddings.ipynb) as a
+Replicates the exact Lab 3 notebook process (03_data_and_embeddings.ipynb) as a
 standalone script: loads the A320-200 maintenance manual, splits into chunks,
 generates embeddings via Databricks BGE-large, creates vector and fulltext indexes,
 and runs search validation queries with PASS/FAIL assertions.
@@ -8,7 +8,7 @@ and runs search validation queries with PASS/FAIL assertions.
 Requires data_utils.py uploaded alongside this script.
 
 Usage:
-    ./upload.sh --all && ./submit.sh run_lab4_03.py
+    ./upload.sh --all && ./submit.sh run_lab3_03.py
 """
 
 import argparse
@@ -18,7 +18,7 @@ import time
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Lab 4 Validation: Embedding and Semantic Translation Pipeline"
+        description="Lab 3 Validation: Embedding and Semantic Translation Pipeline"
     )
     parser.add_argument("--neo4j-uri", required=True, help="Neo4j Aura URI")
     parser.add_argument("--neo4j-username", default="neo4j", help="Neo4j username")
@@ -60,7 +60,7 @@ def main():
         print(f"  [{status}] {name}" + (f" — {detail}" if detail else ""))
 
     print("=" * 70)
-    print("Lab 4 Validation: Embedding and Semantic Translation Pipeline")
+    print("Lab 3 Validation: Embedding and Semantic Translation Pipeline")
     print("=" * 70)
     print(f"Neo4j URI:        {args.neo4j_uri}")
     print(f"Data Path:        {args.data_path}")

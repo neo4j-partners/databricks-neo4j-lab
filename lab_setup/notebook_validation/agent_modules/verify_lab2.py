@@ -1,20 +1,20 @@
-"""Read-only verification of Lab 3 data in Neo4j.
+"""Read-only verification of Lab 2 data in Neo4j.
 
 Runs all 13 Cypher verification queries (8 from Notebook 01, 5 from Notebook 02)
 against an existing Neo4j instance without modifying any data. Use this to verify
-Lab 3 data was loaded correctly without the destructive clear+reload of run_lab3_02.py.
+Lab 2 data was loaded correctly without the destructive clear+reload of run_lab2_02.py.
 
-Queries ported from verify_labs/src/verify_labs/lab3_queries.py.
+Queries ported from verify_labs/src/verify_labs/lab2_queries.py.
 
 Usage:
-    ./upload.sh verify_lab3.py && ./submit.sh verify_lab3.py
+    ./upload.sh verify_lab2.py && ./submit.sh verify_lab2.py
 """
 
 import argparse
 import sys
 import time
 
-# ── Query definitions (from verify_labs lab3_queries.py) ──────────────────────
+# ── Query definitions (from verify_labs lab2_queries.py) ──────────────────────
 
 QUERIES = [
     # ── Notebook 01: 01_aircraft_etl_to_neo4j.ipynb ───────────────────────────
@@ -173,7 +173,7 @@ LIMIT 20""",
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Lab 3 Read-Only Verification: 13 Cypher queries"
+        description="Lab 2 Read-Only Verification: 13 Cypher queries"
     )
     parser.add_argument("--neo4j-uri", required=True, help="Neo4j Aura URI")
     parser.add_argument("--neo4j-username", default="neo4j", help="Neo4j username")
@@ -188,7 +188,7 @@ def main():
     from neo4j import GraphDatabase
 
     print("=" * 70)
-    print("Lab 3 Read-Only Verification — 13 queries")
+    print("Lab 2 Read-Only Verification — 13 queries")
     print("=" * 70)
     print(f"Neo4j URI:  {args.neo4j_uri}")
     print()

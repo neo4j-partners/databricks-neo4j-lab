@@ -1,4 +1,4 @@
-# Part A: Genie Space for Aircraft Sensor Analytics
+# Part A: Genie space for Aircraft Sensor Analytics
 
 In this part, you'll create a Databricks AI/BI Genie space that enables natural language queries over your aircraft sensor telemetry data. This Genie will become one of the sub-agents in your multi-agent system.
 
@@ -28,7 +28,7 @@ These four tables form a join chain — `sensor_readings` → `sensors` → `sys
 
 ---
 
-## Step 2: Create the Genie Space
+## Step 2: Create the Genie space
 
 ### 2.1 Navigate to AI/BI Genie
 
@@ -199,13 +199,13 @@ ORDER BY avg_vibration DESC
 
 ---
 
-## Step 6: Save and Note the Genie Space ID
+## Step 6: Save and Note the Genie space ID
 
 ### 6.1 Save Configuration
 
 Click **Save** to preserve your Genie space configuration.
 
-### 6.2 Record the Genie Space Name
+### 6.2 Record the Genie space Name
 
 Note the exact name of your Genie space (e.g., `Aircraft Sensor Analyst RK`). You'll need this in Part B when configuring the multi-agent supervisor.
 

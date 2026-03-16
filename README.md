@@ -73,8 +73,8 @@ Together the dataset includes:
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 3 - Databricks ETL to Neo4j](./Lab_3_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
-| [Lab 4 - Semantic Search](./Lab_4_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
+| [Lab 2 - Databricks ETL to Neo4j](./Lab_2_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
+| [Lab 3 - Semantic Search](./Lab_3_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
 
 ---
 
@@ -84,7 +84,17 @@ Together the dataset includes:
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 5 - Compound AI Agents](./Lab_5_Compound_AI_Agents) | Build a Supervisor Agent combining Genie space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+| [Lab 4 - Compound AI Agents](./Lab_4_Compound_AI_Agents) | Build a Supervisor Agent combining Genie space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+
+---
+
+### Phase 4: Aura Agents
+
+*Build AI agents directly in Neo4j Aura using the Create with AI experience.*
+
+| Lab | Description | Time |
+|-----|-------------|------|
+| [Lab 5 - Aura Agents](./Lab_5_Aura_Agents) | Create AI agents in Neo4j Aura that query the knowledge graph | 30 min |
 
 ---
 

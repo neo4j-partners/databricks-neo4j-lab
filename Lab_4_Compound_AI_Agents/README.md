@@ -48,7 +48,7 @@ Before starting, make sure you have:
 
 This lab is documentation-driven and focuses on **configuration over code**. You'll use the Databricks UI to create intelligent agents that automatically route questions to the right data source.
 
-### Part A: Genie Space for Sensor Analytics (~30 min)
+### Part A: Genie space for Sensor Analytics (~30 min)
 
 Create an AI/BI Genie space that enables natural language queries over sensor telemetry:
 - Connect data sources: `sensor_readings`, `sensors`, `systems`, `aircraft`
@@ -109,12 +109,12 @@ The supervisor routes questions based on intent:
 | File | Description |
 |------|-------------|
 | `README.md` | This overview document |
-| `PART_A.md` | Genie Space configuration guide |
+| `PART_A.md` | Genie space configuration guide |
 | `PART_B.md` | Supervisor Agent setup guide |
 
 ## Key Concepts
 
-- **Genie Space**: AI/BI interface that converts natural language to SQL
+- **Genie space**: AI/BI interface that converts natural language to SQL
 - **MCP (Model Context Protocol)**: Standardized protocol for tool integration
 - **Supervisor Agent**: Agent Bricks orchestration layer that routes questions to specialized subagents
 - **Agent Bricks**: Databricks platform for building and deploying AI agents

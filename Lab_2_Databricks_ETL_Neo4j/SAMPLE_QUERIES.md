@@ -1,5 +1,6 @@
 # Lab 2: Sample Cypher Queries
 
+
 Copy and paste these queries into the [Neo4j Aura Query interface](https://console.neo4j.io) to explore the Aircraft Digital Twin graph.
 
 ## Cypher Concepts Used

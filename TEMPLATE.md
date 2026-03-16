@@ -49,11 +49,11 @@ Load aircraft data into Neo4j, then add semantic search capabilities — chunk m
 
 #### Labs
 
-- **Lab 3 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector
+- **Lab 2 – Databricks ETL to Neo4j**: Load Aircraft Digital Twin data into Neo4j using the Spark Connector
   - Load core aircraft topology (Aircraft, System, Component) via Spark Connector
   - Load full dataset (Sensors, Airports, Flights, Delays, Maintenance Events, Removals) via Spark Connector
   - Validate with Cypher queries and explore in Neo4j Aura
-- **Lab 4 – Semantic Search**: Build GraphRAG pipelines over maintenance documentation
+- **Lab 3 – Semantic Search**: Build GraphRAG pipelines over maintenance documentation
   - Load the A320-200 Maintenance Manual into Neo4j as Document/Chunk nodes
   - Generate embeddings using Databricks Foundation Model APIs (BGE-large)
   - Create a vector index for similarity search
@@ -77,7 +77,7 @@ Build a multi-agent supervisor that combines the Databricks Lakehouse with the N
 
 #### Labs
 
-- **Lab 5 – Compound AI Agents**: Build a Supervisor Agent with Databricks Agent Bricks
+- **Lab 4 – Compound AI Agents**: Build a Supervisor Agent with Databricks Agent Bricks
   - Create a Databricks AI/BI Genie space for natural language sensor analytics
   - Connect to Neo4j via external MCP server for graph queries
   - Build a Multi-Agent Supervisor that routes questions to the appropriate data source

@@ -150,12 +150,12 @@ DO NOT USE FOR:
 
 ---
 
-## Step 4: Add the Genie Space Agent
+## Step 4: Add the Genie space Agent
 
-### 4.1 Add Genie Space
+### 4.1 Add Genie space
 
 1. Click **+ Add** to add another agent
-2. From the **Type** dropdown, select **Genie Space**
+2. From the **Type** dropdown, select **Genie space**
 3. Select your Genie space from Part A: `Aircraft Sensor Analyst [YOUR_INITIALS]`
 
 ### 4.2 Configure the Genie Subagent
@@ -224,7 +224,7 @@ You are an intelligent coordinator for aircraft analytics. Your role is to under
 
 ## Available Agents
 
-### sensor_data_agent (Genie Space - Unity Catalog SQL)
+### sensor_data_agent (Genie space - Unity Catalog SQL)
 Use for questions about:
 - Sensor readings and telemetry data
 - Time-series analytics (averages, trends, rolling windows)
@@ -424,7 +424,7 @@ User Question
      v
 Multi-Agent Supervisor
      |
-     +---> "sensor readings?" ---> Genie Space ---> Unity Catalog (Lakehouse)
+     +---> "sensor readings?" ---> Genie space ---> Unity Catalog (Lakehouse)
      |        time-series              SQL           databricks-neo4j-lab.lakehouse
      |        aggregations                           345,600+ sensor readings
      |        trend analysis

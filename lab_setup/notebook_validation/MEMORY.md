@@ -2,7 +2,7 @@
 
 ## The Problem
 
-The workshop teaches participants how to load aircraft data into Neo4j and query it with Cypher, but the agent experience in Lab 5 routes questions to a stateless Neo4j MCP tool. The agent has no memory of what the user asked before, no ability to learn a maintenance engineer's focus areas, and no way to recall diagnostic reasoning from prior sessions. Every conversation starts from zero.
+The workshop teaches participants how to load aircraft data into Neo4j and query it with Cypher, but the agent experience in Lab 4 routes questions to a stateless Neo4j MCP tool. The agent has no memory of what the user asked before, no ability to learn a maintenance engineer's focus areas, and no way to recall diagnostic reasoning from prior sessions. Every conversation starts from zero.
 
 The retail assistant project solved this same gap for a shopping domain: session-scoped conversation memory, user-scoped preference tracking, reasoning traces that accumulate diagnostic patterns over time. The aircraft digital twin dataset is richer in structural relationships (nine node types, twelve relationship types, component hierarchies four levels deep) and carries a natural "maintenance analyst" persona that makes memory especially valuable. An engineer investigating N95040A's engine vibration across multiple sessions should not have to re-explain their focus each time.
 
@@ -22,7 +22,7 @@ Three tiers, matching the retail assistant's proven architecture but mapped to m
 
 ## The Agent's Tool Set (MVP)
 
-The minimum viable prototype starts with 8-10 tools across four categories, with knowledge tools deferred until Lab 4 validation is complete.
+The minimum viable prototype starts with 8-10 tools across four categories, with knowledge tools deferred until Lab 3 validation is complete.
 
 **Graph query tools** form the core (3-4 tools). Search aircraft by tail number, model, or operator. Retrieve the full hierarchy for an aircraft (systems, components, sensors). Find maintenance events filtered by severity, system, or date range. Get component removal history. These are Cypher queries executed against Neo4j via the neo4j driver, returning structured results the agent can reason over.
 
@@ -32,7 +32,7 @@ The minimum viable prototype starts with 8-10 tools across four categories, with
 
 **An echo tool** for baseline validation (1 tool), same as the retail assistant.
 
-**Deferred to Phase 2 (after Lab 4):** Knowledge tools (semantic search over maintenance manual chunks, hybrid search, diagnosis tools) and the diagnostic recommendation tool that combines user preferences with GraphRAG context. These depend on the vector indexes and entity graph that Lab 4's GraphRAG enrichment creates.
+**Deferred to Phase 2 (after Lab 3):** Knowledge tools (semantic search over maintenance manual chunks, hybrid search, diagnosis tools) and the diagnostic recommendation tool that combines user preferences with GraphRAG context. These depend on the vector indexes and entity graph that Lab 3's GraphRAG enrichment creates.
 
 
 ## The Deployment and Validation Flow
@@ -57,18 +57,18 @@ The agent's identity is a maintenance engineering assistant with access to the a
 
 ## How This Relates to Existing Lab Content
 
-This prototype sits between Lab 3 (data loading, already validated by run_lab3_02.py) and Lab 5 (multi-agent supervisor). Lab 3 proves the data is in Neo4j. This prototype proves a single agent can query that data intelligently with memory. Lab 5 then composes that agent with Genie into a multi-agent system.
+This prototype sits between Lab 2 (data loading, already validated by run_lab2_02.py) and Lab 4 (multi-agent supervisor). Lab 2 proves the data is in Neo4j. This prototype proves a single agent can query that data intelligently with memory. Lab 4 then composes that agent with Genie into a multi-agent system.
 
-The prototype is phased to respect the dependency on Lab 4. Phase 1 works with only the base graph from Lab 3 plus the Lakehouse sensor tables. Phase 2, built after Lab 4 validation exists, adds GraphRAG knowledge tools for semantic search over maintenance manuals.
+The prototype is phased to respect the dependency on Lab 3. Phase 1 works with only the base graph from Lab 2 plus the Lakehouse sensor tables. Phase 2, built after Lab 3 validation exists, adds GraphRAG knowledge tools for semantic search over maintenance manuals.
 
-The scripts do not replace any existing lab content. They validate the agent patterns that Lab 5 assumes are working and provide a reusable foundation that workshop administrators can run to verify the full agent stack before participants arrive. The endpoint is admin-only; participants interact with the multi-agent supervisor in Lab 5 instead.
+The scripts do not replace any existing lab content. They validate the agent patterns that Lab 4 assumes are working and provide a reusable foundation that workshop administrators can run to verify the full agent stack before participants arrive. The endpoint is admin-only; participants interact with the multi-agent supervisor in Lab 4 instead.
 
 
 ## Implementation Phasing
 
-**Phase 1 (current):** Graph query tools, sensor query tool, memory tools, echo tool. Deploy agent, exercise with keyword validation, verify memory persistence. Depends on: Lab 3 data loaded, SQL warehouse available, neo4j-agent-memory wheel on cluster.
+**Phase 1 (current):** Graph query tools, sensor query tool, memory tools, echo tool. Deploy agent, exercise with keyword validation, verify memory persistence. Depends on: Lab 2 data loaded, SQL warehouse available, neo4j-agent-memory wheel on cluster.
 
-**Phase 2 (after Lab 4):** Add knowledge tools (vector search, hybrid search, diagnosis), diagnostic recommendation tool. Extend check_agent.py with GraphRAG-specific exercises. Depends on: Lab 4 GraphRAG enrichment complete (vector indexes, entity graph).
+**Phase 2 (after Lab 3):** Add knowledge tools (vector search, hybrid search, diagnosis), diagnostic recommendation tool. Extend check_agent.py with GraphRAG-specific exercises. Depends on: Lab 3 GraphRAG enrichment complete (vector indexes, entity graph).
 
 **Phase 3 (later):** MLflow Agent Evaluation script with RelevanceToQuery and Safety scorers. Structured evaluation dataset.
 
@@ -81,7 +81,7 @@ The scripts do not replace any existing lab content. They validate the agent pat
 1. **neo4j-agent-memory:** Available and pre-installed. MLflow pip requirements will reference it.
 2. **LLM endpoint:** databricks-claude-sonnet-4-6.
 3. **Secrets scope:** New scope `aircraft-agent-secrets` with keys: neo4j-uri, neo4j-username, neo4j-password, warehouse-http-path. Created by setup.sh.
-4. **GraphRAG dependency:** Lab 4 validation built first. Agent Phase 1 works without it; Phase 2 adds knowledge tools after Lab 4 exists.
+4. **GraphRAG dependency:** Lab 3 validation built first. Agent Phase 1 works without it; Phase 2 adds knowledge tools after Lab 3 exists.
 5. **Embedding endpoint:** databricks-bge-large-en (1024 dimensions), same as retail assistant.
 6. **Unity Catalog location:** databricks-neo4j-lab.agents.aircraft_agent. Schema created by setup.sh.
 7. **Tool scope:** MVP set of 8-10 tools (graph, sensor, memory, echo). Knowledge tools deferred to Phase 2.
@@ -90,6 +90,6 @@ The scripts do not replace any existing lab content. They validate the agent pat
 10. **Evaluation:** MLflow eval as fourth script, deferred to Phase 3.
 11. **Setup script:** Single setup.sh handles secrets scope creation, credential population, and UC schema creation. Idempotent, run once before first deploy.
 12. **Memory isolation:** Controlled by optional CLEAR_MEMORY in .env (default: true). Each validation run starts clean unless explicitly configured otherwise.
-13. **Audience:** Admin-only validation tool. Participants use Lab 5 multi-agent supervisor.
+13. **Audience:** Admin-only validation tool. Participants use Lab 4 multi-agent supervisor.
 
 All questions resolved. Ready for implementation.
