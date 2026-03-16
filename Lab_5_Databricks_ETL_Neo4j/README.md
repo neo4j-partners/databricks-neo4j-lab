@@ -15,9 +15,9 @@ This lab has two notebooks:
 | Notebook | Description | Required For |
 |----------|-------------|--------------|
 | [`01_aircraft_etl_to_neo4j.ipynb`](01_aircraft_etl_to_neo4j.ipynb) | Core ETL — loads Aircraft, System, and Component nodes using the Spark Connector | Labs 6, 7 |
-| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 6** |
+| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 7** |
 
-> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 6 (AgentBricks).
+> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 7 (AgentBricks).
 
 ---
 
@@ -172,7 +172,7 @@ Open `02_load_neo4j_full` from your cloned folder and run the complete dataset l
 3. Set `CLEAR_DATABASE = True` for a clean load (recommended)
 4. Click **Run All**
 
-This loads additional node types and relationships required by Lab 6:
+This loads additional node types and relationships required by Lab 7:
 
 | Node Type | Count | Description |
 |-----------|-------|-------------|
@@ -284,8 +284,8 @@ This loads additional node types and relationships required by Lab 6:
 ## Next Steps
 
 After completing this lab:
-- Continue to [Lab 6 - AgentBricks](../Lab_6_AgentBricks) to build multi-agent systems with Genie and Neo4j MCP
-- Continue to [Lab 7 - Semantic Search](../Lab_7_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
+- Continue to [Lab 6 - Semantic Search](../Lab_6_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
+- Continue to [Lab 7 - AgentBricks](../Lab_7_AgentBricks) to build multi-agent systems with Genie and Neo4j MCP
 - The data you loaded will be queried by AI agents in later labs
 
 ---

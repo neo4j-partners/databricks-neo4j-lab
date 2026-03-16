@@ -75,12 +75,12 @@ Runs 13 read-only Cypher queries against the existing data without modifying any
 ./submit.sh verify_lab5.py
 ```
 
-### Step 6: Build and verify Lab 7 embedding pipeline
+### Step 6: Build and verify Lab 6 embedding pipeline
 
 Loads the A320 maintenance manual, chunks it, generates embeddings, creates vector and fulltext indexes, then runs 16 PASS/FAIL checks:
 
 ```bash
-./submit.sh run_lab7_03.py
+./submit.sh run_lab6_03.py
 ```
 
 > Requires `data_utils.py` on the cluster (included when you run `./upload.sh --all`).
@@ -93,7 +93,7 @@ Loads the A320 maintenance manual, chunks it, generates embeddings, creates vect
 | `check_neo4j.py` | Neo4j connectivity and data presence check | No | No |
 | `run_lab5_02.py` | Load Lab 5 data + validate (19 checks) | **Yes** — clears DB | Yes |
 | `verify_lab5.py` | Read-only Lab 5 verification (13 queries) | No | No |
-| `run_lab7_03.py` | Build Lab 7 embedding pipeline + validate (16 checks) | **Yes** — clears Document/Chunk nodes | No |
+| `run_lab6_03.py` | Build Lab 6 embedding pipeline + validate (16 checks) | **Yes** — clears Document/Chunk nodes | No |
 | `data_utils.py` | Shared utilities (embeddings, Neo4j connection, text splitting) | — | — |
 
 ## Shell Scripts

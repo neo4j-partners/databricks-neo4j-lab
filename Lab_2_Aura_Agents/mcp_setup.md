@@ -93,11 +93,11 @@ Use the `.mcp.json.template` file as a reference for configuring other MCP clien
 
 Once connected, your MCP client has access to the Aura Agent's tools. Try these questions:
 
-- "What products does Apple offer?"
-- "Show me risk factors for technology companies"
-- "Which asset managers own Microsoft?"
-- "What are NVIDIA's main competitors?"
-- "Find documents related to Intel"
+- "What systems does aircraft AC1001 have?"
+- "Show maintenance events for aircraft AC1001"
+- "Show details for flight EX370"
+- "What are the most common fault types across all maintenance events?"
+- "Which airports have the most departing flights?"
 
 The Aura Agent will select the appropriate tool (Cypher Template, Similarity Search, or Text2Cypher) automatically.
 
@@ -105,17 +105,13 @@ The Aura Agent will select the appropriate tool (Cypher Template, Similarity Sea
 
 | Tool | Type | Description |
 |------|------|-------------|
-| Company Details | Cypher Template | Look up company information (name, ticker, sector) |
-| Company Risk Factors | Cypher Template | Risk factors disclosed in 10-K filings |
-| Companies Owned by Asset Manager | Cypher Template | Asset manager holdings and share counts |
-| Company Financial Metrics | Cypher Template | Financial KPIs and metrics |
-| Company Products Offered | Cypher Template | Products and services by company |
-| Documents by Company Identifier | Cypher Template | Source documents linked to companies |
-| Company Executives | Cypher Template | Executives and board members |
-| Company Partners | Cypher Template | Partnership relationships |
-| Company Competitors | Cypher Template | Competitive landscape |
-| Search Chunks | Similarity Search | Semantic vector search over document chunks |
-| Natural Language to Cypher | Text2Cypher | Ad-hoc Cypher query generation |
+| Get Aircraft Systems | Cypher Template | Systems connected to an aircraft (engines, avionics, hydraulics) |
+| Get System Components | Cypher Template | Components within a system (turbine, compressor, pump, etc.) |
+| Get Aircraft Maintenance Events | Cypher Template | Maintenance events by aircraft (faults, severity, corrective actions) |
+| Get Flight Details by Number | Cypher Template | Flight details by flight number (route, schedule, operator) |
+| Get Component Removals | Cypher Template | Component removal records (reason, part number, dates) |
+| Search Maintenance Documentation Chunks | Similarity Search | Semantic vector search over maintenance manual chunks |
+| Natural Language to Cypher Tool | Text2Cypher | Ad-hoc Cypher query generation |
 
 ## Troubleshooting
 

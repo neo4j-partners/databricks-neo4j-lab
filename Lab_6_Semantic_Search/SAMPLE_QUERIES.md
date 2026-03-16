@@ -1,4 +1,4 @@
-# Lab 7: Sample Cypher Queries
+# Lab 6: Sample Cypher Queries
 
 Copy and paste these queries into the [Neo4j Aura Query interface](https://console.neo4j.io) to explore the Document-Chunk graph and semantic search capabilities built in this lab.
 
@@ -293,4 +293,4 @@ RETURN name, labelsOrTypes, properties
 CALL db.schema.visualization()
 ```
 
-> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 7, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 5.
+> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 6, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 5.

@@ -1,4 +1,4 @@
-# Lab 6 - Multi-Agent Aircraft Analytics with AgentBricks
+# Lab 7 - Multi-Agent Aircraft Analytics with AgentBricks
 
 In this lab, you'll build a multi-agent system using Databricks AgentBricks that combines **Genie** (for sensor time-series analytics) with **Neo4j MCP** (for graph relationship queries). The multi-agent supervisor routes each question to the right system and, for complex questions spanning both, queries each sequentially and synthesizes a combined answer.
 
@@ -128,10 +128,8 @@ The supervisor routes questions based on intent:
 
 ## Next Steps
 
-Continue to [Lab 7 - Semantic Search](../Lab_7_Semantic_Search) to add GraphRAG capabilities over maintenance documentation.
-
 After completing the workshop, you can:
-- Add more sub-agents (e.g., documentation search from Lab 7)
+- Add more sub-agents (e.g., documentation search from Lab 6)
 - Create custom tools for specific maintenance workflows
 - Deploy the agent as a production service
 - Integrate with external systems via additional MCP servers

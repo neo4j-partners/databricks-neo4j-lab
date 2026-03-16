@@ -81,11 +81,11 @@ README says "plan for one m5.xlarge per user" under Cost Considerations, but the
 ### 8. Pre-Workshop Checklist item "Configure Databricks Genie Space" has no instructions (Line 22)
 
 The checklist says:
-> - [ ] Configure Databricks Genie Space (Lab 6)
+> - [ ] Configure Databricks Genie Space (Lab 7)
 
 But there are no instructions anywhere in the README for how to do this. The troubleshooting section mentions Genie briefly, and Step 4 references a Genie Space ID, but there's no actual "how to set up Genie" section.
 
-**Question:** Should a Genie setup section be added? Or is this documented elsewhere and just needs a link? Or has Lab 6 changed scope (CLAUDE.md describes it as the multi-agent supervisor, not Genie setup)?
+**Question:** Should a Genie setup section be added? Or is this documented elsewhere and just needs a link? Or has Lab 7 changed scope (CLAUDE.md describes it as the multi-agent supervisor, not Genie setup)?
 
 ---
 
@@ -109,7 +109,7 @@ The README correctly describes the format but doesn't explicitly say the admin m
 
 Track B's description (lines 196–197) says "Uploads workshop notebooks to the shared workspace folder" but doesn't mention which notebooks or where they end up. The `NotebookConfig` in the code shows:
 - Lab 5 notebooks (2 ipynb files)
-- Lab 7 notebooks (3 ipynb + 1 py)
+- Lab 6 notebooks (3 ipynb + 1 py)
 - neo4j_mcp_connection (1 py + 2 ipynb)
 
 All uploaded to `/Shared/databricks-neo4j-lab/`.

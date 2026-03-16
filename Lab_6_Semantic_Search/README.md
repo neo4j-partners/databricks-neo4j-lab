@@ -1,4 +1,4 @@
-# Lab 7 - Semantic Search for Aircraft Maintenance
+# Lab 6 - Semantic Search for Aircraft Maintenance
 
 In this lab, you'll add semantic search capabilities to your aircraft knowledge graph. Building on the aircraft topology loaded in Lab 5, you'll create a Document-Chunk structure for the A320-200 Maintenance Manual and enable AI-powered retrieval of maintenance procedures.
 
@@ -42,7 +42,7 @@ After completing this lab, your knowledge graph will combine:
 (:Aircraft)-[:HAS_SYSTEM]->(:System)-[:HAS_COMPONENT]->(:Component)
 ```
 
-**From Lab 7 (Unstructured Data):**
+**From Lab 6 (Unstructured Data):**
 ```
 (:Document) <-[:FROM_DOCUMENT]- (:Chunk) -[:NEXT_CHUNK]-> (:Chunk)
 ```

@@ -63,7 +63,7 @@ Each under `lab_setup/` is a standalone Python package with its own `pyproject.t
 - **Databricks**: Delta tables for `sensor_readings` (345K+ rows), `sensors`, `systems`, `aircraft`
 - Aircraft/Systems/Sensors exist in **both** databases as join points
 
-### Multi-Agent Architecture (Lab 6)
+### Multi-Agent Architecture (Lab 7)
 ```
 User Question → Multi-Agent Supervisor (AgentBricks)
   ├→ Genie Agent → Databricks Lakehouse (natural language → SQL)
@@ -73,7 +73,7 @@ User Question → Multi-Agent Supervisor (AgentBricks)
 The MCP agent (`lab_setup/neo4j_mcp_connection/neo4j_mcp_agent.py`) uses OAuth2 M2M auth via Unity Catalog HTTP connection to an external MCP server.
 
 ### Lab Progression
-Lab 0 (sign-in) → Lab 1 (Neo4j Aura setup) → Lab 5 (ETL via Spark Connector notebooks) → Lab 6 (multi-agent supervisor) → Lab 7 (GraphRAG semantic search over maintenance manuals)
+Lab 0 (sign-in) → Lab 1 (Neo4j Aura setup) → Lab 5 (ETL via Spark Connector notebooks) → Lab 6 (GraphRAG semantic search over maintenance manuals) → Lab 7 (multi-agent supervisor)
 
 ## Configuration
 

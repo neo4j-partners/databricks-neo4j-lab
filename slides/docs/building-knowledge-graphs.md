@@ -485,4 +485,4 @@ This structure enables three retrieval patterns:
 2. **Vector + Graph**: Find similar content, then traverse to related entities
 3. **Text2Cypher**: Query the graph structure directly
 
-These patterns are covered in detail in Lab 7.
+These patterns are covered in detail in Lab 6.

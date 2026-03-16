@@ -30,8 +30,8 @@ image::lab-architecture-overview.png[Lab architecture overview showing the multi
 | Lab 0 | Sign in to Databricks and Neo4j Aura
 | Lab 1 | Set up your Neo4j Aura instance and load the aircraft graph
 | Lab 5 | Build ETL pipelines with the Neo4j Spark Connector in Databricks notebooks
-| Lab 6 | Deploy the Multi-Agent Supervisor with Genie and Neo4j MCP agents
-| Lab 7 | Add GraphRAG semantic search over maintenance manuals
+| Lab 6 | Add GraphRAG semantic search over maintenance manuals
+| Lab 7 | Deploy the Multi-Agent Supervisor with Genie and Neo4j MCP agents
 |===
 
 == Prerequisites

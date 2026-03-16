@@ -67,24 +67,24 @@ Together the dataset includes:
 
 ---
 
-### Phase 2: Databricks ETL & Multi-Agent Analytics
+### Phase 2: Databricks ETL & Semantic Search
 
-*Load aircraft data into Neo4j and build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph.*
+*Load aircraft data into Neo4j, then add semantic search capabilities — chunk maintenance documentation, generate vector embeddings, and build GraphRAG retrievers.*
 
 | Lab | Description | Time |
 |-----|-------------|------|
 | [Lab 5 - Databricks ETL to Neo4j](./Lab_5_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
-| [Lab 6 - AgentBricks](./Lab_6_AgentBricks) | Build a multi-agent supervisor combining Genie Space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+| [Lab 6 - Semantic Search](./Lab_6_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
 
 ---
 
-### Phase 3: Semantic Search & GraphRAG
+### Phase 3: Multi-Agent Analytics
 
-*Add semantic search capabilities to the knowledge graph — chunk maintenance documentation, generate vector embeddings, and build GraphRAG retrievers.*
+*Build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph.*
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 7 - Semantic Search](./Lab_7_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
+| [Lab 7 - AgentBricks](./Lab_7_AgentBricks) | Build a multi-agent supervisor combining Genie Space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
 
 ---
 
