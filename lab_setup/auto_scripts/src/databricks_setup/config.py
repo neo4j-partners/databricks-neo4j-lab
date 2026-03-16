@@ -24,9 +24,7 @@ class ClusterConfig:
     spark_version: str = "17.3.x-cpu-ml-scala2.13"  # 17.3 LTS ML (Spark 4.0.0)
     autotermination_minutes: int = 30
     runtime_engine: str = "STANDARD"  # or "PHOTON"
-    node_type: str | None = None  # Auto-detected from cloud provider
-    instance_profile_arn: str | None = None  # AWS instance profile for cluster nodes
-    cloud_provider: str = "aws"
+    node_type: str | None = None  # Set via NODE_TYPE env var
 
     @classmethod
     def from_env(cls) -> ClusterConfig:
@@ -42,19 +40,16 @@ class ClusterConfig:
             config.runtime_engine = val
         if val := os.getenv("NODE_TYPE"):
             config.node_type = val
-        if val := os.getenv("INSTANCE_PROFILE_ARN"):
-            config.instance_profile_arn = val
-        if val := os.getenv("CLOUD_PROVIDER"):
-            config.cloud_provider = val.lower()
         return config
 
     def get_node_type(self) -> str:
-        """Get node type, auto-detecting based on cloud provider if not set."""
+        """Get node type, defaulting to m5.large if not set.
+
+        Override via NODE_TYPE env var for different cloud providers or instance sizes.
+        """
         if self.node_type:
             return self.node_type
-        if self.cloud_provider == "azure":
-            return "Standard_D4ds_v5"  # 16 GB Memory, 4 Cores
-        return "m5.large"  # AWS default: 8 GB Memory, 2 Cores
+        return "m5.large"  # Default: 8 GB Memory, 2 Cores
 
 
 @dataclass

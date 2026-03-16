@@ -9,7 +9,7 @@ A participant reference covering the workshop overview, GenAI capabilities and l
 ### What You'll Build
 
 - **Load** aircraft fleet data into a Neo4j knowledge graph using the Spark Connector
-- **Explore** a pre-deployed AWS AgentCore agent that queries Neo4j via MCP
+- **Explore** a pre-deployed agent that queries Neo4j via MCP
 - **Build** a multi-agent supervisor combining Databricks Genie (sensor analytics) with Neo4j MCP (graph queries)
 - **Add** semantic search with vector embeddings and GraphRAG retrievers
 - **Create** a no-code Aura Agent with Cypher Templates, Text2Cypher, and Similarity Search
@@ -76,8 +76,8 @@ A multi-agent supervisor routes questions to the right database automatically.
 | Resource | Description |
 |----------|-------------|
 | Reference Aura Instance | Fully populated Neo4j database with the complete Aircraft Digital Twin |
-| Neo4j MCP Server | Deployed to AWS AgentCore, connected to the Reference Aura Instance |
-| AgentCore Sample Agent | Pre-deployed agent that calls Neo4j MCP for natural language graph queries |
+| Neo4j MCP Server | External MCP server connected to the Reference Aura Instance |
+| Sample MCP Agent | Pre-deployed agent that calls Neo4j MCP for natural language graph queries |
 | Databricks Data & Tables | CSV files in Unity Catalog Volume and pre-created Lakehouse tables |
 | Databricks MCP Connection | External MCP server registered in Unity Catalog |
 
@@ -88,7 +88,7 @@ A multi-agent supervisor routes questions to the right database automatically.
 | Personal Aura Instance | Your own Neo4j database to load data into during ETL labs |
 | Databricks Workspace | Clone notebooks and run them on a shared cluster |
 
-Labs using the MCP server (AgentCore, AgentBricks) connect to the shared Reference Aura Instance. Labs doing ETL and GraphRAG (Labs 5, 7) load data into your personal instance.
+Labs using the MCP server (AgentBricks) connect to the shared Reference Aura Instance. Labs doing ETL and GraphRAG (Labs 5, 7) load data into your personal instance.
 
 ![Workshop Infrastructure](../images/workshop-infrastructure.png)
 

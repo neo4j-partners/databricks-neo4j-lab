@@ -112,9 +112,6 @@ cp lab_setup/.env.example lab_setup/.env
 Edit `.env` and set at minimum:
 
 ```bash
-# Cloud provider: "aws" or "azure"
-CLOUD_PROVIDER="aws"
-
 # Databricks CLI profile (optional - uses default if empty)
 DATABRICKS_PROFILE=""
 ```
@@ -135,16 +132,7 @@ DATABRICKS_PROFILE=""
 | `SPARK_VERSION` | Databricks Runtime version | `17.3.x-cpu-ml-scala2.13` |
 | `AUTOTERMINATION_MINUTES` | Cluster auto-shutdown | `30` |
 | `RUNTIME_ENGINE` | `STANDARD` or `PHOTON` | `STANDARD` |
-| `CLOUD_PROVIDER` | `aws` or `azure` | `aws` |
-| `NODE_TYPE` | Instance type (auto-detected per cloud) | See below |
-| `INSTANCE_PROFILE_ARN` | AWS IAM instance profile for cluster nodes | None |
-
-### Cloud provider defaults
-
-| Provider | Default Node Type | Notes |
-|----------|------------------|-------|
-| AWS | `m5.xlarge` | 16 GB, 4 cores, EBS volume attached |
-| Azure | `Standard_D4ds_v5` | 16 GB, 4 cores |
+| `NODE_TYPE` | Instance type for cluster nodes | `m5.large` |
 
 ### Cluster defaults
 
@@ -152,8 +140,7 @@ DATABRICKS_PROFILE=""
 |---------|-------|
 | Runtime | 17.3 LTS ML (Spark 4.0.0, Scala 2.13) |
 | Photon | Disabled (workshop data is small; Photon only benefits >100GB workloads) |
-| Node type (AWS) | `m5.xlarge` (16 GB, 4 cores) |
-| Node type (Azure) | `Standard_D4ds_v5` (16 GB, 4 cores) |
+| Node type | `m5.large` (8 GB, 2 cores). Override via `NODE_TYPE` env var. |
 | Workers | 0 (single node) |
 | Access mode | Dedicated (Single User) |
 | Auto-terminate | 30 minutes |

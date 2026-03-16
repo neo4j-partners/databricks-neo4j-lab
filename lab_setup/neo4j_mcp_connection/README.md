@@ -1,42 +1,41 @@
-# Databricks Samples
+# Neo4j MCP Connection for Databricks
 
-Sample notebooks for integrating Neo4j MCP Server with Databricks via AWS AgentCore.
+Sample notebooks for integrating Neo4j MCP Server with Databricks via Unity Catalog HTTP connections.
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Neo4j MCP server deployed** to AWS AgentCore via [aws-starter](https://github.com/neo4j-partners/aws-starter)
+- **Neo4j MCP server deployed** to an external hosting platform (container service, VM, etc.) with an HTTP endpoint and OAuth2 M2M credentials
 - **Databricks CLI** installed and authenticated (`databricks auth login`)
 - **Databricks cluster** running Runtime 15.4 LTS or later with [required libraries](#cluster-setup) installed
 - **Unity Catalog** enabled on your workspace
-- **jq** installed (`brew install jq` on macOS)
 
-### Step 1: Deploy the Neo4j MCP Server and Get Credentials
+### Step 1: Deploy the Neo4j MCP Server
 
-Deploy the Neo4j MCP server to AWS AgentCore using [aws-starter](https://github.com/neo4j-partners/aws-starter):
+Deploy the Neo4j MCP server to your hosting platform of choice. The server must expose an HTTP endpoint that accepts JSON-RPC 2.0 requests and supports OAuth2 M2M authentication.
 
-```bash
-aws-starter neo4j-agentcore-mcp-server
-```
-
-This deploys the MCP server and generates a `.mcp-credentials.json` file with OAuth2 credentials. Copy this file into this directory:
-
-```bash
-cp /path/to/.mcp-credentials.json .
-```
+After deployment, you need these OAuth2 credentials:
+- **Gateway host URL** (the MCP server endpoint)
+- **Client ID** and **Client Secret**
+- **Token endpoint** (for OAuth2 token exchange)
+- **OAuth scope**
 
 ### Step 2: Configure Databricks Secrets
 
-From this directory:
+Store the OAuth2 credentials in a Databricks secret scope:
 
 ```bash
-./setup_databricks_secrets.sh                              # Uses default profile
-./setup_databricks_secrets.sh --profile my-workspace       # Use a specific Databricks CLI profile
-./setup_databricks_secrets.sh my-scope --profile staging   # Custom scope + profile
-```
+# Create the secret scope
+databricks secrets create-scope mcp-neo4j-secrets
 
-This reads the OAuth2 credentials from `.mcp-credentials.json` in this directory and stores them securely in Databricks secrets. The `--profile` flag specifies which Databricks CLI profile to use (as configured in `~/.databrickscfg`).
+# Store each credential
+echo -n "https://your-mcp-server-host" | databricks secrets put-secret mcp-neo4j-secrets gateway_host
+echo -n "your-client-id" | databricks secrets put-secret mcp-neo4j-secrets client_id
+echo -n "your-client-secret" | databricks secrets put-secret mcp-neo4j-secrets client_secret
+echo -n "https://your-token-endpoint/oauth2/token" | databricks secrets put-secret mcp-neo4j-secrets token_endpoint
+echo -n "your-oauth-scope" | databricks secrets put-secret mcp-neo4j-secrets oauth_scope
+```
 
 ### Step 3: Import and Run the HTTP Connection Notebook
 
@@ -101,51 +100,35 @@ Go to the **Libraries** tab on your cluster and install these packages from PyPI
 
 ## Overview
 
-This sample demonstrates how to connect Databricks to a Neo4j graph database through the Model Context Protocol (MCP). Instead of connecting directly to Neo4j, Databricks uses a Unity Catalog HTTP connection that acts as a secure proxy to an external MCP server running on AWS AgentCore.
+This sample demonstrates how to connect Databricks to a Neo4j graph database through the Model Context Protocol (MCP). Instead of connecting directly to Neo4j, Databricks uses a Unity Catalog HTTP connection that acts as a secure proxy to an external MCP server.
 
 Here's how it works:
 
-1. **MCP Server Deployment**: The Neo4j MCP server is deployed to AWS AgentCore Runtime using [aws-starter](https://github.com/neo4j-partners/aws-starter), accessible via the AgentCore Gateway. The Gateway provides OAuth2 authentication and tool name prefixing.
+1. **MCP Server Deployment**: The Neo4j MCP server is deployed to an external hosting platform, accessible via an HTTP endpoint with OAuth2 authentication.
 
-2. **Unity Catalog HTTP Connection**: Databricks creates an HTTP connection in Unity Catalog that stores the Gateway endpoint URL and OAuth2 M2M credentials (client ID, client secret, token endpoint). Databricks automatically handles token exchange and refresh.
+2. **Unity Catalog HTTP Connection**: Databricks creates an HTTP connection in Unity Catalog that stores the endpoint URL and OAuth2 M2M credentials (client ID, client secret, token endpoint). Databricks automatically handles token exchange and refresh.
 
-3. **Secure Proxy**: When notebooks or SQL queries call the MCP tools, Databricks routes requests through its internal proxy (`/api/2.0/mcp/external/{connection_name}`). This proxy handles OAuth2 authentication and forwards requests to the AgentCore Gateway.
+3. **Secure Proxy**: When notebooks or SQL queries call the MCP tools, Databricks routes requests through its internal proxy (`/api/2.0/mcp/external/{connection_name}`). This proxy handles OAuth2 authentication and forwards requests to the MCP server.
 
-4. **Tool Execution**: The Gateway prefixes tool names with the target name (e.g., `neo4j-mcp-server-target___read-cypher`), then routes to the MCP Runtime. The MCP server parses JSON-RPC requests, executes Cypher queries against Neo4j, and returns results.
+4. **Tool Execution**: The MCP server parses JSON-RPC requests, executes Cypher queries against Neo4j, and returns results.
 
 This architecture provides several benefits:
 - **Centralized credential management** via Databricks secrets
-- **Automatic token refresh** - Databricks handles OAuth2 token lifecycle
+- **Automatic token refresh** — Databricks handles OAuth2 token lifecycle
 - **Governance and auditing** through Unity Catalog
-- **Network isolation** - the MCP server can be locked down to only accept requests from authorized sources
-- **Consistent interface** - notebooks and agents use the same MCP protocol
+- **Network isolation** — the MCP server can be locked down to only accept requests from authorized sources
+- **Consistent interface** — notebooks and agents use the same MCP protocol
 
 ## Why External Hosting?
 
-You might wonder: "Why not just run the Neo4j MCP server directly in Databricks?" The answer lies in fundamental technology constraints.
+The official Neo4j MCP server ([github.com/neo4j/mcp](https://github.com/neo4j/mcp)) is **written in Go** and distributed as a **compiled binary or Docker container**. This creates an incompatibility with Databricks Apps, which only supports Python and Node.js runtimes.
 
-### The Problem: Technology Stack Mismatch
+This external hosting pattern is **Databricks' recommended approach** for MCP servers that cannot run natively in Databricks Apps. By deploying the MCP server to an external container service, you get:
 
-The official Neo4j MCP server ([github.com/neo4j/mcp](https://github.com/neo4j/mcp)) is **written in Go** and distributed as a **compiled binary or Docker container**. This creates an incompatibility with Databricks Apps, which has strict runtime limitations.
-
-### Databricks Apps Limitations
-
-| Capability | Databricks Apps | Neo4j MCP Server |
-|------------|-----------------|------------------|
-| **Runtime** | Python, Node.js only | Go (compiled binary) |
-| **Containers** | Not supported | Requires Docker |
-| **Frameworks** | Streamlit, Dash, Gradio, React | Native HTTP server |
-| **File size** | Max 10 MB | Binary exceeds limit |
-| **Dependencies** | pip/npm packages only | System-level binary |
-
-### The Databricks-Recommended Solution
-
-This external hosting pattern is **Databricks' recommended approach** for MCP servers that cannot run natively in Databricks Apps. By deploying the MCP server to AWS AgentCore (or Azure Container Apps), you get:
-
-1. **Full compatibility** - Run any MCP server regardless of language or runtime
-2. **Managed infrastructure** - AgentCore handles scaling, security, and availability
-3. **Secure integration** - Unity Catalog HTTP connections provide governance
-4. **Automatic auth** - Databricks manages OAuth2 token lifecycle
+1. **Full compatibility** — Run any MCP server regardless of language or runtime
+2. **Managed infrastructure** — The hosting platform handles scaling, security, and availability
+3. **Secure integration** — Unity Catalog HTTP connections provide governance
+4. **Automatic auth** — Databricks manages OAuth2 token lifecycle
 
 This pattern applies to any MCP server built with Go, Rust, C++, or other compiled languages, not just Neo4j.
 
@@ -153,16 +136,16 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    DATABRICKS WORKSPACE (AWS)                            │
+│                                    DATABRICKS WORKSPACE                                  │
 │                                                                                          │
 │  ┌──────────────────┐      ┌─────────────────────────────────────────────────────────┐  │
 │  │                  │      │                   UNITY CATALOG                          │  │
 │  │   Notebooks /    │      │  ┌─────────────────┐    ┌────────────────────────────┐  │  │
-│  │   SQL Queries    │─────▶│  │  HTTP Connection │    │  Secrets Scope             │  │  │
-│  │                  │      │  │  (neo4j_agentcore│◀───│  - gateway_host            │  │  │
+│  │   SQL Queries    │─────>│  │  HTTP Connection │    │  Secrets Scope             │  │  │
+│  │                  │      │  │  (neo4j_agentcore│<───│  - gateway_host            │  │  │
 │  │  http_request()  │      │  │   _mcp)          │    │  - client_id               │  │  │
 │  │  or LangGraph    │      │  │                  │    │  - client_secret           │  │  │
-│  │                  │      │  │  Is MCP: ✓       │    │  - token_endpoint          │  │  │
+│  │                  │      │  │  Is MCP: Y       │    │  - token_endpoint          │  │  │
 │  │                  │      │  │  OAuth2 M2M      │    │  - oauth_scope             │  │  │
 │  └──────────────────┘      │  └────────┬────────┘    └────────────────────────────┘  │  │
 │                            └───────────┼──────────────────────────────────────────────┘  │
@@ -171,7 +154,7 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
 │  │                    DATABRICKS HTTP PROXY                                           │  │
 │  │                    /api/2.0/mcp/external/{connection_name}                         │  │
 │  │                                                                                    │  │
-│  │    OAuth2 Token Exchange ──▶  Forwards JSON-RPC  ──▶  Returns MCP Response        │  │
+│  │    OAuth2 Token Exchange ──>  Forwards JSON-RPC  ──>  Returns MCP Response        │  │
 │  │    (automatic refresh)                                                             │  │
 │  └─────────────────────────────────────┬─────────────────────────────────────────────┘  │
 │                                        │                                                 │
@@ -179,25 +162,16 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
                                          │
                                          │ HTTPS (OAuth2 JWT Bearer Token)
                                          │ JSON-RPC 2.0 over HTTP
-                                         ▼
+                                         v
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              AWS AGENTCORE                                               │
+│                              EXTERNAL MCP SERVER                                         │
 │                                                                                          │
 │  ┌───────────────────────────────────────────────────────────────────────────────────┐  │
-│  │                           AGENTCORE GATEWAY                                        │  │
+│  │                           NEO4J MCP SERVER                                         │  │
 │  │                                                                                    │  │
-│  │   - OAuth2 token validation via Cognito                                           │  │
-│  │   - Tool name prefixing: {target}___{tool}                                        │  │
-│  │   - Routes requests to MCP Runtime                                                │  │
-│  └───────────────────────────────────────────────────────────────────────────────────┘  │
-│                                        │                                                 │
-│                                        ▼                                                 │
-│  ┌───────────────────────────────────────────────────────────────────────────────────┐  │
-│  │                           NEO4J MCP SERVER (AgentCore Runtime)                     │  │
-│  │                                                                                    │  │
-│  │   Tools (Gateway-prefixed):                                                        │  │
-│  │   - neo4j-mcp-server-target___get-schema: Returns node labels, relationships      │  │
-│  │   - neo4j-mcp-server-target___read-cypher: Executes read-only Cypher queries      │  │
+│  │   Tools:                                                                           │  │
+│  │   - get-schema: Returns node labels, relationships                                │  │
+│  │   - read-cypher: Executes read-only Cypher queries                                │  │
 │  │                                                                                    │  │
 │  │   Config: NEO4J_READ_ONLY=true (write-cypher disabled)                            │  │
 │  └───────────────────────────────────────────────────────────────────────────────────┘  │
@@ -205,14 +179,14 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
 └────────────────────────────────────────┼─────────────────────────────────────────────────┘
                                          │
                                          │ Bolt Protocol (neo4j+s://)
-                                         ▼
+                                         v
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │                              NEO4J AURA                                                  │
 │                                                                                          │
 │  ┌───────────────────────────────────────────────────────────────────────────────────┐  │
 │  │                           GRAPH DATABASE                                           │  │
 │  │                                                                                    │  │
-│  │   (Nodes)──[:RELATIONSHIPS]──▶(Nodes)                                             │  │
+│  │   (Nodes)──[:RELATIONSHIPS]──>(Nodes)                                             │  │
 │  │                                                                                    │  │
 │  └───────────────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                          │
@@ -224,20 +198,17 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
 ```
 1. Notebook calls http_request() or agent invokes MCP tool
                     │
-                    ▼
+                    v
 2. Unity Catalog resolves connection settings (OAuth2 M2M credentials)
                     │
-                    ▼
-3. Databricks proxy exchanges credentials for JWT, forwards to Gateway
+                    v
+3. Databricks proxy exchanges credentials for JWT, forwards to MCP server
                     │
-                    ▼
-4. Gateway validates token, prefixes tool name, routes to Runtime
+                    v
+4. MCP server parses JSON-RPC, executes Cypher against Neo4j
                     │
-                    ▼
-5. MCP server parses JSON-RPC, executes Cypher against Neo4j
-                    │
-                    ▼
-6. Results returned through Gateway and proxy to notebook
+                    v
+5. Results returned through proxy to notebook
 ```
 
 ## Files
@@ -247,16 +218,15 @@ This pattern applies to any MCP server built with Go, Rust, C++, or other compil
 | [neo4j-mcp-http-connection.ipynb](./neo4j-mcp-http-connection.ipynb) | Setup and test an HTTP connection to query Neo4j via MCP |
 | [neo4j_mcp_agent.py](./neo4j_mcp_agent.py) | LangGraph agent that connects to Neo4j via external MCP HTTP connection |
 | [neo4j-mcp-agent-deploy.ipynb](./neo4j-mcp-agent-deploy.ipynb) | Test, evaluate, and deploy the Neo4j MCP agent |
-| [setup_databricks_secrets.sh](./setup_databricks_secrets.sh) | Setup script to configure OAuth2 secrets from AgentCore credentials |
 
 ## Available MCP Tools
 
-Tool names are prefixed by the AgentCore Gateway:
+| Tool | Description |
+|------|-------------|
+| `get-schema` | Retrieve database schema |
+| `read-cypher` | Execute read-only Cypher queries |
 
-| Tool | Gateway Name | Description |
-|------|--------------|-------------|
-| `get-schema` | `neo4j-mcp-server-target___get-schema` | Retrieve database schema |
-| `read-cypher` | `neo4j-mcp-server-target___read-cypher` | Execute read-only Cypher queries |
+Note: Tool names may be prefixed by a gateway if your MCP server uses one (e.g., `neo4j-mcp-server-target___get-schema`).
 
 ## Example Usage
 
@@ -266,14 +236,14 @@ After completing the Quick Start, you can query Neo4j from any notebook:
 # Using the helper function from the HTTP connection notebook
 result = query_neo4j("MATCH (n:Person) RETURN n.name LIMIT 10")
 
-# Or directly with SQL (note the prefixed tool name)
+# Or directly with SQL
 spark.sql("""
     SELECT http_request(
       conn => 'neo4j_agentcore_mcp',
       method => 'POST',
       path => '',
       headers => map('Content-Type', 'application/json'),
-      json => '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"neo4j-mcp-server-target___get-schema","arguments":{}},"id":1}'
+      json => '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"get-schema","arguments":{}},"id":1}'
     )
 """)
 ```
@@ -297,15 +267,15 @@ This integration provides **read-only access** to Neo4j. The MCP server is deplo
 
 | Issue | Solution |
 |-------|----------|
-| Secret not found | Run `./setup_databricks_secrets.sh` |
+| Secret not found | Create the secrets scope and store OAuth2 credentials (see Step 2) |
 | Connection already exists | Drop it with `DROP CONNECTION IF EXISTS neo4j_agentcore_mcp` |
-| HTTP timeout | Verify MCP server is running via [aws-starter](https://github.com/neo4j-partners/aws-starter) |
-| 401 Unauthorized | Re-deploy with `aws-starter neo4j-agentcore-mcp-server`, copy new `.mcp-credentials.json`, then re-run `./setup_databricks_secrets.sh` |
-| Tool not found | Use the Gateway-prefixed name: `neo4j-mcp-server-target___get-schema` |
+| HTTP timeout | Verify MCP server is running and accessible |
+| 401 Unauthorized | Verify OAuth2 credentials are correct and re-store secrets |
+| Tool not found | Check the tool name; it may be prefixed by the gateway |
 
 ## Related Documentation
 
-- [aws-starter](https://github.com/neo4j-partners/aws-starter) - Neo4j MCP server deployment to AWS AgentCore
+- [Neo4j MCP Server](https://github.com/neo4j/mcp)
 - [Databricks HTTP Connections](https://docs.databricks.com/aws/en/query-federation/http)
 - [Databricks External MCP](https://docs.databricks.com/aws/en/generative-ai/mcp/external-mcp)
 - [Neo4j Cypher Manual](https://neo4j.com/docs/cypher-manual/current/)

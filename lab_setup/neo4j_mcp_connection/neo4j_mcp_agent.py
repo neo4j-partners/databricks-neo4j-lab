@@ -1,11 +1,10 @@
 """
 Neo4j MCP Tool-Calling LangGraph Agent
 
-This agent connects to a Neo4j MCP server deployed on AWS AgentCore Gateway
-via a Databricks Unity Catalog HTTP connection with OAuth2 M2M authentication.
+This agent connects to a Neo4j MCP server via a Databricks Unity Catalog
+HTTP connection with OAuth2 M2M authentication.
 
-The connection is created in neo4j-mcp-http-connection.ipynb and uses secrets
-configured by setup_databricks_secrets.sh.
+The connection is created in neo4j-mcp-http-connection.ipynb.
 
 Features:
 - Connects to external Neo4j MCP server via Unity Catalog HTTP connection proxy
@@ -15,7 +14,7 @@ Features:
 
 Prerequisites:
 - HTTP connection created: neo4j_agentcore_mcp (see neo4j-mcp-http-connection.ipynb)
-- Secrets configured in scope: mcp-neo4j-secrets (see setup_databricks_secrets.sh)
+- Secrets configured in scope: mcp-neo4j-secrets
 - "Is MCP connection" checkbox enabled in Catalog Explorer
 """
 
@@ -60,15 +59,15 @@ llm = ChatDatabricks(endpoint=LLM_ENDPOINT_NAME)
 
 # Unity Catalog HTTP connection name for Neo4j MCP
 # This connection is created by neo4j-mcp-http-connection.ipynb
-# Uses OAuth2 M2M authentication with AWS Cognito (Databricks handles token refresh)
+# Uses OAuth2 M2M authentication (Databricks handles token refresh)
 CONNECTION_NAME = "neo4j_agentcore_mcp"
 
 # Databricks secrets scope for MCP credentials
-# Configured by setup_databricks_secrets.sh
+# Configured via Databricks secrets
 SECRET_SCOPE = "mcp-neo4j-secrets"
 
 # System prompt for the Neo4j graph assistant
-# Note: Tool names are prefixed by AgentCore Gateway with the target name
+# Note: Tool names may be prefixed by the MCP gateway with the target name
 system_prompt = """
 You are a helpful assistant that can query a Neo4j graph database.
 
@@ -272,7 +271,7 @@ def initialize_agent():
         LangGraphResponsesAgent: The initialized agent ready for predictions
     """
     # Get MCP tools from the configured Neo4j server
-    # Note: Tool names are prefixed by AgentCore Gateway (e.g., neo4j-mcp-server-target___get-schema)
+    # Note: Tool names may be prefixed by the MCP gateway (e.g., neo4j-mcp-server-target___get-schema)
     mcp_tools = asyncio.run(databricks_mcp_client.get_tools())
 
     print(f"Loaded {len(mcp_tools)} tools from Neo4j MCP server:")

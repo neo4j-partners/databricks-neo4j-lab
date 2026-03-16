@@ -10,10 +10,7 @@ from dataclasses import dataclass, replace
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.compute import (
-    AwsAttributes,
-    AwsAvailability,
     DataSecurityMode,
-    EbsVolumeType,
     RuntimeEngine,
     State,
 )
@@ -23,33 +20,6 @@ from .log import log
 from .models import ClusterInfo
 from .users import cluster_name_for_user
 from .utils import poll_until
-
-
-def ensure_instance_profile_registered(
-    client: WorkspaceClient,
-    instance_profile_arn: str,
-    iam_role_arn: str | None = None,
-) -> None:
-    """Check if an instance profile is registered in the workspace, and register it if not.
-
-    Args:
-        client: Databricks workspace client.
-        instance_profile_arn: The ARN of the instance profile.
-        iam_role_arn: Optional IAM role ARN backing the instance profile.
-    """
-    registered = {ip.instance_profile_arn for ip in client.instance_profiles.list()}
-
-    if instance_profile_arn in registered:
-        log(f"  Instance profile already registered: {instance_profile_arn}")
-        return
-
-    log(f"  Registering instance profile: {instance_profile_arn}")
-    client.instance_profiles.add(
-        instance_profile_arn=instance_profile_arn,
-        iam_role_arn=iam_role_arn,
-        skip_validation=True,
-    )
-    log("  Registered successfully.")
 
 
 def find_cluster(client: WorkspaceClient, cluster_name: str) -> ClusterInfo | None:
@@ -90,18 +60,6 @@ def create_cluster(
 
     custom_tags = {"ResourceClass": "SingleNode"}
 
-    # AWS-specific configuration (EBS volumes + instance profile)
-    aws_attributes = None
-    if config.cloud_provider != "azure":
-        aws_attributes = AwsAttributes(
-            availability=AwsAvailability.ON_DEMAND,
-            first_on_demand=1,
-            ebs_volume_type=EbsVolumeType.GENERAL_PURPOSE_SSD,
-            ebs_volume_count=1,
-            ebs_volume_size=100,
-            instance_profile_arn=config.instance_profile_arn,
-        )
-
     runtime = RuntimeEngine.PHOTON if config.runtime_engine == "PHOTON" else RuntimeEngine.STANDARD
 
     log(f"Creating cluster '{config.name}'...")
@@ -118,7 +76,6 @@ def create_cluster(
         autotermination_minutes=config.autotermination_minutes,
         spark_conf=spark_conf,
         custom_tags=custom_tags,
-        aws_attributes=aws_attributes,
     )
 
     if not response.cluster_id:
@@ -184,10 +141,6 @@ def get_or_create_cluster(
     Returns:
         The cluster ID.
     """
-    # Ensure the instance profile is registered before creating/starting a cluster
-    if config.instance_profile_arn and config.cloud_provider != "azure":
-        ensure_instance_profile_registered(client, config.instance_profile_arn)
-
     log(f"Looking for existing cluster \"{config.name}\"...")
 
     info = find_cluster(client, config.name)

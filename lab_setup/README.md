@@ -2,14 +2,7 @@
 
 **Purpose:** Instructions for workshop administrators to prepare the Databricks environment before participants arrive.
 
-**Participant Materials:** To create the zip file for participants to upload to Databricks, run:
-
-```bash
-./lab_setup/prepare_material.sh
-```
-
 ---
-
 
 ## Pre-Workshop Checklist
 
@@ -19,7 +12,6 @@ Complete these steps before the workshop begins:
 - [ ] Create `aircraft_workshop_group` at the account level and add it to the workspace (Step 1.5)
 - [ ] Run `databricks-setup setup` to upload data, create tables, and lock down permissions (Step 2)
 - [ ] Add participant emails to `lab_setup/users.csv` and run `databricks-setup add-users` (Step 3)
-- [ ] Configure Databricks Genie Space (Lab 6)
 - [ ] Test the complete workflow
 - [ ] Document connection details for participants
 
@@ -75,7 +67,7 @@ The following resources must exist before running `databricks-setup`. See detail
 
 ## Why Catalog Creation Is Manual
 
-Newer Databricks workspaces use **Default Storage**, which blocks programmatic catalog creation via CLI, REST API, and SQL — all return the same error. Only the UI has the special handling to assign Default Storage to a new catalog. Once the catalog exists, everything else (schema, volume, compute, data upload, and table creation) is automated by `databricks-setup`. See [CATALOG_SETUP_COMPLEXITY.md](CATALOG_SETUP_COMPLEXITY.md) for details.
+Newer Databricks workspaces use **Default Storage**, which blocks programmatic catalog creation via CLI, REST API, and SQL — all return the same error. Only the UI has the special handling to assign Default Storage to a new catalog. Once the catalog exists, everything else (schema, volume, compute, data upload, and table creation) is automated by `databricks-setup`. 
 
 ---
 
@@ -163,9 +155,6 @@ cp lab_setup/.env.example lab_setup/.env
 Edit `.env` and set at minimum:
 
 ```bash
-# Cloud provider: "aws" or "azure"
-CLOUD_PROVIDER="aws"
-
 # Databricks CLI profile (optional - uses default if empty)
 DATABRICKS_PROFILE=""
 
@@ -233,7 +222,7 @@ Ensure `DATABRICKS_ACCOUNT_ID` is set in `lab_setup/.env`. This is required for 
 
 ### 3.2 Prepare the CSV
 
-Edit `lab_setup/users.csv` with participant email addresses:
+Create `lab_setup/users.csv` (this file is not included in the repository) with participant email addresses:
 
 ```csv
 email,name
@@ -293,19 +282,16 @@ Create a handout or slide with:
 |----------|-------|
 | Databricks Workspace URL | `https://your-workspace.cloud.databricks.com` |
 | Data Volume Path | `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/` |
-| Genie Space ID | `{your-genie-space-id}` (for Lab 6) |
+| Shared Notebook Folder | `/Shared/databricks-neo4j-lab/` |
 
 ### Quick Start Instructions
 
 1. Sign in to Databricks with your workshop credentials
 2. Navigate to Compute — your dedicated cluster (`lab-<your-name>`) should be running
-3. Download the `aircraft_etl_to_neo4j.dbc` file
-4. Go to Workspace > your personal folder
-5. Right-click > Import > upload the DBC file
-6. Open the imported notebook
-7. Enter your Neo4j credentials from Lab 1
-8. Run all cells (Shift+Enter or Run All)
-9. Verify the counts in the output cells
+3. Open **Workspace** > **Shared** > **databricks-neo4j-lab** to find the lab notebooks
+4. Enter your Neo4j credentials from Lab 1
+5. Run all cells (Shift+Enter or Run All)
+6. Verify the counts in the output cells
 
 ---
 
@@ -389,6 +375,7 @@ databricks-setup cleanup [--yes]               # Delete data, tables, catalog, a
 databricks-setup add-users [--skip-clusters]   # Create users, add to group, create per-user clusters
 databricks-setup remove-users [--keep-clusters] # Remove from group, delete per-user clusters
 databricks-setup list-users                    # Show group members and cluster status
+databricks-setup sync                          # Upload/sync workshop notebooks to workspace
 ```
 
 | Flag | Command | Effect |
@@ -412,7 +399,7 @@ The setup CLI uploads **25 files** to the Volume:
 
 ## Cost Considerations
 
-- **Clusters:** Each participant gets a single-node cluster; plan for one m5.xlarge per user
+- **Clusters:** Each participant gets a single-node cluster; plan for one m5.large per user
 - **Auto-termination:** Set to 30 minutes by default to avoid idle costs
 - **Storage:** Volume storage for CSV files is negligible (~25 MB total)
 - **Delta Lake:** The lakehouse tables add minimal storage overhead
