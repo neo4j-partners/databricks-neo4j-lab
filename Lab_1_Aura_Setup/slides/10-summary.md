@@ -24,7 +24,7 @@ Save your Neo4j credentials — you'll enter them in each notebook's Configurati
 
 ## Next Up
 
-**Lab 5: Databricks ETL to Neo4j** - Load the Aircraft Digital Twin dataset into your Neo4j Aura instance using the Spark Connector.
+**Lab 2: Databricks ETL to Neo4j** - Load the Aircraft Digital Twin dataset into your Neo4j Aura instance using the Spark Connector.
 
 ---
 

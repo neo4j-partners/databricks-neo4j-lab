@@ -392,8 +392,8 @@ All user commands read from `lab_setup/users.csv`.
 For the full file inventory with sizes, record counts, and sensor data details, see **[MANUAL_SETUP.md](docs/MANUAL_SETUP.md#file-inventory)**.
 
 The setup CLI uploads **25 files** to the Volume:
-- **22 CSV files** from `aircraft_digital_twin_data/` (nodes and relationships for Labs 5 and 7)
-- **3 Markdown files** (maintenance manuals for Lab 7: A320, A321neo, B737)
+- **22 CSV files** from `aircraft_digital_twin_data/` (nodes and relationships for Labs 2 and 3)
+- **3 Markdown files** (maintenance manuals for Lab 3: A320, A321neo, B737)
 
 ---
 

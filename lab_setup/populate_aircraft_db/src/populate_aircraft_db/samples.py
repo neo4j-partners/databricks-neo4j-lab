@@ -394,7 +394,7 @@ def _vector_similarity(driver: Driver, limit: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 10. Full-text search (Lab 7 — keyword search via fulltext index)
+# 10. Full-text search (Lab 3 — keyword search via fulltext index)
 # ---------------------------------------------------------------------------
 
 _FULLTEXT_Q = """\
@@ -410,7 +410,7 @@ def _fulltext_search(driver: Driver, limit: int) -> None:
     _header(
         "10. Full-Text Search",
         "Keyword search over maintenance chunks using the fulltext index.\n"
-        "  This mirrors the HybridRetriever's keyword component from Lab 7.",
+        "  This mirrors the HybridRetriever's keyword component from Lab 3.",
     )
     search_terms = ["engine vibration", "hydraulic pressure", "EGT exceedance"]
     for term in search_terms:
@@ -433,7 +433,7 @@ def _fulltext_search(driver: Driver, limit: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 11. Vector search with document context (Lab 7 — VectorCypherRetriever)
+# 11. Vector search with document context (Lab 3 — VectorCypherRetriever)
 # ---------------------------------------------------------------------------
 
 _VECTOR_DOC_Q = """\
@@ -458,7 +458,7 @@ def _vector_document_context(driver: Driver, limit: int) -> None:
     _header(
         "11. Vector Search \u2192 Document Context",
         "Semantic search enriched with source document metadata.\n"
-        "  Mirrors the VectorCypherRetriever document-context pattern from Lab 7.",
+        "  Mirrors the VectorCypherRetriever document-context pattern from Lab 3.",
     )
     _cypher(_VECTOR_DOC_Q)
     try:
@@ -488,7 +488,7 @@ def _vector_document_context(driver: Driver, limit: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 12. Adjacent chunk retrieval (Lab 7 — VectorCypherRetriever + NEXT_CHUNK)
+# 12. Adjacent chunk retrieval (Lab 3 — VectorCypherRetriever + NEXT_CHUNK)
 # ---------------------------------------------------------------------------
 
 _ADJACENT_Q = """\
@@ -516,7 +516,7 @@ def _adjacent_chunks(driver: Driver, limit: int) -> None:
     _header(
         "12. Adjacent Chunk Retrieval",
         "Vector search with surrounding context via NEXT_CHUNK traversal.\n"
-        "  Mirrors the VectorCypherRetriever adjacent-chunks pattern from Lab 7.",
+        "  Mirrors the VectorCypherRetriever adjacent-chunks pattern from Lab 3.",
     )
     _cypher(_ADJACENT_Q)
     try:
@@ -542,7 +542,7 @@ def _adjacent_chunks(driver: Driver, limit: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 13. Vector search → Aircraft topology (Lab 7 — system connection pattern)
+# 13. Vector search → Aircraft topology (Lab 3 — system connection pattern)
 # ---------------------------------------------------------------------------
 
 _VECTOR_TOPO_Q = """\
@@ -577,7 +577,7 @@ def _vector_topology(driver: Driver, limit: int) -> None:
     _header(
         "13. Vector Search \u2192 Aircraft Topology",
         "Semantic search connected to the operational graph (Aircraft \u2192 System).\n"
-        "  Mirrors the VectorCypherRetriever system-context pattern from Lab 7.",
+        "  Mirrors the VectorCypherRetriever system-context pattern from Lab 3.",
     )
     _cypher(_VECTOR_TOPO_Q)
     try:
@@ -608,7 +608,7 @@ def _vector_topology(driver: Driver, limit: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 14. Hybrid search comparison (Lab 7 — vector vs fulltext side-by-side)
+# 14. Hybrid search comparison (Lab 3 — vector vs fulltext side-by-side)
 # ---------------------------------------------------------------------------
 
 _HYBRID_VECTOR_Q = """\
@@ -651,7 +651,7 @@ def _hybrid_comparison(driver: Driver, limit: int) -> None:
     _header(
         "14. Hybrid Search Comparison",
         "Side-by-side vector vs fulltext results for the same seed chunk.\n"
-        "  Demonstrates why Lab 7's HybridRetriever combines both approaches.",
+        "  Demonstrates why Lab 3's HybridRetriever combines both approaches.",
     )
 
     # --- Vector results ---

@@ -1,20 +1,6 @@
-/* Hide the left navigation sidebar */
-.nav-container {
-  display: none;
-}
-
-/* Make the main content full width when nav is hidden */
-.body {
-  grid-template-columns: 1fr;
-}
-
-.main {
-  max-width: 100%;
-}
-
 /* Improve content width */
 .doc {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
 }
 

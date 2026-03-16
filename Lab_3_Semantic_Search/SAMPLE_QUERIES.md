@@ -1,4 +1,5 @@
-# Lab 7: Sample Cypher Queries
+# Lab 3: Sample Cypher Queries
+
 
 Copy and paste these queries into the [Neo4j Aura Query interface](https://console.neo4j.io) to explore the Document-Chunk graph and semantic search capabilities built in this lab.
 
@@ -85,81 +86,9 @@ ORDER BY c.index
 
 ---
 
-## Vector Similarity Search
+## Vector Similarity Search and Graph-Enhanced Retrieval
 
-> **Prerequisite:** These queries require the `maintenanceChunkEmbeddings` vector index and embeddings on Chunk nodes, created in notebook 03.
->
-> **Setup:** Before running vector queries, set your OpenAI API key as a parameter in the Neo4j Query interface:
-> ```sql
-> :param token => 'sk-...'
-> ```
-
-### Search for engine troubleshooting procedures
-
-```sql
-// Embed the query text and find the 5 most similar chunks
-CALL db.index.vector.queryNodes(
-  'maintenanceChunkEmbeddings',
-  5,
-  genai.vector.encode(
-    'How do I troubleshoot engine vibration?',
-    'OpenAI',
-    { token: $token, model: 'text-embedding-3-small', dimensions: 1536 }
-  )
-)
-YIELD node, score
-RETURN score,
-       node.index AS ChunkIndex,
-       substring(node.text, 0, 200) AS Content
-ORDER BY score DESC
-```
-
-> **Concepts**: `db.index.vector.queryNodes()` searches the named vector index and returns matching nodes ranked by cosine similarity. `genai.vector.encode()` generates an embedding from query text using the OpenAI API. The `dimensions` must match the index (1536).
-
-### Search for hydraulic system limits
-
-```sql
-CALL db.index.vector.queryNodes(
-  'maintenanceChunkEmbeddings',
-  3,
-  genai.vector.encode(
-    'What are the hydraulic system pressure limits?',
-    'OpenAI',
-    { token: $token, model: 'text-embedding-3-small', dimensions: 1536 }
-  )
-)
-YIELD node, score
-RETURN score,
-       node.index AS ChunkIndex,
-       node.text AS FullText
-ORDER BY score DESC
-```
-
-> **Concepts**: Same pattern as above with `top_k=3`. Returns the full text instead of a substring — useful when you want to read complete procedures.
-
-### Vector search with document metadata
-
-```sql
-CALL db.index.vector.queryNodes(
-  'maintenanceChunkEmbeddings',
-  3,
-  genai.vector.encode(
-    'EGT limits during takeoff',
-    'OpenAI',
-    { token: $token, model: 'text-embedding-3-small', dimensions: 1536 }
-  )
-)
-YIELD node, score
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-RETURN score,
-       doc.documentId AS Document,
-       doc.aircraftType AS AircraftType,
-       node.index AS ChunkIndex,
-       substring(node.text, 0, 200) AS Content
-ORDER BY score DESC
-```
-
-> **Concepts**: After the vector search, a `MATCH` traverses `FROM_DOCUMENT` to enrich each result with the source document's metadata. This is the pattern used by VectorCypherRetriever in notebook 04.
+> **Note:** Vector similarity search and graph-enhanced retrieval queries are demonstrated interactively in **notebooks 04 and 05**. These notebooks use the `VectorRetriever`, `VectorCypherRetriever`, `HybridRetriever`, and `HybridCypherRetriever` from the `neo4j-graphrag` library, which handle embedding generation via Databricks Foundation Model APIs automatically. Refer to those notebooks for hands-on examples of semantic search over the maintenance manual.
 
 ---
 
@@ -194,64 +123,6 @@ LIMIT 5
 ```
 
 > **Concepts**: Multiple keywords are OR'd together by default — chunks matching more keywords score higher. This is useful for domain-specific terminology where exact terms matter.
-
----
-
-## Graph-Enhanced Retrieval
-
-### Adjacent chunk retrieval (context window)
-
-```sql
-CALL db.index.vector.queryNodes(
-  'maintenanceChunkEmbeddings',
-  3,
-  genai.vector.encode(
-    'engine vibration diagnostic procedure',
-    'OpenAI',
-    { token: $token, model: 'text-embedding-3-small', dimensions: 1536 }
-  )
-)
-YIELD node, score
-OPTIONAL MATCH (prev:Chunk)-[:NEXT_CHUNK]->(node)
-OPTIONAL MATCH (node)-[:NEXT_CHUNK]->(next:Chunk)
-RETURN node.index AS ChunkIndex,
-       score,
-       substring(COALESCE(prev.text, ''), 0, 80) AS PreviousChunk,
-       substring(node.text, 0, 80) AS MatchedChunk,
-       substring(COALESCE(next.text, ''), 0, 80) AS NextChunk
-ORDER BY score DESC
-```
-
-> **Concepts**: After finding the best-matching chunks, `OPTIONAL MATCH` traverses `NEXT_CHUNK` in both directions to gather surrounding context. `COALESCE(..., '')` handles the first/last chunks that have no predecessor or successor. This is the pattern used by the adjacent-chunk retriever in notebooks 04 and 05.
-
-### Connect chunks to aircraft systems
-
-```sql
-CALL db.index.vector.queryNodes(
-  'maintenanceChunkEmbeddings',
-  3,
-  genai.vector.encode(
-    'engine fuel pump maintenance',
-    'OpenAI',
-    { token: $token, model: 'text-embedding-3-small', dimensions: 1536 }
-  )
-)
-YIELD node, score
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System)
-  WHERE (node.text CONTAINS 'Engine' AND s.name CONTAINS 'Engine')
-     OR (node.text CONTAINS 'Hydraulic' AND s.name CONTAINS 'Hydraulic')
-     OR (node.text CONTAINS 'Avionics' AND s.name CONTAINS 'Avionics')
-RETURN score,
-       doc.aircraftType AS AircraftType,
-       node.index AS ChunkIndex,
-       substring(node.text, 0, 150) AS Content,
-       collect(DISTINCT s.name) AS RelatedSystems,
-       collect(DISTINCT a.tail_number) AS AffectedAircraft
-ORDER BY score DESC
-```
-
-> **Concepts**: Combines vector search with graph traversal to connect maintenance documentation to the aircraft topology from Lab 5. `OPTIONAL MATCH` ensures chunks are returned even if no system keyword matches. `collect(DISTINCT ...)` gathers unique system names and tail numbers per chunk.
 
 ---
 
@@ -293,4 +164,5 @@ RETURN name, labelsOrTypes, properties
 CALL db.schema.visualization()
 ```
 
-> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 7, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 5.
+> **Concepts**: Introspects the database and returns every node label, relationship type, and how they connect. After Lab 3, you should see Document and Chunk nodes alongside the Aircraft topology from Lab 2.
+

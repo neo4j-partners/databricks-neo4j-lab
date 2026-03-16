@@ -14,7 +14,7 @@ Together, the two platforms provide a complete Aircraft Digital Twin: Databricks
 
 ## Lab Architecture
 
-The end-to-end lab architecture centers on a **Multi-Agent Supervisor** built with Databricks AgentBricks. When a user asks a question, the supervisor routes it to the right agent: a **Genie Agent** for sensor telemetry analytics over Unity Catalog tables, or a **Neo4j MCP Agent** for graph-powered queries over the knowledge graph. The Neo4j MCP Server exposes the graph database through the Model Context Protocol so agents can query it with natural language. Neo4j Aura provides the graph database, while Databricks handles notebooks, model serving, and vector search.
+The end-to-end lab architecture centers on a **Supervisor Agent** built with Databricks Agent Bricks. When a user asks a question, the supervisor routes it to the right agent: a **Genie Agent** for sensor telemetry analytics over Unity Catalog tables, or a **Neo4j MCP Agent** for graph-powered queries over the knowledge graph. The Neo4j MCP Server exposes the graph database through the Model Context Protocol so agents can query it with natural language. Neo4j Aura provides the graph database, while Databricks handles notebooks, model serving, and vector search.
 
 ![Lab Architecture Overview](images/lab-architecture-overview.png)
 
@@ -47,7 +47,7 @@ Together the dataset includes:
 | **Neo4j Aura** | Graph database for storing aircraft relationships |
 | **Databricks** | Notebooks, Unity Catalog |
 | **AI/BI Genie** | Natural language analytics over Unity Catalog tables |
-| **AgentBricks** | No-code multi-agent supervisor combining multiple data sources |
+| **Agent Bricks: Supervisor Agent** | No-code multi-agent supervisor combining multiple data sources |
 | **GraphRAG** | Graph-enhanced retrieval combining vector search with graph traversal |
 | **Neo4j Spark Connector** | ETL from Databricks to Neo4j |
 | **Model Context Protocol (MCP)** | Standard for connecting AI models to data sources |
@@ -67,24 +67,34 @@ Together the dataset includes:
 
 ---
 
-### Phase 2: Databricks ETL & Multi-Agent Analytics
+### Phase 2: Databricks ETL & Semantic Search
 
-*Load aircraft data into Neo4j and build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph.*
+*Load aircraft data into Neo4j, then add semantic search capabilities — chunk maintenance documentation, generate vector embeddings, and build GraphRAG retrievers.*
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 5 - Databricks ETL to Neo4j](./Lab_5_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
-| [Lab 6 - AgentBricks](./Lab_6_AgentBricks) | Build a multi-agent supervisor combining Genie Space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+| [Lab 2 - Databricks ETL to Neo4j](./Lab_2_Databricks_ETL_Neo4j) | Load Aircraft Digital Twin data into Neo4j using the Spark Connector | 45 min |
+| [Lab 3 - Semantic Search](./Lab_3_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
 
 ---
 
-### Phase 3: Semantic Search & GraphRAG
+### Phase 3: Multi-Agent Analytics
 
-*Add semantic search capabilities to the knowledge graph — chunk maintenance documentation, generate vector embeddings, and build GraphRAG retrievers.*
+*Build a multi-agent supervisor that combines the Databricks Lakehouse with the Neo4j knowledge graph.*
 
 | Lab | Description | Time |
 |-----|-------------|------|
-| [Lab 7 - Semantic Search](./Lab_7_Semantic_Search) | Load maintenance manual, generate embeddings, build GraphRAG retrievers | 45 min |
+| [Lab 4 - Compound AI Agents](./Lab_4_Compound_AI_Agents) | Build a Supervisor Agent combining Genie space (sensor analytics) + Neo4j MCP (graph queries) | 75 min |
+
+---
+
+### Phase 4: Aura Agents
+
+*Build AI agents directly in Neo4j Aura using the Create with AI experience.*
+
+| Lab | Description | Time |
+|-----|-------------|------|
+| [Lab 5 - Aura Agents](./Lab_5_Aura_Agents) | Create AI agents in Neo4j Aura that query the knowledge graph | 30 min |
 
 ---
 
@@ -141,7 +151,7 @@ The Aircraft Digital Twin dataset includes:
 | Embeddings | Databricks BGE-large (databricks-bge-large-en) |
 | LLM | Databricks Llama 3.3 70B |
 | Vector Search | Neo4j Vector Index |
-| Multi-Agent | Databricks AgentBricks |
+| Multi-Agent | Databricks Agent Bricks: Supervisor Agent |
 | ETL | Neo4j Spark Connector |
 
 ## Configuration
@@ -168,7 +178,7 @@ Databricks notebooks use Foundation Model APIs (MLflow deployments client) which
 ### Databricks
 - [Foundation Model APIs](https://docs.databricks.com/aws/en/machine-learning/foundation-model-apis/)
 - [AI/BI Genie](https://docs.databricks.com/aws/en/genie/)
-- [AgentBricks Multi-Agent Supervisor](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor)
+- [Agent Bricks: Supervisor Agent](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor)
 - [Databricks Unity Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/)
 
 ## Feedback

@@ -1,4 +1,4 @@
-# Lab 5: Databricks ETL to Neo4j
+# Lab 2: Databricks ETL to Neo4j
 
 Load aircraft data from Databricks into Neo4j using the Spark Connector.
 
@@ -14,10 +14,10 @@ This lab has two notebooks:
 
 | Notebook | Description | Required For |
 |----------|-------------|--------------|
-| [`01_aircraft_etl_to_neo4j.ipynb`](01_aircraft_etl_to_neo4j.ipynb) | Core ETL — loads Aircraft, System, and Component nodes using the Spark Connector | Labs 6, 7 |
-| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 6** |
+| [`01_aircraft_etl_to_neo4j.ipynb`](01_aircraft_etl_to_neo4j.ipynb) | Core ETL — loads Aircraft, System, and Component nodes using the Spark Connector | Labs 3, 4 |
+| [`02_load_neo4j_full.ipynb`](02_load_neo4j_full.ipynb) | Full dataset — adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals using the Spark Connector | **Lab 4** |
 
-> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 6 (AgentBricks).
+> **Important:** Run **both** notebooks before proceeding. Notebook 01 loads the core aircraft topology needed by all subsequent labs. Notebook 02 loads the complete dataset required by the Neo4j MCP agent in Lab 4 (Compound AI Agents).
 
 ---
 
@@ -33,10 +33,10 @@ Before starting this lab, ensure you have:
 ## Quick Start
 
 1. **Accept** the workspace invitation from your email
-2. **Verify** your personal compute cluster is running
+2. **Verify** your personal compute is running
 3. **View** the CSV data files in the Unity Catalog Volume
 4. **Clone** the lab notebooks into your home directory
-5. **Attach** your compute cluster to the notebook
+5. **Attach** your compute to the notebook
 6. **Run notebook 01**: Enter your Neo4j credentials and **Run All** cells
 7. **Run notebook 02**: Enter your Neo4j credentials and **Run All** cells
 8. **Explore** the graph in Neo4j Aura
@@ -61,25 +61,25 @@ Your workshop admin has added you to a shared Databricks workspace. You received
 > ![Databricks login error](images/DBX_LOGIN_ERRIR.png)
 
 
-### Step 2: Verify Your Compute Cluster
+### Step 2: Verify Your Compute
 
-In Databricks, **compute** refers to the cloud infrastructure that runs your code. A **compute cluster** is a set of virtual machines managed by Databricks that provides the CPU, memory, and Apache Spark runtime needed to execute notebook cells. Think of it as the engine behind your notebooks — without it, your code has nowhere to run.
+In Databricks, **compute** refers to the cloud infrastructure that runs your code. A **compute resource** is a set of virtual machines managed by Databricks that provides the CPU, memory, and Apache Spark runtime needed to execute notebook cells. Think of it as the engine behind your notebooks — without it, your code has nowhere to run.
 
-Your workshop admin has pre-configured a personal cluster for each participant. Your cluster comes with:
+Your workshop admin has pre-configured a personal compute for each participant. Your compute comes with:
 
 - **Apache Spark** runtime for processing data at scale
 - **Neo4j Spark Connector** library for writing DataFrames directly into Neo4j
 - **Python packages** (`neo4j`, `neo4j-graphrag`, etc.) needed by the lab notebooks
 
-To verify your cluster:
+To verify your compute:
 
 1. Click **Compute** in the left sidebar.
-2. Look for a cluster named with your identifier (e.g., `lab-<yourname>`).
-3. Confirm the cluster shows a green dot or **Running** status.
+2. Look for a compute resource named with your identifier (e.g., `lab-<yourname>`).
+3. Confirm it shows a green dot or **Running** status.
 
-If the cluster is stopped, the workshop administrator will need to start it.
+If the compute is stopped, the workshop administrator will need to start it.
 
-![Compute overview showing your personal cluster](images/compute_overview.png)
+![Compute overview showing your personal compute](images/compute_overview.png)
 
 ### Step 3: View the CSV Data
 
@@ -103,8 +103,8 @@ The lab notebooks are stored in a shared folder that all participants can see. Y
 
 1. Click **Workspace** in the left sidebar.
 2. Expand **Shared > databricks-neo4j-lab**.
-3. Click on the **Lab_5_Databricks_ETL_Neo4j** folder.
-4. Right-click on the `Lab_5_Databricks_ETL_Neo4j` folder and select **Clone**.
+3. Click on the **Lab_2_Databricks_ETL_Neo4j** folder.
+4. Right-click on the `Lab_2_Databricks_ETL_Neo4j` folder and select **Clone**.
 
 ![Right-click the folder and select Clone](images/03_clone.png)
 
@@ -119,19 +119,19 @@ The Clone dialog lets you place a personal copy of the notebooks in your home di
 
 **Expected outcome:** A copy of the `labs` folder appears under your home directory in the Workspace browser. It contains all notebooks and the `data_utils.py` utility module.
 
-### Step 5: Attach Your Compute Cluster
+### Step 5: Attach Your Compute
 
-A notebook by itself is just a document — it needs to be **attached** to a compute cluster before any code can run. Attaching tells Databricks which cluster should execute the notebook's cells. By attaching your personal cluster, you get the pre-installed Neo4j Spark Connector and Python libraries that the lab requires.
+A notebook by itself is just a document — it needs to be **attached** to a compute resource before any code can run. Attaching tells Databricks which compute should execute the notebook's cells. By attaching your personal compute, you get the pre-installed Neo4j Spark Connector and Python libraries that the lab requires.
 
 1. Open the first notebook, `01_aircraft_etl_to_neo4j.ipynb`, from your cloned folder.
 2. Click the **compute selector** in the top-right corner of the notebook (it may say "Serverless" or "Connect" by default).
-3. Under **Active resources**, select your personal cluster (e.g., `lab-<yourname>`).
+3. Under **Active resources**, select your personal compute (e.g., `lab-<yourname>`).
 
 > **Note:** Do not use **Serverless** compute — it does not have the Neo4j Spark Connector installed.
 
-![Select your personal compute cluster from the dropdown](images/6-change-compute-your-compute.png)
+![Select your personal compute from the dropdown](images/6-change-compute-your-compute.png)
 
-**Expected outcome:** The notebook header shows your cluster name and a green connection indicator.
+**Expected outcome:** The notebook header shows your compute name and a green connection indicator.
 
 ### Step 6: Configure and Run Notebook 01
 
@@ -167,12 +167,12 @@ The final verification cells display node and relationship counts. Confirm:
 
 Open `02_load_neo4j_full` from your cloned folder and run the complete dataset load:
 
-1. Attach your compute cluster (same as Step 5)
+1. Attach your compute (same as Step 5)
 2. Enter your Neo4j credentials (same as notebook 01)
 3. Set `CLEAR_DATABASE = True` for a clean load (recommended)
 4. Click **Run All**
 
-This loads additional node types and relationships required by Lab 6:
+This loads additional node types and relationships required by Lab 4:
 
 | Node Type | Count | Description |
 |-----------|-------|-------------|
@@ -246,9 +246,9 @@ This loads additional node types and relationships required by Lab 6:
 
 ### "Spark Connector not found" error
 
-- Ensure you're using the workshop cluster (not a personal cluster)
+- Ensure you're using the workshop compute (not a personal compute)
 - The cluster must be in **Dedicated (Single User)** access mode
-- Try restarting the cluster
+- Try restarting the compute
 
 ### "Path does not exist" for data files
 
@@ -284,8 +284,8 @@ This loads additional node types and relationships required by Lab 6:
 ## Next Steps
 
 After completing this lab:
-- Continue to [Lab 6 - AgentBricks](../Lab_6_AgentBricks) to build multi-agent systems with Genie and Neo4j MCP
-- Continue to [Lab 7 - Semantic Search](../Lab_7_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
+- Continue to [Lab 3 - Semantic Search](../Lab_3_Semantic_Search) to add GraphRAG capabilities over maintenance documentation
+- Continue to [Lab 4 - Compound AI Agents](../Lab_4_Compound_AI_Agents) to build a Supervisor Agent with Genie space and Neo4j MCP
 - The data you loaded will be queried by AI agents in later labs
 
 ---

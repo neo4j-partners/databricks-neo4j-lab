@@ -100,8 +100,7 @@ class DatabricksLLM(LLMInterfaceV2):
 
     Supports Databricks-hosted LLM endpoints like:
     - databricks-meta-llama-3-3-70b-instruct
-    - databricks-dbrx-instruct
-    - databricks-mixtral-8x7b-instruct
+    - databricks-llama-4-maverick
 
     Uses MLflow deployments client for API calls.
     """
@@ -213,7 +212,7 @@ class Neo4jConnection:
         return self
 
     def clear_chunks(self):
-        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 5)."""
+        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 2)."""
         records, _, _ = self.driver.execute_query("""
             MATCH (n) WHERE n:Document OR n:Chunk
             DETACH DELETE n

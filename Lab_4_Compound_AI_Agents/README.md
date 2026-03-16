@@ -1,6 +1,6 @@
-# Lab 6 - Multi-Agent Aircraft Analytics with AgentBricks
+# Lab 4 - Compound AI Agents for Aircraft Analytics
 
-In this lab, you'll build a multi-agent system using Databricks AgentBricks that combines **Genie** (for sensor time-series analytics) with **Neo4j MCP** (for graph relationship queries). The multi-agent supervisor routes each question to the right system and, for complex questions spanning both, queries each sequentially and synthesizes a combined answer.
+In this lab, you'll build a compound AI agent system using Databricks Agent Bricks that combines a **Genie space** (for sensor time-series analytics) with **Neo4j MCP** (for graph relationship queries). The Supervisor Agent routes each question to the right system and, for complex questions spanning both, queries each sequentially and synthesizes a combined answer.
 
 > **Infrastructure:** This lab uses **shared** workshop resources — the Genie space queries shared Lakehouse tables in Unity Catalog, and the Neo4j MCP agent queries the **Reference Aura Instance** (the fully populated graph). You do not need data in your personal Aura instance for this lab.
 
@@ -37,30 +37,30 @@ The multi-agent approach lets users ask questions in natural language without kn
 ## Prerequisites
 
 Before starting, make sure you have:
-- Completed **Lab 5** (Databricks ETL) — run **both** notebooks:
+- Completed **Lab 2** (Databricks ETL) — run **both** notebooks:
   - `01_aircraft_etl_to_neo4j.ipynb` (core: Aircraft, System, Component)
   - `02_load_neo4j_full.ipynb` (full dataset: adds Sensors, Flights, Airports, Delays, MaintenanceEvents, Removals — **required** for the Neo4j MCP agent in Part B)
 - Sensor readings data loaded in your Databricks lakehouse (Unity Catalog)
-- Running in a **Databricks workspace** with AgentBricks access
+- Running in a **Databricks workspace** with Agent Bricks access
 - Neo4j MCP server connection configured in Unity Catalog
 
 ## Lab Overview
 
 This lab is documentation-driven and focuses on **configuration over code**. You'll use the Databricks UI to create intelligent agents that automatically route questions to the right data source.
 
-### Part A: Genie Space for Sensor Analytics (~30 min)
+### Part A: Genie space for Sensor Analytics (~30 min)
 
 Create an AI/BI Genie space that enables natural language queries over sensor telemetry:
 - Connect data sources: `sensor_readings`, `sensors`, `systems`, `aircraft`
 - Add sample questions and domain-specific instructions (sensor types, normal ranges, fleet info)
 - Test natural language to SQL queries for time-series aggregations and anomaly detection
 
-### Part B: Multi-Agent Supervisor (~45 min)
+### Part B: Supervisor Agent (~45 min)
 
 Build a supervisor agent that coordinates two specialized sub-agents:
-- Add the **Neo4j MCP agent** for graph relationship queries (topology, maintenance, flights)
-- Add the **Genie space agent** for time-series sensor analytics (readings, trends, fleet comparisons)
-- Configure routing rules so the supervisor directs questions to the right agent
+- Add the **Neo4j MCP subagent** for graph relationship queries (topology, maintenance, flights)
+- Add the **Genie space subagent** for time-series sensor analytics (readings, trends, fleet comparisons)
+- Configure routing rules so the Supervisor Agent directs questions to the right subagent
 - Test single-agent routing and combined multi-agent queries
 - Deploy as a serving endpoint for programmatic access
 
@@ -102,22 +102,22 @@ The supervisor routes questions based on intent:
 ## Getting Started
 
 1. **Part A** (~30 min): Create and configure the Genie space for sensor analytics
-2. **Part B** (~45 min): Build the multi-agent supervisor with Neo4j integration
+2. **Part B** (~45 min): Build the Supervisor Agent with Neo4j integration
 
 ## Files
 
 | File | Description |
 |------|-------------|
 | `README.md` | This overview document |
-| `PART_A.md` | Genie Space configuration guide |
-| `PART_B.md` | Multi-Agent Supervisor setup guide |
+| `PART_A.md` | Genie space configuration guide |
+| `PART_B.md` | Supervisor Agent setup guide |
 
 ## Key Concepts
 
-- **Genie Space**: AI/BI interface that converts natural language to SQL
+- **Genie space**: AI/BI interface that converts natural language to SQL
 - **MCP (Model Context Protocol)**: Standardized protocol for tool integration
-- **Multi-Agent Supervisor**: Orchestration layer that routes questions to specialized agents
-- **AgentBricks**: Databricks platform for building and deploying AI agents
+- **Supervisor Agent**: Agent Bricks orchestration layer that routes questions to specialized subagents
+- **Agent Bricks**: Databricks platform for building and deploying AI agents
 - **Unity Catalog**: Governance layer for data and connections
 
 ## Performance Considerations
@@ -128,10 +128,8 @@ The supervisor routes questions based on intent:
 
 ## Next Steps
 
-Continue to [Lab 7 - Semantic Search](../Lab_7_Semantic_Search) to add GraphRAG capabilities over maintenance documentation.
-
 After completing the workshop, you can:
-- Add more sub-agents (e.g., documentation search from Lab 7)
+- Add more subagents (e.g., documentation search from Lab 3)
 - Create custom tools for specific maintenance workflows
 - Deploy the agent as a production service
 - Integrate with external systems via additional MCP servers

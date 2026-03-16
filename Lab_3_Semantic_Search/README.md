@@ -1,13 +1,13 @@
-# Lab 7 - Semantic Search for Aircraft Maintenance
+# Lab 3 - Semantic Search for Aircraft Maintenance
 
-In this lab, you'll add semantic search capabilities to your aircraft knowledge graph. Building on the aircraft topology loaded in Lab 5, you'll create a Document-Chunk structure for the A320-200 Maintenance Manual and enable AI-powered retrieval of maintenance procedures.
+In this lab, you'll add semantic search capabilities to your aircraft knowledge graph. Building on the aircraft topology loaded in Lab 2, you'll create a Document-Chunk structure for the A320-200 Maintenance Manual and enable AI-powered retrieval of maintenance procedures.
 
-> **Infrastructure:** This lab uses your **personal** Aura instance. You'll load maintenance manual chunks and generate embeddings into the graph you built in Lab 5.
+> **Infrastructure:** This lab uses your **personal** Aura instance. You'll load maintenance manual chunks and generate embeddings into the graph you built in Lab 2.
 
 ## Prerequisites
 
 Before starting, make sure you have:
-- Completed **Lab 5** (Databricks ETL) to load the aircraft graph (Aircraft, System, Component nodes)
+- Completed **Lab 2** (Databricks ETL) to load the aircraft graph (Aircraft, System, Component nodes)
 - Neo4j Aura credentials from Lab 1 (URI, username, password)
 - Running in a **Databricks notebook environment** (for Foundation Model API access)
 - **Maintenance manual uploaded** to the Unity Catalog Volume
@@ -37,12 +37,12 @@ Learn retrieval patterns from simple to graph-enhanced:
 
 After completing this lab, your knowledge graph will combine:
 
-**From Lab 5 (Structured Data):**
+**From Lab 2 (Structured Data):**
 ```
 (:Aircraft)-[:HAS_SYSTEM]->(:System)-[:HAS_COMPONENT]->(:Component)
 ```
 
-**From Lab 7 (Unstructured Data):**
+**From Lab 3 (Unstructured Data):**
 ```
 (:Document) <-[:FROM_DOCUMENT]- (:Chunk) -[:NEXT_CHUNK]-> (:Chunk)
 ```
@@ -61,8 +61,7 @@ This lab uses Databricks-hosted embedding and LLM models:
 | Model | Description |
 |-------|-------------|
 | `databricks-meta-llama-3-3-70b-instruct` | Llama 3.3 70B (default) |
-| `databricks-dbrx-instruct` | DBRX Instruct |
-| `databricks-mixtral-8x7b-instruct` | Mixtral 8x7B |
+| `databricks-llama-4-maverick` | Llama 4 Maverick |
 
 These models are pre-deployed and ready to use via the MLflow deployments client.
 
@@ -114,7 +113,7 @@ The embedding and LLM models use Databricks Foundation Model APIs which are pre-
 
 ## Getting Started
 
-1. Ensure Lab 5 is complete (aircraft topology loaded)
+1. Ensure Lab 2 is complete (aircraft topology loaded)
 2. Verify the maintenance manual is uploaded to the Volume:
    ```
    /Volumes/databricks-neo4j-lab/lab-schema/lab-volume/MAINTENANCE_A320.md

@@ -138,16 +138,16 @@ class NotebookConfig:
         default_factory=lambda: Path(__file__).resolve().parent.parent.parent.parent.parent,
     )
     lab_notebooks: tuple[tuple[str, tuple[str, ...], str], ...] = (
-        ("Lab_5_Databricks_ETL_Neo4j", (
+        ("Lab_2_Databricks_ETL_Neo4j", (
             "01_aircraft_etl_to_neo4j.ipynb",
             "02_load_neo4j_full.ipynb",
-        ), "Lab_5_Databricks_ETL_Neo4j"),
-        ("Lab_7_Semantic_Search", (
+        ), "Lab_2_Databricks_ETL_Neo4j"),
+        ("Lab_3_Semantic_Search", (
             "03_data_and_embeddings.ipynb",
             "04_graphrag_retrievers.ipynb",
             "05_hybrid_retrievers.ipynb",
             "data_utils.py",
-        ), "Lab_7_Semantic_Search"),
+        ), "Lab_3_Semantic_Search"),
         ("lab_setup/neo4j_mcp_connection", (
             "neo4j_mcp_agent.py",
             "neo4j-mcp-agent-deploy.ipynb",

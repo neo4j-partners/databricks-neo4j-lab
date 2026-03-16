@@ -180,7 +180,7 @@ No Cypher or SQL knowledge required from the end user.
                 User Question
                      |
                      v
-        ┌─── AgentBricks Supervisor ───┐
+        ┌─── Supervisor Agent ───┐
         |           (no code)          |
         v                              v
 Neo4j Agent Endpoint          Genie Space Agent

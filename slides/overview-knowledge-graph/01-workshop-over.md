@@ -138,9 +138,9 @@ Each participant gets their own environment to work in:
 | **Personal Aura Instance** | Your own Neo4j database to load data into during ETL labs and explore independently |
 | **Databricks Workspace** | Clone notebooks and run them on a shared cluster to build your graph and agents |
 
-Labs using the **MCP server** (AgentBricks) connect to the **shared** Reference Aura Instance — so every participant works with the full graph regardless of their personal instance's state.
+Labs using the **MCP server** (Supervisor Agent) connect to the **shared** Reference Aura Instance — so every participant works with the full graph regardless of their personal instance's state.
 
-Labs doing **ETL and GraphRAG** (Labs 5, 7) load data into your **personal** instance.
+Labs doing **ETL and GraphRAG** (Labs 2, 3) load data into your **personal** instance.
 
 ---
 

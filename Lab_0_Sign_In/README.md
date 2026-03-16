@@ -34,4 +34,4 @@ At this point you can click through to dismiss any help dialogs. In the next lab
 
 ## Next Steps
 
-Continue to [Lab 1 - Aura Setup](../Lab_1_Aura_Setup) to create your Neo4j Aura database and load the Aircraft Digital Twin knowledge graph.
+Continue to [Lab 1 - Aura Setup](../Lab_1_Aura_Setup) to set up your Neo4j Aura database and learn the basics of Cypher.

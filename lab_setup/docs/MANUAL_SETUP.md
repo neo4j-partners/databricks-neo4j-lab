@@ -141,14 +141,14 @@ Upload the CSV and Markdown files from the `aircraft_digital_twin_data/` directo
 ```bash
 VOLUME_PATH="dbfs:/Volumes/databricks-neo4j-lab/lab-schema/lab-volume"
 
-# Lab 5 - Aircraft digital twin (core: notebook 01)
+# Lab 2 - Aircraft digital twin (core: notebook 01)
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_aircraft.csv    "${VOLUME_PATH}/nodes_aircraft.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_systems.csv     "${VOLUME_PATH}/nodes_systems.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_components.csv  "${VOLUME_PATH}/nodes_components.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/rels_aircraft_system.csv  "${VOLUME_PATH}/rels_aircraft_system.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/rels_system_component.csv "${VOLUME_PATH}/rels_system_component.csv" --overwrite
 
-# Lab 5 - Full dataset (notebook 02: airports, flights, delays, maintenance, removals)
+# Lab 2 - Full dataset (notebook 02: airports, flights, delays, maintenance, removals)
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_airports.csv    "${VOLUME_PATH}/nodes_airports.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_flights.csv     "${VOLUME_PATH}/nodes_flights.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_delays.csv      "${VOLUME_PATH}/nodes_delays.csv" --overwrite
@@ -164,12 +164,12 @@ databricks fs cp lab_setup/aircraft_digital_twin_data/rels_flight_arrival.csv   
 databricks fs cp lab_setup/aircraft_digital_twin_data/rels_flight_delay.csv       "${VOLUME_PATH}/rels_flight_delay.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/rels_flight_departure.csv   "${VOLUME_PATH}/rels_flight_departure.csv" --overwrite
 
-# Lab 7 - Maintenance manuals
+# Lab 3 - Maintenance manuals
 databricks fs cp lab_setup/aircraft_digital_twin_data/MAINTENANCE_A320.md    "${VOLUME_PATH}/MAINTENANCE_A320.md" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/MAINTENANCE_A321neo.md "${VOLUME_PATH}/MAINTENANCE_A321neo.md" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/MAINTENANCE_B737.md    "${VOLUME_PATH}/MAINTENANCE_B737.md" --overwrite
 
-# Lab 6 - Sensor data
+# Lab 4 - Sensor data
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_sensors.csv     "${VOLUME_PATH}/nodes_sensors.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/nodes_readings.csv    "${VOLUME_PATH}/nodes_readings.csv" --overwrite
 databricks fs cp lab_setup/aircraft_digital_twin_data/rels_system_sensor.csv "${VOLUME_PATH}/rels_system_sensor.csv" --overwrite
@@ -194,27 +194,27 @@ The volume should contain 25 files (22 CSV + 3 Markdown):
 ```
 /Volumes/databricks-neo4j-lab/lab-schema/lab-volume/
 │
-│  Nodes (Lab 5 core)
+│  Nodes (Lab 2 core)
 ├── nodes_aircraft.csv
 ├── nodes_systems.csv
 ├── nodes_components.csv
 │
-│  Nodes (Lab 5 full dataset - notebook 02)
+│  Nodes (Lab 2 full dataset - notebook 02)
 ├── nodes_airports.csv
 ├── nodes_delays.csv
 ├── nodes_flights.csv
 ├── nodes_maintenance.csv
 ├── nodes_removals.csv
 │
-│  Nodes (Lab 6 sensors)
+│  Nodes (Lab 4 sensors)
 ├── nodes_sensors.csv
 ├── nodes_readings.csv          (23 MB, 345,600 rows)
 │
-│  Relationships (Lab 5 core)
+│  Relationships (Lab 2 core)
 ├── rels_aircraft_system.csv
 ├── rels_system_component.csv
 │
-│  Relationships (Lab 5 full dataset - notebook 02)
+│  Relationships (Lab 2 full dataset - notebook 02)
 ├── rels_aircraft_flight.csv
 ├── rels_aircraft_removal.csv
 ├── rels_component_event.csv
@@ -225,10 +225,10 @@ The volume should contain 25 files (22 CSV + 3 Markdown):
 ├── rels_flight_delay.csv
 ├── rels_flight_departure.csv
 │
-│  Relationships (Lab 6)
+│  Relationships (Lab 4)
 ├── rels_system_sensor.csv
 │
-│  Maintenance Manuals (Lab 7)
+│  Maintenance Manuals (Lab 3)
 ├── MAINTENANCE_A320.md
 ├── MAINTENANCE_A321neo.md
 └── MAINTENANCE_B737.md
@@ -238,7 +238,7 @@ The volume should contain 25 files (22 CSV + 3 Markdown):
 
 ## Step 5: Create Lakehouse Tables
 
-Create the Delta Lake tables needed for Databricks Genie (Lab 6) using the Python CLI:
+Create the Delta Lake tables needed for Databricks Genie (Lab 4) using the Python CLI:
 
 ```bash
 cd lab_setup/auto_scripts
@@ -260,11 +260,11 @@ This uploads data files and creates the lakehouse tables via the SQL Warehouse's
 
 ## File Inventory
 
-### Lab 5 - Aircraft Digital Twin Data
+### Lab 2 - Aircraft Digital Twin Data
 
 The `aircraft_digital_twin_data/` directory contains:
 
-**Core data (Lab 5 notebook 01):**
+**Core data (Lab 2 notebook 01):**
 
 | File | Size | Records | Description |
 |------|------|---------|-------------|
@@ -274,7 +274,7 @@ The `aircraft_digital_twin_data/` directory contains:
 | `rels_aircraft_system.csv` | 2 KB | 80 | Aircraft-System links |
 | `rels_system_component.csv` | 13 KB | 320 | System-Component links |
 
-**Full dataset (Lab 5 notebook 02):**
+**Full dataset (Lab 2 notebook 02):**
 
 | File | Size | Records | Description |
 |------|------|---------|-------------|
@@ -293,7 +293,7 @@ The `aircraft_digital_twin_data/` directory contains:
 | `rels_flight_delay.csv` | 14 KB | ~300 | Flight-Delay links |
 | `rels_flight_departure.csv` | 20 KB | ~800 | Flight-Airport departures |
 
-**Sensor data (Lab 6):**
+**Sensor data (Lab 4):**
 
 | File | Size | Records | Description |
 |------|------|---------|-------------|
@@ -301,17 +301,17 @@ The `aircraft_digital_twin_data/` directory contains:
 | `nodes_readings.csv` | 23 MB | 345,600 | Hourly sensor readings (90 days) |
 | `rels_system_sensor.csv` | 6 KB | 160 | System-Sensor links |
 
-### Lab 7 - Maintenance Manuals
+### Lab 3 - Maintenance Manuals
 
-| File | Size | Description | Required for Lab 7 |
+| File | Size | Description | Required for Lab 3 |
 |------|------|-------------|-------------------|
 | `MAINTENANCE_A320.md` | ~30 KB | A320-200 Maintenance and Troubleshooting Manual | Yes (used in notebooks) |
 | `MAINTENANCE_A321neo.md` | ~41 KB | A321neo Maintenance and Troubleshooting Manual | Optional |
 | `MAINTENANCE_B737.md` | ~37 KB | B737-800 Maintenance and Troubleshooting Manual | Optional |
 
-**Note:** The Lab 7 notebooks use the A320-200 manual by default. The additional manuals (A321neo, B737) cover other aircraft models in the fleet and can be used for extended exercises or additional semantic search content.
+**Note:** The Lab 3 notebooks use the A320-200 manual by default. The additional manuals (A321neo, B737) cover other aircraft models in the fleet and can be used for extended exercises or additional semantic search content.
 
-### Lab 6 - Sensor Data Details
+### Lab 4 - Sensor Data Details
 
 The sensor data covers **90 days** of hourly readings (July 1 - September 29, 2024):
 

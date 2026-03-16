@@ -46,8 +46,8 @@ The `submit.sh` script creates a one-time job run on an existing cluster:
 
 ```bash
 ./submit.sh test_hello.py               # Run with default wait
-./submit.sh run_lab5_02.py              # Run data load
-./submit.sh run_lab5_02.py --no-wait    # Fire and forget
+./submit.sh run_lab2_02.py              # Run data load
+./submit.sh run_lab2_02.py --no-wait    # Fire and forget
 ```
 
 Neo4j credentials from `.env` are automatically injected as `--neo4j-uri`, `--neo4j-username`, `--neo4j-password` command-line arguments. Scripts that don't use `argparse` (like the smoke test) safely ignore them. The credentials are serialized through Python's `json.dumps` to handle special characters in passwords.
@@ -232,8 +232,8 @@ After the remote job succeeds, run the `verify-labs` CLI locally to confirm the 
 cd lab_setup/verify_labs
 uv sync
 uv run verify-labs check           # Connectivity + node count
-uv run verify-labs lab5             # All Lab 5 queries
-uv run verify-labs lab5 --notebook 02   # Notebook 02 queries only
+uv run verify-labs lab2             # All Lab 2 queries
+uv run verify-labs lab2 --notebook 02   # Notebook 02 queries only
 ```
 
 The CLI connects directly to Neo4j Aura using credentials from `lab_setup/.env`. It runs the same verification queries that participants will encounter in the workshop notebooks. A passing remote job with a failing local verification indicates a data or schema problem that the Spark Connector masked (e.g., silent relationship drops or misnamed properties).
@@ -266,7 +266,7 @@ Run this check whenever CSV data is regenerated. The cost of catching a dangling
 
 Schema operations in Neo4j (`CREATE INDEX`, `DROP INDEX`, `CREATE CONSTRAINT`) require auto-commit transactions. The Neo4j Python driver offers two execution paths, and they handle transactions differently.
 
-`driver.execute_query()` runs statements inside managed transactions. For data operations (CRUD on nodes and relationships) this is correct and convenient. For schema operations, managed transactions silently succeed without actually creating the index. No error is raised, no exception is thrown, and `SHOW INDEXES` reveals nothing was created. This failure mode cost six debugging runs during Lab 7 validation development.
+`driver.execute_query()` runs statements inside managed transactions. For data operations (CRUD on nodes and relationships) this is correct and convenient. For schema operations, managed transactions silently succeed without actually creating the index. No error is raised, no exception is thrown, and `SHOW INDEXES` reveals nothing was created. This failure mode cost six debugging runs during Lab 3 validation development.
 
 `session.run()` runs statements in auto-commit mode, which is what schema operations require. The result must be consumed before the session closes:
 
@@ -298,11 +298,11 @@ The `neo4j-graphrag` library's `create_vector_index` and `create_fulltext_index`
 
 Neo4j enforces index uniqueness by label and property, not by name. Attempting to create a second index on the same label+property combination under a different name returns `An equivalent index already exists`, even with `IF NOT EXISTS`.
 
-This surfaces when multiple tools create indexes on the same schema. For example, if `populate_aircraft_db` creates an index named `requirement_embeddings` on `Chunk.embedding`, then `run_lab7_03.py` attempts to create `maintenanceChunkEmbeddings` on the same `Chunk.embedding`. The second creation fails because Neo4j sees the label and property are already indexed.
+This surfaces when multiple tools create indexes on the same schema. For example, if `populate_aircraft_db` creates an index named `requirement_embeddings` on `Chunk.embedding`, then `run_lab3_03.py` attempts to create `maintenanceChunkEmbeddings` on the same `Chunk.embedding`. The second creation fails because Neo4j sees the label and property are already indexed.
 
 Two approaches handle this:
 
-**Clean database (recommended for validation).** Reset the Neo4j database before running the validation suite. This eliminates any pre-existing indexes and ensures the script creates exactly the indexes it expects. The validation workflow is: reset database, run Lab 5 (structural graph), run Lab 7 (semantic layer).
+**Clean database (recommended for validation).** Reset the Neo4j database before running the validation suite. This eliminates any pre-existing indexes and ensures the script creates exactly the indexes it expects. The validation workflow is: reset database, run Lab 2 (structural graph), run Lab 3 (semantic layer).
 
 **Detect and reuse.** Query `SHOW INDEXES` after the creation attempt and find the actual index name covering the target label+property. The validation script does this as a fallback:
 
@@ -332,10 +332,10 @@ The index name returned by `SHOW INDEXES` is the one that must be passed to `db.
 |------|---------|
 | Upload all scripts | `./upload.sh --all` |
 | Smoke test | `./upload.sh test_hello.py && ./submit.sh test_hello.py` |
-| Run Lab 5 | `./submit.sh run_lab5_02.py` |
-| Run Lab 7 | `./submit.sh run_lab7_03.py` |
+| Run Lab 2 | `./submit.sh run_lab2_02.py` |
+| Run Lab 3 | `./submit.sh run_lab3_03.py` |
 | List recent runs | `databricks jobs list-runs --profile <profile> --limit 5` |
 | Get run details | `databricks jobs get-run <RUN_ID> --profile <profile> -o json` |
 | Get task output | `databricks jobs get-run-output <TASK_RUN_ID> --profile <profile> -o json` |
 | Upload CSV to Volume | `databricks fs cp file.csv "dbfs:/Volumes/catalog/schema/volume/file.csv" --profile <profile> --overwrite` |
-| Local Neo4j verify | `cd lab_setup/verify_labs && uv run verify-labs lab5` |
+| Local Neo4j verify | `cd lab_setup/verify_labs && uv run verify-labs lab2` |

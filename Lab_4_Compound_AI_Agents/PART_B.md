@@ -43,7 +43,7 @@ Before starting, ensure you have:
 - Completed **Part A** (Genie space for sensor analytics)
 - Access to the Unity Catalog: `databricks-neo4j-lab.lakehouse` (tables) and `databricks-neo4j-lab.lab-schema` (volume)
 
-> **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 5 notebooks they completed.
+> **Note on the Neo4j MCP connection:** This lab uses a **pre-configured Neo4j MCP connection** that has already been set up by the workshop administrators. The MCP server points to the **administrator's Neo4j Aura instance** (not your individual Aura instance from Lab 1), because it contains the **complete dataset** — all 20 aircraft, 80 systems, 320 components, 160 sensors, 300 maintenance events, 800 flights, and 300 delays. This ensures every participant has access to the full graph regardless of which Lab 2 notebooks they completed.
 
 ---
 
@@ -150,15 +150,15 @@ DO NOT USE FOR:
 
 ---
 
-## Step 4: Add the Genie Space Agent
+## Step 4: Add the Genie space Agent
 
-### 4.1 Add Genie Space
+### 4.1 Add Genie space
 
 1. Click **+ Add** to add another agent
-2. From the **Type** dropdown, select **Genie Space**
+2. From the **Type** dropdown, select **Genie space**
 3. Select your Genie space from Part A: `Aircraft Sensor Analyst [YOUR_INITIALS]`
 
-### 4.2 Configure Agent Settings
+### 4.2 Configure the Genie Subagent
 
 1. **Agent Name:** `sensor_data_agent`
    - Edit the auto-populated name if needed
@@ -224,7 +224,7 @@ You are an intelligent coordinator for aircraft analytics. Your role is to under
 
 ## Available Agents
 
-### sensor_data_agent (Genie Space - Unity Catalog SQL)
+### sensor_data_agent (Genie space - Unity Catalog SQL)
 Use for questions about:
 - Sensor readings and telemetry data
 - Time-series analytics (averages, trends, rolling windows)
@@ -424,7 +424,7 @@ User Question
      v
 Multi-Agent Supervisor
      |
-     +---> "sensor readings?" ---> Genie Space ---> Unity Catalog (Lakehouse)
+     +---> "sensor readings?" ---> Genie space ---> Unity Catalog (Lakehouse)
      |        time-series              SQL           databricks-neo4j-lab.lakehouse
      |        aggregations                           345,600+ sensor readings
      |        trend analysis
@@ -465,7 +465,7 @@ Multi-Agent Supervisor
 - Use the Examples tab to add labeled training questions
 
 ### "Cypher query failed"
-- Check that Neo4j data was loaded correctly (Lab 5)
+- Check that Neo4j data was loaded correctly (Lab 2)
 - Verify node labels and relationship types match documentation
 - Review Cypher syntax for errors
 - Test queries directly in Neo4j Aura console first
