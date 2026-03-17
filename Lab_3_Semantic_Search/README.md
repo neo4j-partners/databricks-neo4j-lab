@@ -16,7 +16,7 @@ Before starting, make sure you have:
 
 ## Lab Overview
 
-This lab consists of two notebooks that add semantic search to your existing knowledge graph:
+This lab consists of two core notebooks that add semantic search to your existing knowledge graph, plus an optional third notebook for hybrid retrieval:
 
 ### 03_data_and_embeddings.ipynb - Data Preparation
 Build the foundation for semantic search over maintenance documentation:
@@ -34,6 +34,11 @@ Learn retrieval patterns from simple to graph-enhanced:
 - Create custom Cypher queries with VectorCypherRetriever
 - Connect maintenance documentation to your aircraft topology
 - Compare standard vs. graph-enhanced retrieval results
+
+### 05_hybrid_retrievers.ipynb - Hybrid Search (Optional)
+Combine vector similarity with keyword-based fulltext search for more robust retrieval:
+- Use HybridRetriever and HybridCypherRetriever to blend vector and keyword results
+- Compare hybrid retrieval against pure vector search
 
 ## Configuration
 
@@ -76,3 +81,5 @@ The embedding and LLM models use Databricks Foundation Model APIs which are pre-
 ## Next Steps
 
 Congratulations! You've completed the Semantic Search lab. You can now combine vector search with graph traversal to build powerful GraphRAG retrievers.
+
+Copy and paste queries from the [Sample Queries](SAMPLE_QUERIES.md) page to explore the Document-Chunk structure and verify your vector indexes in the Neo4j Query Workspace.

@@ -6,19 +6,27 @@ Data Intelligence Meets Graph Intelligence
 
 Databricks is the Data Intelligence Platform. It governs and analyzes structured, semi-structured, and unstructured data at scale. Neo4j is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Together they form a complete intelligence platform: Databricks handles volume and governance, Neo4j handles topology and traversal.
 
-The integration rests on four pillars: bi-directional data pipelines through the Databricks-certified Spark Connector, graph analytics that unlock hidden patterns at scale, GraphRAG retrieval that grounds AI responses in structured knowledge, and agent integration that lets AI systems query both platforms through natural language.
+The integration rests on four pillars: bi-directional data pipelines through the Databricks-certified Spark Connector, graph analytics that surface patterns invisible in flat tables, GraphRAG retrieval that grounds AI responses in structured knowledge, and agent integration that lets AI systems query both platforms through natural language.
 
-## Databricks: The Data Intelligence Platform
+## Databricks: Volume and Governance
 
-In this architecture, Databricks provides the governed data foundation. Delta Lake stores operational data as open lakehouse tables. Unity Catalog governs access across data and AI assets. Databricks SQL handles aggregation workloads at petabyte scale, including time-series analysis and fleet-wide statistical comparisons. AI/BI Genie translates natural language into governed SQL, and Agent Bricks hosts the multi-agent systems that coordinate queries across both platforms.
+In this architecture, Databricks provides the governed data foundation. Delta Lake stores operational data as open lakehouse tables. Unity Catalog governs access across data and AI assets. Databricks SQL handles aggregation workloads at petabyte scale, including time-series analysis and fleet-wide statistical comparisons. The Lakehouse is the system of record and the analytical engine for everything that stays in rows and columns.
 
-## Neo4j: The Graph Intelligence Platform
+## Neo4j: Topology and Traversal
 
-Neo4j stores the connections that flat tables obscure. Cypher queries traverse multi-hop relationships in milliseconds, matching patterns across nodes and the edges connecting them. AuraDB runs the graph as a managed service. Graph Data Science provides algorithms like PageRank and community detection that write results back to the Lakehouse. GraphRAG combines vector search with graph traversal for enriched retrieval, and Aura Agent enables conversational interfaces built directly on the knowledge graph.
+Neo4j makes the structural relationships between entities explicit and directly traversable. The graph captures how entities connect, what paths exist between them, and which communities form. Graph algorithm results write back to the Lakehouse as enrichment columns in Gold tables.
+
+## From the Lakehouse to the Graph
+
+Not everything moves to the graph. Aggregates, metrics, logs, and documents stay in Delta Lake where they belong. Only the subset with connection patterns worth traversing projects into Neo4j.
+
+The mapping follows a consistent pattern. Rows become nodes, with columns as node properties. Foreign keys become relationships, and mapping tables dissolve into relationships with properties of their own. When two entities share an attribute value, that shared value becomes a node connecting them, making the implicit relationship explicit. Self-referential columns like from_account and to_account in a transactions table become traversable relationship chains.
+
+The lakehouse remains the system of record. The graph is a projection of the connections that matter. The Medallion Architecture organizes how that projection happens in practice.
 
 ## The Medallion Architecture
 
-Databricks organizes data through progressive refinement across three layers. Bronze is the raw landing zone: files arrive from cloud storage with no transformation. Silver is the curation layer: schema enforcement, type casting, and column renaming produce clean, governed tables. The Spark Connector reads from Silver tables and writes nodes and relationships into Neo4j. Gold is where all intelligence converges: graph algorithm results like cycle detection, PageRank, and community scores write back to Delta as columns in Gold tables, joining with operational data that never left the Lakehouse.
+Databricks organizes data through progressive refinement across three layers. Bronze is the raw landing zone, where files arrive from cloud storage with no transformation. Silver curates that raw data into governed tables through schema enforcement, type casting, and column renaming. The Spark Connector reads from Silver tables and writes nodes and relationships into Neo4j. Gold is where all intelligence converges. Graph algorithm results like cycle detection, PageRank, and community scores write back to Delta as columns in Gold tables, joining with operational data that never left the Lakehouse.
 
 Data flows forward through the layers, graph insights flow back. Silver feeds the graph, Gold captures what the graph discovers.
 
@@ -45,13 +53,21 @@ Each stage uses a different connector optimized for its workload.
 | Data Analytics | Spark Connector + Unity Catalog JDBC | GDS algorithm results as DataFrames; governed SQL via JDBC |
 | GraphRAG Retrieval / Agent | Neo4j MCP Server + Python driver | Schema inspection, read-only Cypher, vector search |
 
-## Two Data Models, Two Query Languages
+## The Data Intelligence Platform
 
-SQL and Cypher answer different shapes of questions. SQL handles aggregation over rows and columns, computing totals, averages, and distributions across large datasets. Cypher handles traversal across connection topologies, following variable-depth hops and matching patterns that span multiple relationship types.
+Databricks processes transactions, sensor streams, and clickstreams at petabyte scale. Databricks SQL handles aggregation workloads, from simple totals and averages to time-series analysis and fleet-wide statistical comparisons. Unity Catalog provides unified governance across data and AI assets. Delta Lake provides the open storage layer with schema enforcement and ACID transactions.
 
-Consider financial fraud detection as a concrete example. Money laundering moves funds through chains of accounts and back to the origin. Each individual transfer looks legitimate in isolation. The circular pattern is only visible when you follow the connections. Detecting the cycle in SQL requires recursive CTEs that self-join the transactions table at each hop. In Cypher, the same detection is a single pattern match.
+The AI stack builds on the governed foundation. AI/BI Genie translates natural language into governed SQL for conversational analytics. Mosaic AI provides model training and serving. Agent Bricks hosts compound AI systems that coordinate queries across multiple data sources.
 
-Most real-world questions need both platforms working together.
+## The Graph Intelligence Platform
+
+Cypher, the graph query language, matches patterns across nodes and relationships. A multi-hop traversal that follows three relationship types is a single query, not a chain of JOINs. Pattern matching extends to variable-length paths, shortest path computation, and subgraph detection.
+
+AuraDB provides the managed cloud runtime. Graph Data Science adds algorithmic capabilities: PageRank scores influence, community detection clusters tightly connected groups, and similarity algorithms surface hidden connections. GraphRAG layers vector search on top of graph traversal, combining semantic similarity with structural context in a single retrieval step. Aura Agent turns the knowledge graph into a conversational interface.
+
+## Data Intelligence, Graph Intelligence, or Both?
+
+Each platform answers a different shape of question. SQL handles aggregation, computing totals, averages, and distributions across large datasets. Cypher handles traversal, following variable-depth hops and matching patterns across multiple relationship types.
 
 | Question | Platform |
 |----------|----------|
@@ -59,7 +75,7 @@ Most real-world questions need both platforms working together.
 | Accounts within three hops of a flagged account | Neo4j (graph traversal) |
 | Find the fraud ring, compute its total volume | Both |
 
-The rule of thumb: counting things stays in SQL. Following connections moves to the graph.
+The rule of thumb: counting things stays in SQL. Following connections moves to the graph. Most real-world questions need both platforms working together.
 
 ## Workshop Roadmap
 

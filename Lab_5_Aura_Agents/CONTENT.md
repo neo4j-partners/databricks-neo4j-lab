@@ -4,11 +4,15 @@ Labs 3 and 4 built retrieval and agent capabilities programmatically, wiring vec
 
 ## What Are Aura Agents?
 
-Aura Agents combine semantic search, graph traversal, and natural language queries into a single conversational layer hosted inside the Neo4j console. The "Create with AI" workflow inspects the knowledge graph schema and automatically generates the tools an agent needs. There is no application code to write and no Cypher templates to configure manually. The result is a chatbot-style interface where users ask questions in plain English and the agent selects the right retrieval strategy behind the scenes.
+Aura Agents is Neo4j's no-code agent platform for building, testing, and deploying conversational agents grounded in the data stored in AuraDB. The platform provides the orchestration layer and the integration with generative AI models, abstracting away the complexity of wiring together LLM frameworks, graph retrieval patterns, and serving infrastructure. Users describe a use case, and the platform auto-generates an agent with tailored tools based on the graph's schema, including vector search, Cypher query templates, and text-to-Cypher generation.
+
+The agent runtime uses a curated set of AI models for planning, reasoning, and retrieval, with a fine-tuned model dedicated to text-to-Cypher generation. The testing interface exposes the agent's reasoning transparently: users can inspect which tools were invoked, their inputs and outputs, and the full reasoning chain, making it straightforward to diagnose unexpected results and iterate on the agent's configuration.
+
+Once an agent is ready, it can be deployed externally through two mechanisms. A **REST API** endpoint returns structured JSON responses, accessible with Aura API credentials. An **MCP server** endpoint exposes the agent as a read-only tool that external agents (or clients like Claude Desktop) can discover and call. This is how the Lab 4 architecture connects to Neo4j: the Aura Agent serves as the MCP backend that the Databricks supervisor routes graph questions to.
 
 ## The "Create with AI" Workflow
 
-When you launch "Create with AI" against a database, the system reads the graph's node labels, relationship types, properties, and vector indexes. From that schema inspection it generates a set of tools across three categories, each mapped to the query patterns the graph can support. You can then test the agent in the console, adjust which tools are enabled, and iterate without redeploying anything.
+Aura Agents supports two creation paths. **From scratch**, users manually select a target AuraDB instance, provide a name and instructions, and add tools one at a time. **Create with AI** is the faster path: users describe their use case in plain language, and the platform inspects the graph's node labels, relationship types, properties, and vector indexes to auto-generate a set of tools across three categories, each mapped to the query patterns the graph can support. If the result is not quite right, "Regenerate with AI" overwrites the current configuration with a fresh generation. Either way, you can test the agent in the console, adjust which tools are enabled, and iterate without redeploying anything.
 
 ## Agent Tool Types
 
@@ -20,12 +24,14 @@ Pre-defined graph traversal patterns that map to specific relationships in the k
 
 Semantic vector search over embedded content. The agent converts the user's question into an embedding and retrieves the most similar chunks from the vector index, surfacing maintenance manual passages even when the terminology differs from the query.
 
+> **Note on embedding models:** Lab 3 generates embeddings using Databricks Foundation Model APIs (BGE-large, 1024 dimensions), while Lab 5 configures the Aura Agent with OpenAI's `text-embedding-3-small`. Different platforms offer different embedding model availability — Databricks hosts BGE and GTE models, while Aura Agents currently supports OpenAI and other external providers. We are working with Databricks to add support for their embedding models in the Aura Agents platform. In the meantime, the "Create with AI" workflow will re-embed content using the configured provider when generating the Similarity Search tool.
+
 ### Text2Cypher
 
 Translates arbitrary natural language into Cypher for ad-hoc exploration. This is the most flexible tool but carries the highest risk of incorrect results, since the generated query varies with each invocation.
 
-## Confabulation Risk with Text2Cypher
+## Accuracy Challenges with Text2Cypher
 
-Text2Cypher generates a different Cypher query each time, and subtle bugs in the generated query can produce wrong answers silently. Filtering on `"critical"` instead of `"CRITICAL"` returns no results for case-sensitive properties. Rather than questioning the empty result, the agent confabulates a plausible explanation, confidently stating that the aircraft had no critical events when it actually has seven.
+Text2Cypher is the most flexible of the three tool types, but it carries a challenge with accuracy of response. Because it generates a different Cypher query each time, subtle differences in the generated query can produce incorrect answers silently. Filtering on `"critical"` instead of `"CRITICAL"` returns no results for case-sensitive properties, and the agent may present the empty result as a confident answer rather than flagging a possible query issue.
 
-This failure mode is why the three tool types exist as a spectrum of reliability. Cypher Templates are deterministic and always return correct results. Similarity Search is grounded in vector similarity scores. Text2Cypher is valuable for ad-hoc exploration but should be cross-checked, especially when the answer is zero or seems surprising. Running the same question twice and comparing results is a practical way to spot generated-query variability.
+This is why the three tool types exist as a spectrum of reliability. Cypher Templates are deterministic and always return correct results for the patterns they cover. Similarity Search is grounded in vector similarity scores. Text2Cypher is valuable for ad-hoc exploration but should be cross-checked, especially when the answer is zero or seems surprising. Running the same question twice and comparing results is a practical way to spot generated-query variability.

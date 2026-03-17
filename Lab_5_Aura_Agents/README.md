@@ -126,7 +126,7 @@ Other Text2Cypher questions to try:
 - "What are the most common fault types across all maintenance events?" — Generates a query grouping and counting maintenance events by fault type.
 - "Which airports have the most departing flights?" — Aggregates flights by departure airport to show the busiest hubs.
 
-> **Caution: Text2Cypher can silently return wrong answers.** Try this experiment: first ask *"Which aircraft had the highest number of maintenance events?"* The agent correctly identifies AC1014 with 26 events. Now ask *"How many critical maintenance events does aircraft AC1014 have?"* You may get a confident answer of zero — even though AC1014 actually has 7 CRITICAL events. Run the same question again and you might get the correct answer. See [CONTENT.md](CONTENT.md#text2cypher-understanding-confabulation-risk) for a detailed explanation of why this happens.
+> **Caution: Text2Cypher can silently return wrong answers.** Try this experiment: first ask *"Which aircraft had the highest number of maintenance events?"* The agent correctly identifies AC1014 with 26 events. Now ask *"How many critical maintenance events does aircraft AC1014 have?"* You may get a confident answer of zero — even though AC1014 actually has 7 CRITICAL events. Run the same question again and you might get the correct answer. See [CONTENT.md](CONTENT.md#accuracy-challenges-with-text2cypher) for a detailed explanation of why this happens.
 
 ## Step 6: (Optional) Deploy to API
 
@@ -150,7 +150,7 @@ The quick version:
 
 ## Summary
 
-For a full comparison of the three tool types and their tradeoffs, see [CONTENT.md](CONTENT.md#tool-comparison).
+For a full comparison of the three tool types and their tradeoffs, see [CONTENT.md](CONTENT.md#agent-tool-types).
 
 ## Next Steps
 

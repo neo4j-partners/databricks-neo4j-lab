@@ -13,12 +13,10 @@ In this lab, you'll build a compound AI agent system using Databricks Agent Bric
 ## Prerequisites
 
 Before starting, make sure you have:
-- Completed **Lab 2** (Databricks ETL) — run **both** notebooks:
-  - `01_aircraft_etl_to_neo4j.ipynb` (core: Aircraft, System, Component)
-  - `02_load_neo4j_full.ipynb` (full dataset: adds Sensors, Flights, Airports, Delays, MaintenanceEvents, Removals — **required** for the Neo4j MCP agent in Part B)
-- Sensor readings data loaded in your Databricks lakehouse (Unity Catalog)
 - Running in a **Databricks workspace** with Agent Bricks access
 - Neo4j MCP server connection configured in Unity Catalog
+
+**Recommended:** Complete **Lab 2** (Databricks ETL) before starting this lab. Lab 4 uses shared workshop infrastructure (not your personal Aura instance), but completing Lab 2 gives you familiarity with the data model — the aircraft topology, sensor relationships, flights, and maintenance events — that the agents in this lab query.
 
 ## Lab Overview
 
