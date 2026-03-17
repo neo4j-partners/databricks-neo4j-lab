@@ -1,3 +1,5 @@
+https://neo4j-partners.github.io/databricks-neo4j-lab
+
 # Hands-On Lab: Neo4j and Databricks
 
 Build AI Agents and Knowledge Graphs with Neo4j and Databricks.
