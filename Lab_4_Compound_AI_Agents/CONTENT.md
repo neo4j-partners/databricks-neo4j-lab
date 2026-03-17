@@ -2,7 +2,7 @@
 
 Lab 3 built a knowledge graph from maintenance documentation and enabled semantic search over it. GraphRAG grounds LLM answers in retrieved content enriched with graph context: entities, relationships, connected chunks. But GraphRAG can only reach data in the graph. The full sensor telemetry ledger (345,600+ hourly readings across 90 days) stays in Delta Lake. GraphRAG cannot answer "what is the average EGT for aircraft N95040A?" because that requires SQL aggregation over rows that never entered the graph. To answer questions that span both platforms, the architecture needs agents.
 
-## Agent Fundamentals and the ReAct Pattern
+## What Are Agents
 
 An AI agent is more than a language model answering questions. It perceives its environment (the user's question, available tools, conversation history), reasons about what to do, takes action by calling tools, and returns a response. These four stages run in a loop: after observing the result of one action, the agent can reason again and take another.
 
@@ -10,9 +10,35 @@ This loop is the **ReAct pattern** (Reason + Act). The agent receives a question
 
 Tools are what give agents their capabilities. Each tool has a description that the agent matches against the user's question during the reasoning phase. The quality of these descriptions directly affects routing accuracy.
 
-## Agent Bricks
+## Databricks AI Solutions
 
-Databricks Agent Bricks is the platform layer for building and deploying AI agents within the Databricks ecosystem. It provides the scaffolding for defining agent behavior, connecting tools (including Genie spaces and external services), and deploying agents as governed endpoints. Agent Bricks handles the operational concerns that sit outside the agent's reasoning loop: authentication, tool registration, deployment, and monitoring. The agents you build in this lab run as Agent Bricks components, inheriting Unity Catalog governance.
+Building production agents requires more than a reasoning loop and a set of tools. The agent needs a way to translate natural language into the right query language for each data store, a platform to handle deployment and governance, and an orchestration layer to coordinate multiple specialists. Databricks provides three capabilities that address these concerns: Mosaic AI as the foundational AI platform, AI/BI Genie for natural language analytics over structured data, and Agent Bricks for building and deploying the agents themselves.
+
+### Mosaic AI
+
+Mosaic AI is the AI platform within Databricks that provides the infrastructure for building, deploying, and monitoring generative AI applications. It spans the full lifecycle: foundation model serving through managed endpoints, vector search for unstructured data retrieval, AI Gateway for managing access across model providers, and MLflow integration for tracing, evaluation, and production monitoring. Unity Catalog provides governance across all of these capabilities, so that models, tools, data, and agent endpoints share a single permission and lineage model.
+
+Rather than a single product, Mosaic AI is the layer that the agent-specific tools build on. Genie uses Mosaic AI's model serving infrastructure to run its compound AI pipeline. Agent Bricks deploys agents to Mosaic AI's serverless compute and monitors them through MLflow tracing. The platform handles the operational concerns (model hosting, authentication, scaling, observability) so that agent development can focus on the reasoning and tool-calling logic that makes each agent useful.
+
+### AI/BI Genie
+
+Genie specializes in one problem: turning natural language questions into correct SQL. It is purpose-built for structured data analytics, translating conversational questions into queries, executing them against a SQL warehouse, and returning results as tables, summaries, and visualizations.
+
+Rather than relying on a single language model to handle everything from parsing the question to generating SQL to summarizing results, Genie operates as a compound AI system. Multiple specialized components work together: one parses the question, another generates SQL, another summarizes the result, and so on. This multi-component design lets the platform select the best-suited model for each subtask and evolve individual components independently.
+
+The accuracy of any natural-language-to-SQL system depends on how much context the model has about the data it queries. Genie draws its context from Unity Catalog metadata: table names and descriptions, column names and descriptions, primary and foreign key relationships, and sample column values. Domain experts configure **Genie spaces** by curating a set of tables (up to 25 per space), writing plain-text instructions that teach business terminology and rules, defining JOIN relationships, and supplying example SQL queries that demonstrate correct patterns. When a user's question matches a parameterized example query, Genie marks the response as **Trusted**, signaling that the answer follows a verified pattern rather than a generated one.
+
+Genie also provides a **Knowledge Store** where space authors can define structured business semantics: column-level synonyms, local join relationships, SQL measures with filters and dimensions, and prompt-matching rules. These refinements stay local to the space and do not alter the underlying Unity Catalog metadata, so multiple spaces can present different views of the same tables for different audiences. Every query Genie generates is read-only, which makes it safe to expose to business users who need answers without writing SQL themselves.
+
+### Agent Bricks
+
+Agent Bricks is the platform layer for building, deploying, and governing AI agents within Databricks. It handles the operational concerns that sit outside an agent's reasoning loop: authentication, tool registration, model selection, deployment to serverless compute, and monitoring through MLflow.
+
+The platform offers managed agent builders for common patterns. **Knowledge Assistant** converts documents into conversational agents that answer questions with source attribution. **Information Extraction** processes unstructured text into structured data through classification and extraction. **Custom LLM** handles specialized generation tasks like summarization and text transformation. The builder most relevant to this lab is the **Supervisor Agent**, which orchestrates multi-agent systems by routing questions to the right specialist.
+
+The Supervisor Agent supports up to 20 subagents of four types: Genie spaces for natural language analytics over structured data, agent endpoints for document-based Q&A, Unity Catalog functions for custom tool logic, and MCP servers for external services. Each subagent is registered with a name and a detailed description of its capabilities. The supervisor reads these descriptions to determine which subagent should handle each incoming question. When a question requires multiple subagents, the supervisor delegates to each and synthesizes a unified response. Access control flows through the platform: end users only reach subagents they have explicit permissions for.
+
+Teams that need more control can build agents with frameworks like LangChain, LangGraph, or LlamaIndex and deploy them through Agent Bricks to inherit Unity Catalog governance and MLflow evaluation without adopting the managed builders.
 
 ## Specialized Agents for Different Data Structures
 
@@ -20,11 +46,11 @@ Two schemas, two query languages, and two sets of conventions in one prompt dilu
 
 The architecture separates concerns: one agent per platform, a supervisor to coordinate them.
 
-### Databricks Genie: Natural Language to SQL
+### Genie Space: Sensor Telemetry Analytics
 
-Genie is a compound AI system, not a single LLM. It turns natural language into governed SQL, purpose-built for tabular data. Genie queries any data registered in Unity Catalog: managed tables, external tables, foreign tables from federated sources, and views. Unity Catalog provides the metadata that makes Genie effective: table names, column descriptions, primary and foreign key relationships.
+The Genie space in this lab is configured against the Lakehouse sensor data: `sensor_readings`, `sensors`, `systems`, and `aircraft` tables registered in Unity Catalog. Domain instructions teach Genie the aircraft terminology (EGT, fuel flow, vibration amplitude) and the JOIN paths between tables. Example queries demonstrate the aggregation patterns that sensor analytics requires: daily averages, percentile calculations, cross-aircraft comparisons.
 
-Domain experts configure Genie Spaces: curated sets of tables with JOIN definitions, plain-text instructions teaching domain terminology and business rules, and example SQL queries that Genie selects from when they match the user's question. When a response matches a parameterized example query exactly, Genie marks it as "Trusted." Every generated query is read-only.
+When a user asks "What is the average EGT temperature for aircraft N95040A?", Genie matches the question against its configured context, generates a SQL query that joins `sensor_readings` to `sensors` to `aircraft`, applies the appropriate aggregation, and returns the result. The compound AI system handles the full translation from conversational English to correct SQL without the user needing to know the schema.
 
 ### Neo4j Graph Agent: Natural Language to Cypher
 
