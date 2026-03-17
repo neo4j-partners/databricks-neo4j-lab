@@ -4,7 +4,7 @@ Lab 2 loaded structured data into Neo4j: aircraft, systems, components, sensors,
 
 ## From RAG to GraphRAG
 
-Traditional RAG retrieves text chunks by embedding similarity and passes them to an LLM as context. This works well for single-document questions but struggles when answers require connecting information across entities, following causal chains through related components, or filtering results by graph structure. These are symptoms of what the workshop overview describes as Context ROT (Redundancy, Outdated content, Topic drift), where vector similarity alone retrieves context that is plausible but incomplete. GraphRAG addresses this by grounding retrieval in a knowledge graph. Instead of returning isolated text fragments, it can traverse from a semantically matched chunk to the entities, relationships, and metadata that give that chunk meaning.
+Traditional RAG retrieves text chunks by embedding similarity and passes them to an LLM as context. This works well for single-document questions but struggles when answers require connecting information across entities, following causal chains through related components, or filtering results by graph structure. These are symptoms of what the workshop overview describes as Context ROT, where vector similarity alone retrieves context that is plausible but incomplete. GraphRAG addresses this by grounding retrieval in a knowledge graph. Instead of returning isolated text fragments, it can traverse from a semantically matched chunk to the entities, relationships, and metadata that give that chunk meaning.
 
 ## Building the Knowledge Graph from Documents
 
