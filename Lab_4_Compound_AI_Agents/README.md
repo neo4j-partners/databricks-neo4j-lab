@@ -2,37 +2,13 @@
 
 In this lab, you'll build a compound AI agent system using Databricks Agent Bricks that combines a **Genie space** (for sensor time-series analytics) with **Neo4j MCP** (for graph relationship queries). The Supervisor Agent routes each question to the right system and, for complex questions spanning both, queries each sequentially and synthesizes a combined answer.
 
+> **Background Reading:** For the concepts and architecture behind this lab, see [CONTENT.md](CONTENT.md).
+
 > **Infrastructure:** This lab uses **shared** workshop resources — the Genie space queries shared Lakehouse tables in Unity Catalog, and the Neo4j MCP agent queries the **Reference Aura Instance** (the fully populated graph). You do not need data in your personal Aura instance for this lab.
 
 ## Multi-Agent Architecture
 
 ![Lab Architecture Overview](../images/lab-architecture-overview.png)
-
-## Overview of the Two Data Sources - Databricks Lakehouse and Neo4j Knowledge Graph
-
-Aircraft intelligence requires both **time-series telemetry** and **rich relational data**, and each is best served by a purpose-built platform:
-
-- **Databricks Genie with Lakehouse** excels at time-series sensor data — 345,600+ hourly readings stored in Delta Lake columnar format, optimized for aggregations, trend analysis, percentile calculations, and fleet-wide statistical comparisons over time. SQL is the natural language for these analytical workloads, and Genie translates natural language into SQL automatically.
-- **Neo4j MCP Server with Knowledge Graph** excels at richly connected relational data — aircraft topology, component hierarchies, maintenance event chains, flight-to-airport routes, and delay root causes. These queries traverse multiple relationships (e.g., "Which components in the hydraulics system had maintenance events that caused flight delays?") and would require expensive multi-table JOINs in a relational database, but Neo4j handles them natively.
-
-| System | Strength | Best For |
-|--------|----------|----------|
-| **Databricks (Genie)** | SQL analytics, aggregations | Time-series queries, statistics |
-| **Neo4j (MCP)** | Graph traversals, pattern matching | Relationships, topology |
-
-The multi-agent approach lets users ask questions in natural language without knowing which system to query. The supervisor intelligently routes based on the question's intent.
-
-## Data Model Overview
-
-### Data Overlap
-
-**Shared data** — Aircraft, Systems, and Sensors metadata exist in both the lakehouse tables and Neo4j nodes.
-
-**Genie-exclusive** — `sensor_readings` (345,600+ rows). The high-volume time-series telemetry lives only in the lakehouse, where SQL excels at aggregations, trends, and statistical analysis.
-
-**Neo4j-exclusive** — Components, MaintenanceEvents, Flights, Delays, Airports, and Removals, plus the relationships between all entities (`HAS_COMPONENT`, `HAS_EVENT`, `OPERATES_FLIGHT`, `HAS_DELAY`, `HAS_REMOVAL`, etc.). These relationship-rich structures are what make graph queries powerful for topology, maintenance history, and operational analysis.
-
-
 
 ## Prerequisites
 
@@ -64,41 +40,6 @@ Build a supervisor agent that coordinates two specialized sub-agents:
 - Test single-agent routing and combined multi-agent queries
 - Deploy as a serving endpoint for programmatic access
 
-## Query Routing Strategy
-
-The supervisor routes questions based on intent:
-
-| Question Type | Route To | Example |
-|---------------|----------|---------|
-| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?" |
-| Statistical analysis | Genie | "Show sensors with readings above 95th percentile" |
-| Trend analysis | Genie | "Compare fuel flow rates between 737 and A320" |
-| Relationship traversals | Neo4j | "Which components are connected to Engine 1?" |
-| Pattern matching | Neo4j | "Find all aircraft with maintenance delays" |
-| Topology exploration | Neo4j | "Show the system hierarchy for N95040A" |
-| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events" |
-
-## Sample Questions
-
-### Genie Agent (Sensor Analytics)
-- "What is the average EGT temperature for aircraft N95040A?"
-- "Show daily vibration trends for Engine 1 over the last month"
-- "Which sensors have readings above their 95th percentile?"
-- "Compare fuel flow rates between Boeing and Airbus aircraft"
-- "Find the maximum N1 speed recorded across the fleet"
-
-### Neo4j Agent (Graph Relationships)
-- "Which systems does aircraft AC1001 have?"
-- "Show all maintenance events affecting Engine 1"
-- "Find flights that were delayed due to maintenance"
-- "What components are in the hydraulics system?"
-- "Which aircraft have had critical maintenance events?"
-
-### Multi-Agent (Combined Queries)
-- "Find aircraft with high EGT readings and show their recent maintenance history"
-- "Which engines have above-average vibration, and what components were recently serviced?"
-- "Compare sensor trends for aircraft that had delays versus those that didn't"
-
 ## Getting Started
 
 1. **Part A** (~30 min): Create and configure the Genie space for sensor analytics
@@ -109,22 +50,9 @@ The supervisor routes questions based on intent:
 | File | Description |
 |------|-------------|
 | `README.md` | This overview document |
+| `CONTENT.md` | Concepts and reference (dual-database architecture, routing strategy, domain knowledge) |
 | `PART_A.md` | Genie space configuration guide |
 | `PART_B.md` | Supervisor Agent setup guide |
-
-## Key Concepts
-
-- **Genie space**: AI/BI interface that converts natural language to SQL
-- **MCP (Model Context Protocol)**: Standardized protocol for tool integration
-- **Supervisor Agent**: Agent Bricks orchestration layer that routes questions to specialized subagents
-- **Agent Bricks**: Databricks platform for building and deploying AI agents
-- **Unity Catalog**: Governance layer for data and connections
-
-## Performance Considerations
-
-- **Genie**: Optimized for large-scale aggregations (345K+ readings)
-- **Neo4j**: Optimized for relationship hops and pattern matching
-- **Supervisor**: Adds minimal latency for routing decisions
 
 ## Next Steps
 

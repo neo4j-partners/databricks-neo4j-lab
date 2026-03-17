@@ -1,6 +1,8 @@
 # Lab 5: Aura Agents
 
-Neo4j Aura Agents combine semantic search, graph traversal, and natural language queries into a single conversational interface. In this lab, you will use the "Create with AI" workflow to build an agent that analyzes aircraft maintenance and operations data. Neo4j inspects your knowledge graph schema and automatically generates the tools the agent needs, so there is no code to write and no Cypher templates to configure manually.
+In this lab, you will use the Neo4j Aura Agents "Create with AI" workflow to build an agent that analyzes aircraft maintenance and operations data.
+
+> **Background Reading:** For the concepts and architecture behind this lab, see [CONTENT.md](CONTENT.md).
 
 ## Prerequisites
 
@@ -78,7 +80,7 @@ The generated tools fall into three categories:
 | **Similarity Search** | Search Maintenance Documentation Chunks |
 | **Text2Cypher** | Natural Language to Cypher Tool |
 
-Each Cypher Template tool maps to a specific traversal pattern in the graph. The Similarity Search tool uses the vector index to find semantically relevant maintenance manual passages. The Text2Cypher tool translates arbitrary natural language questions into Cypher queries for ad-hoc exploration.
+See [CONTENT.md](CONTENT.md#agent-tool-types) for a deeper explanation of each tool type and when to use them.
 
 ## Step 5: Test the Agent
 
@@ -124,11 +126,7 @@ Other Text2Cypher questions to try:
 - "What are the most common fault types across all maintenance events?" — Generates a query grouping and counting maintenance events by fault type.
 - "Which airports have the most departing flights?" — Aggregates flights by departure airport to show the busiest hubs.
 
-> **Caution: Text2Cypher can silently return wrong answers.** Try this experiment: first ask *"Which aircraft had the highest number of maintenance events?"* The agent correctly identifies AC1014 with 26 events. Now ask *"How many critical maintenance events does aircraft AC1014 have?"* You may get a confident answer of zero — even though AC1014 actually has 7 CRITICAL events. Run the same question again and you might get the correct answer.
->
-> The issue is that Text2Cypher generates a different Cypher query each time. Sometimes the generated query has a subtle bug (e.g., filtering on `"critical"` instead of `"CRITICAL"`), which returns no results. Rather than questioning the data, the agent confabulates a plausible explanation — in this case, that the aircraft simply had no critical events.
->
-> This is why the three tool types exist. **Cypher Templates are deterministic and always return correct results.** Text2Cypher is powerful for ad-hoc exploration but should be cross-checked, especially when the answer is zero or seems surprising.
+> **Caution: Text2Cypher can silently return wrong answers.** Try this experiment: first ask *"Which aircraft had the highest number of maintenance events?"* The agent correctly identifies AC1014 with 26 events. Now ask *"How many critical maintenance events does aircraft AC1014 have?"* You may get a confident answer of zero — even though AC1014 actually has 7 CRITICAL events. Run the same question again and you might get the correct answer. See [CONTENT.md](CONTENT.md#text2cypher-understanding-confabulation-risk) for a detailed explanation of why this happens.
 
 ## Step 6: (Optional) Deploy to API
 
@@ -152,15 +150,7 @@ The quick version:
 
 ## Summary
 
-The "Create with AI" workflow generated an agent with three retrieval patterns, each suited to different question types:
-
-| Tool Type | Purpose | Best For |
-|-----------|---------|----------|
-| **Cypher Templates** | Controlled, precise graph traversals | Aircraft systems, component hierarchy, maintenance history, flight details, component removals |
-| **Similarity Search** | Semantic retrieval over maintenance manuals | Finding troubleshooting procedures by meaning |
-| **Text2Cypher** | Flexible natural language to Cypher | Ad-hoc questions, aggregations, and cross-entity queries |
-
-These same patterns are implemented programmatically in Labs 3 and 4 using Python and the Neo4j GraphRAG package.
+For a full comparison of the three tool types and their tradeoffs, see [CONTENT.md](CONTENT.md#tool-comparison).
 
 ## Next Steps
 

@@ -2,6 +2,8 @@
 
 In this lab, you will set up your Neo4j Aura database and save your connection credentials for use in later labs.
 
+> **Background Reading:** For the concepts and architecture behind this lab, see [CONTENT.md](CONTENT.md).
+
 ## Prerequisites
 
 - For **Workshop SSO Login**: Access to OneBlink credentials page (provided by your organizer)

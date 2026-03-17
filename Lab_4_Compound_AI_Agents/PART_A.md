@@ -89,7 +89,7 @@ Show the trend of EGT temperatures over the 90-day period for aircraft N95040A
 
 ## Step 4: Add Instructions
 
-Navigate to **Configure** > **Instructions**. Instructions provide domain knowledge and query conventions. Enter the following:
+Navigate to **Configure** > **Instructions**. Instructions provide domain knowledge and query conventions. These instructions give the Genie domain knowledge about sensor types, normal ranges, and data conventions so it can generate accurate SQL queries. Enter the following:
 
 ```
 # Aircraft Sensor Analytics Domain Knowledge

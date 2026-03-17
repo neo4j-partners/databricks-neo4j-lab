@@ -2,6 +2,8 @@
 
 Load aircraft data from Databricks into Neo4j using the Spark Connector.
 
+> **Background Reading:** For the concepts and architecture behind this lab, see [CONTENT.md](CONTENT.md).
+
 > **Infrastructure:** This lab uses your **personal** Aura instance. You'll walk through the same ETL process used to build the shared Reference Aura Instance, loading data from shared CSV files into your own Neo4j database.
 
 **Duration:** ~45 minutes
@@ -63,13 +65,7 @@ Your workshop admin has added you to a shared Databricks workspace. You received
 
 ### Step 2: Verify Your Compute
 
-In Databricks, **compute** refers to the cloud infrastructure that runs your code. A **compute resource** is a set of virtual machines managed by Databricks that provides the CPU, memory, and Apache Spark runtime needed to execute notebook cells. Think of it as the engine behind your notebooks — without it, your code has nowhere to run.
-
-Your workshop admin has pre-configured a personal compute for each participant. Your compute comes with:
-
-- **Apache Spark** runtime for processing data at scale
-- **Neo4j Spark Connector** library for writing DataFrames directly into Neo4j
-- **Python packages** (`neo4j`, `neo4j-graphrag`, etc.) needed by the lab notebooks
+Your workshop admin has pre-configured a personal compute for each participant with the Spark runtime, Neo4j Spark Connector, and required Python packages. See [CONTENT.md](CONTENT.md#what-is-databricks-compute) for details on what compute provides.
 
 To verify your compute:
 
@@ -97,9 +93,7 @@ To view the data files:
 
 ### Step 4: Clone the Lab Notebooks
 
-A **notebook** in Databricks is an interactive document made up of cells that can contain Python code, SQL queries, or markdown text. You run cells one at a time or all at once, and each cell displays its output directly below it. Notebooks are the primary way you write and execute code in Databricks.
-
-The lab notebooks are stored in a shared folder that all participants can see. You will clone (copy) them into your own workspace so you can edit and run them without affecting other participants.
+The lab notebooks are stored in a shared folder that all participants can see. You will clone (copy) them into your own workspace so you can edit and run them without affecting other participants. See [CONTENT.md](CONTENT.md#what-are-notebooks) for an overview of notebooks in Databricks.
 
 1. Click **Workspace** in the left sidebar.
 2. Expand **Shared > databricks-neo4j-lab**.
@@ -194,45 +188,7 @@ This loads additional node types and relationships required by Lab 4:
 
 ## What You Loaded
 
-### Notebook 01: Core Graph Structure
-
-```
-(Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_COMPONENT]-> (Component)
-```
-
-| Entity | Count | Description |
-|--------|-------|-------------|
-| Aircraft | 20 | Boeing 737-800, Airbus A320/A321, Embraer E190 |
-| System | 80 | 2 engines + avionics + hydraulics per aircraft |
-| Component | 320 | Fans, compressors, turbines, pumps, etc. |
-
-### Notebook 02: Full Dataset (adds to above)
-
-```
-(Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_SENSOR]-> (Sensor)
-(Aircraft) -[:OPERATES_FLIGHT]-> (Flight) -[:DEPARTS_FROM / :ARRIVES_AT]-> (Airport)
-(Flight) -[:HAS_DELAY]-> (Delay)
-(Component) -[:HAS_EVENT]-> (MaintenanceEvent) -[:AFFECTS_SYSTEM / :AFFECTS_AIRCRAFT]-> ...
-(Aircraft) -[:HAS_REMOVAL]-> (Removal) -[:REMOVED_COMPONENT]-> (Component)
-```
-
-| Entity | Count | Description |
-|--------|-------|-------------|
-| Sensor | 160 | EGT, Vibration, N1Speed, FuelFlow per engine |
-| Airport | 12 | Route network |
-| Flight | ~800 | Flight operations |
-| Delay | ~300 | Delay causes |
-| MaintenanceEvent | ~300 | Fault tracking |
-| Removal | ~60 | Component removals |
-
-### Sample Aircraft
-
-| Tail Number | Model | Manufacturer | Operator |
-|-------------|-------|--------------|----------|
-| N95040A | B737-800 | Boeing | ExampleAir |
-| N30268B | A320-200 | Airbus | SkyWays |
-| N54980C | A321neo | Airbus | RegionalCo |
-| N37272D | E190 | Embraer | NorthernJet |
+For the full data model diagrams, entity counts, and sample aircraft, see [CONTENT.md](CONTENT.md#the-aircraft-digital-twin-data-model).
 
 ---
 
@@ -271,13 +227,9 @@ This loads additional node types and relationships required by Lab 4:
 
 ---
 
-## Key Concepts Learned
+## Key Concepts
 
-1. **Unity Catalog Volumes** store files accessible from notebooks
-2. **Neo4j Spark Connector** writes DataFrames directly to Neo4j
-3. **Node loading** uses `labels` and `node.keys` options
-4. **Relationship loading** uses `keys` strategy to match existing nodes
-5. **Cypher queries** can be run from Databricks to verify data
+See [CONTENT.md](CONTENT.md#key-concepts) for a summary of Unity Catalog Volumes, the Spark Connector, and other concepts from this lab.
 
 ---
 

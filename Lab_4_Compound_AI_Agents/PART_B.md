@@ -6,34 +6,7 @@ In this part, you'll create a multi-agent supervisor that intelligently routes q
 
 ---
 
-## Why Two Data Sources?
-
-Aircraft intelligence requires two fundamentally different types of data, and each is best served by a purpose-built system:
-
-### Genie + Lakehouse: Built for Time-Series Data
-
-The Genie space queries **Unity Catalog tables** in the Databricks Lakehouse, which excels at high-volume, time-stamped sensor telemetry. With **345,600+ rows** of hourly readings across 90 days, the Lakehouse handles:
-
-- **Time-series aggregations** — rolling averages, daily trends, percentile calculations
-- **Statistical analysis** — standard deviation, anomaly detection, fleet-wide comparisons
-- **Columnar scans** — efficiently filtering and grouping millions of readings by date range, sensor type, or aircraft
-
-SQL and the Lakehouse architecture (Delta Lake, columnar storage, query optimization) are purpose-built for these analytical workloads. Genie translates natural language into SQL, giving users instant access to this data without writing queries.
-
-### Neo4j: Built for Rich Relational Data
-
-The Neo4j knowledge graph stores the **relationships and structure** of the aircraft fleet — how aircraft connect to systems, systems to components, components to maintenance events, flights to airports, and delays to root causes. Graph databases excel at:
-
-- **Multi-hop traversals** — "Which components in the hydraulics system of AC1001 had maintenance events that caused flight delays?"
-- **Relationship patterns** — finding connected entities across 8+ node types and 13 relationship types
-- **Topology queries** — understanding the hierarchy from aircraft down to individual sensors
-- **Path analysis** — tracing cause-and-effect chains through the graph
-
-Tabular databases require expensive JOINs across many tables for these queries, while Neo4j traverses relationships natively in milliseconds.
-
-### The Multi-Agent Supervisor: Combining Both
-
-The supervisor you'll build in this lab routes each question to the right data source — **time-series questions go to Genie, relationship questions go to Neo4j** — and for complex questions that span both, it queries each system sequentially and synthesizes a combined answer. For example, "Find aircraft with high EGT and show their maintenance history" first gets high-EGT aircraft from the Lakehouse, then retrieves their maintenance events from the graph.
+For background on why this lab uses two data sources and how they complement each other, see [CONTENT.md](CONTENT.md#why-two-data-sources).
 
 ---
 
@@ -416,38 +389,7 @@ You've created a multi-agent system that combines two purpose-built data platfor
 - **Cross-source synthesis** — complex questions that span both systems are answered by querying each sequentially and combining the results
 - **Natural language access** — users ask questions without needing SQL or Cypher knowledge
 
-### Architecture Recap
-
-```
-User Question
-     |
-     v
-Multi-Agent Supervisor
-     |
-     +---> "sensor readings?" ---> Genie space ---> Unity Catalog (Lakehouse)
-     |        time-series              SQL           databricks-neo4j-lab.lakehouse
-     |        aggregations                           345,600+ sensor readings
-     |        trend analysis
-     |
-     +---> "relationships?" ---> Neo4j MCP ---> Knowledge Graph (Aura)
-     |        topology               Cypher       8 node types, 13 relationship types
-     |        maintenance                         admin's pre-configured instance
-     |        flights/delays
-     |
-     +---> "both needed?" ---> Sequential calls to both agents
-                               |
-                               v
-                         Synthesized Response
-```
-
-### Data Sources
-
-| Source | Location | Query Language | Best For |
-|--------|----------|----------------|----------|
-| Sensor Telemetry | `databricks-neo4j-lab.lakehouse.sensor_readings` | SQL | Time-series analytics, trends, aggregations |
-| Aircraft Metadata | `databricks-neo4j-lab.lakehouse.aircraft` | SQL | Fleet-wide comparisons, filtering |
-| Knowledge Graph | Neo4j Aura (admin instance, via MCP) | Cypher | Relationships, topology, graph traversals |
-| Graph Data Origin | `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/` | - | - |
+For the full architecture diagram and data sources reference, see [CONTENT.md](CONTENT.md#multi-agent-architecture).
 
 ---
 
