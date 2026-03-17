@@ -24,7 +24,7 @@ Pre-defined graph traversal patterns that map to specific relationships in the k
 
 Semantic vector search over embedded content. The agent converts the user's question into an embedding and retrieves the most similar chunks from the vector index, surfacing maintenance manual passages even when the terminology differs from the query.
 
-> **Note on embedding models:** Lab 3 generates embeddings using Databricks Foundation Model APIs (BGE-large, 1024 dimensions), while Lab 5 configures the Aura Agent with OpenAI's `text-embedding-3-small`. Different platforms offer different embedding model availability — Databricks hosts BGE and GTE models, while Aura Agents currently supports OpenAI and other external providers. We are working with Databricks to add support for their embedding models in the Aura Agents platform. In the meantime, the "Create with AI" workflow will re-embed content using the configured provider when generating the Similarity Search tool.
+> **Note on embedding models:** Lab 3 generates embeddings using Databricks Foundation Model APIs (BGE-large, 1024 dimensions), while Lab 5 configures the Aura Agent with OpenAI's `text-embedding-3-small`. Different platforms offer different embedding model availability — Databricks hosts BGE and GTE models, while Aura Agents currently supports OpenAI and other external providers. The "Create with AI" workflow will re-embed content using the configured provider when generating the Similarity Search tool.
 
 ### Text2Cypher
 

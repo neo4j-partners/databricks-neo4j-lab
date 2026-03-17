@@ -150,6 +150,14 @@ The quick version:
 
 ## Summary
 
+The "Create with AI" workflow generated an agent with three retrieval patterns:
+
+| Tool Type | Purpose | Best For |
+|-----------|---------|----------|
+| **Cypher Templates** | Controlled, precise graph traversals | Aircraft systems, component hierarchy, maintenance history |
+| **Similarity Search** | Semantic retrieval over maintenance manuals | Finding troubleshooting procedures by meaning |
+| **Text2Cypher** | Flexible natural language to Cypher | Ad-hoc questions, aggregations, cross-entity queries |
+
 For a full comparison of the three tool types and their tradeoffs, see [CONTENT.md](CONTENT.md#agent-tool-types).
 
 ## Next Steps

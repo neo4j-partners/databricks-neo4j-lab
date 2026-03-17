@@ -58,7 +58,7 @@ Review the generated settings:
 * **Name:** The AI suggests a name based on your prompt
 * **Description:** An auto-generated summary of the agent's capabilities
 * **Prompt instruction:** A refined version of your original prompt
-* **Access:** Leave as **Internal** (free) for now
+* **Access:** Leave as **Internal** (free) for now -- you can switch to External later if you want API or MCP access
 
 Click **Create agent** when satisfied.
 
@@ -104,6 +104,8 @@ Other questions to try:
 === Semantic Search Questions
 
 Try: **"What do the maintenance procedures say about engine vibration troubleshooting?"**
+
+The agent uses the Search Maintenance Documentation Chunks tool to find semantically relevant passages from the maintenance manual, then synthesizes the diagnostic steps and corrective actions.
 
 Other questions to try:
 
@@ -170,4 +172,4 @@ The "Create with AI" workflow generated an agent with three retrieval patterns:
 | Ad-hoc questions, aggregations, cross-entity queries
 |===
 
-Congratulations! You have completed the workshop.
+Congratulations! You have completed the workshop. You can optionally connect your agent as an MCP server for use with Claude Code, VS Code, or other MCP-compatible clients. See the MCP Server Setup guide (`mcp_setup.md`) in the lab materials.
