@@ -1,180 +1,75 @@
 = Lab 2: Databricks ETL to Neo4j
 
-Load aircraft data from Databricks into Neo4j using the Spark Connector.
+In this lab you move data from Databricks Lakehouse into Neo4j using the Spark Connector. The Lakehouse holds aircraft fleet data as governed Delta tables; by the end, that same data will exist as a traversable graph of aircraft, systems, components, sensors, flights, and maintenance events.
 
-**Duration:** ~45 minutes
+TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for step-by-step setup.
 
-== Prerequisites
+== From the Lakehouse to the Graph
 
-* Neo4j Aura credentials from Lab 1 (URI, username, password)
-* Databricks workspace invitation email from your workshop admin
+Not everything moves to the graph. Aggregates, metrics, logs, and documents stay in Delta where they belong. Only the subset with connection patterns worth traversing projects into Neo4j. The Lakehouse remains the system of record; the graph is a projection of the connections that matter.
 
-== Notebooks
+The mapping from tables to graph follows a few recurring patterns, and the value compounds as the mappings get more structural.
 
-This lab has two notebooks. Run both before proceeding.
+**Rows become nodes.** A row in the accounts table becomes an Account node, with columns like account_id, customer_name, and status as node properties.
 
-[cols="2,4,1"]
-|===
-| Notebook | Description | Required For
+**Foreign keys become relationships.** A column like `account.address_id` pointing to `addresses.id` becomes `(:Account)-[:REGISTERED_AT]->(:Address)`. These are straightforward one-hop lookups that SQL also handles well.
 
-| `01_aircraft_etl_to_neo4j.ipynb`
-| Core ETL -- loads Aircraft, System, and Component nodes using the Spark Connector
-| Labs 3, 4
+**Mapping tables become relationships.** A junction table like `account_devices` doesn't become nodes. Each row becomes a `USED_DEVICE` relationship with `first_seen` and `last_seen` as relationship properties. The mapping table disappears entirely.
 
-| `02_load_neo4j_full.ipynb`
-| Full dataset -- adds Sensors, Airports, Flights, Delays, Maintenance Events, and Removals
-| Lab 4
-|===
+**Shared attributes become shared nodes.** Two accounts sharing the same SSN have no foreign key between them. Discovering that link in the Lakehouse requires a self-join. In the graph, SSN becomes a shared node and both accounts connect to it, making the hidden connection explicit and traversable.
 
-== Step 1: Accept the Workspace Invitation
+**Self-referential columns become chains.** `from_account` and `to_account` in a transactions table point to two entities in the same table. In the graph this becomes a `TRANSFERRED_TO` relationship. Chains of these are natural traversals in the graph but require recursive CTEs in SQL.
 
-1. Click the link in the invitation email to open the Databricks sign-in page.
-2. Select **Sign in with email**.
-3. Databricks sends a one-time passcode (OTP) to your email address.
-4. Check your inbox, copy the 6-digit code, and enter it on the sign-in page.
+Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace recursive CTEs. The further down the list, the more the graph pays off relative to SQL.
 
-TIP: The passcode expires after a few minutes. If it expires, click **Resend code** to get a new one.
+== ELT: Lakehouse to Graph
 
-NOTE: Sometimes after entering the passcode you may see an error. Simply refresh the page and you will be logged in.
+Raw data lands in cloud storage (S3, ADLS Gen2, GCS) as the unprocessed landing zone. Databricks processes that raw data into Delta tables via Jobs, Notebooks, or Spark Declarative Pipelines. Delta Lake enforces schema and rejects bad data at ingestion: column renaming, type casting, and validation happen here so that graph properties are clean without extra transformation downstream. Delta tables are the interchange format; the Neo4j Spark Connector reads from these governed tables.
 
-image::lab2-dbx-login-error.png[Databricks login error -- refresh to resolve]
+=== The Neo4j Spark Connector
 
-== Step 2: Verify Your Compute Cluster
+The Spark Connector is the officially supported bridge between Databricks and Neo4j. It turns Lakehouse rows into graph nodes and relationships, and pulls graph data back into DataFrames for analytics or ML. It supports batch and incremental loading patterns.
 
-Your workshop admin has pre-configured a personal cluster with Apache Spark, the Neo4j Spark Connector, and Python packages needed by the lab notebooks.
+**Node loading** maps DataFrame columns to node properties. Each row becomes a node via batched upserts (create if new, update if existing), making the load idempotent. The connector uses `labels` and `node.keys` options to control which label the node gets and which property serves as its unique identifier. Nodes load first because both endpoints must exist before relationships can be created.
 
-1. Click **Compute** in the left sidebar.
-2. Look for a cluster named with your identifier (e.g., `lab-<yourname>`).
-3. Confirm the cluster shows a green dot or **Running** status.
+**Relationship loading** matches existing nodes by property values and creates the specified relationship type between them. Transaction details or operational metadata ride as properties on the relationship itself; no separate edge table, no foreign key resolution at query time.
 
-image::lab2-compute-overview.png[Compute overview showing your personal cluster]
+=== Design Decision: Relationship Types vs. Properties
 
-== Step 3: View the CSV Data
+A common modeling choice: use one relationship type per connection kind (`:TRANSFERRED_TO`, `:SHARED_DEVICE`) with indexed type lookups and faster traversal, or use a generic type with a property (`:CONNECTED {type: "transfer"}`) for a simpler schema but slower property filters. Default to type per connection when traversals follow specific connection types. Neo4j relationships are directional, so bidirectional flows require writing in both directions.
 
-1. Click **Catalog** in the left sidebar.
-2. Navigate to **databricks-neo4j-lab > lab-schema > lab-volume**.
-3. Browse the CSV files -- aircraft, airports, components, flights, delays, sensors, systems, and other data files.
+=== Validation
 
-image::lab2-csv-volume-data.png[CSV data files in the Unity Catalog Volume]
+The connector reads from Neo4j just as easily as it writes, returning Cypher results as standard DataFrames. Three checks cover the common failure modes: node counts should match source row counts, relationship counts should fall within expected ranges, and high-connectivity nodes should reflect known patterns from the source data. If counts don't match, the most common causes are failed node loads or key value mismatches. The connector silently drops relationships when the MATCH clause can't find the target node.
 
-== Step 4: Clone the Lab Notebooks
+== Graph Insights Flow Back to the Lakehouse
 
-1. Click **Workspace** in the left sidebar.
-2. Expand **Shared > databricks-neo4j-lab**.
-3. Right-click on the **Lab_2_Databricks_ETL_Neo4j** folder and select **Clone**.
+Graph intelligence flows back as standard DataFrames. Graph-derived metrics become columns in Delta Gold tables, available for dashboards, ML features, and downstream analytics. Cycle detection identifies entities involved in circular chains. PageRank scores influential nodes for risk prioritization. Louvain community detection clusters tightly connected entities into groups. Degree centrality counts connections as ML features. Once in Delta Lake, these insights join with operational data that never left the Lakehouse. This is the Gold layer in action: graph intelligence enriching data intelligence.
 
-image::lab2-clone-menu.png[Right-click the folder and select Clone]
+== Databricks Compute and Notebooks
 
-Then:
+In Databricks, **compute** refers to a managed cluster of virtual machines that provides the Spark runtime needed to execute code. Your workshop compute comes pre-configured with Apache Spark, the Neo4j Spark Connector, and the Python packages required by the lab notebooks.
 
-1. Update the **New name** to include your initials (e.g., `labs-rk`).
-2. Select the **For you** tab, choose your home directory, and click **Clone**.
+A **notebook** is an interactive document of cells containing Python, SQL, or markdown. You run cells sequentially, and each cell displays its output inline. Notebooks are the primary interface for the ETL work in this lab.
 
-image::lab2-clone-dialog.png[Clone dialog -- rename and select your home directory]
+== What You're Loading
 
-== Step 5: Attach Your Compute Cluster
-
-1. Open `01_aircraft_etl_to_neo4j.ipynb` from your cloned folder.
-2. Click the **compute selector** in the top-right corner.
-3. Under **Active resources**, select your personal cluster.
-
-NOTE: Do not use **Serverless** compute -- it does not have the Neo4j Spark Connector installed.
-
-image::lab2-change-compute.png[Select your personal compute cluster]
-
-== Step 6: Run Notebook 01
-
-1. Scroll to the **Configuration** cell and enter your Neo4j Aura credentials:
-+
-[source,python]
-----
-NEO4J_URI = "neo4j+s://xxxxxxxx.databases.neo4j.io"
-NEO4J_USERNAME = "neo4j"
-NEO4J_PASSWORD = "<your-password>"
-----
-+
-IMPORTANT: The URI must start with `neo4j+s://` (the `+s` enables TLS encryption required by Aura).
-
-2. Click **Run All** in the notebook toolbar.
-
-=== Verify Results
-
-[cols="2,1"]
-|===
-| Check | Expected
-
-| Aircraft nodes | 20
-| System nodes | 80
-| Component nodes | 320
-| HAS_SYSTEM relationships | 80
-| HAS_COMPONENT relationships | 320
-|===
-
-== Step 7: Run Notebook 02
-
-Open `02_load_neo4j_full.ipynb` from your cloned folder:
-
-1. Attach your compute cluster
-2. Enter your Neo4j credentials
-3. Set `CLEAR_DATABASE = True` for a clean load (recommended)
-4. Click **Run All**
-
-This loads additional node types and relationships required by Lab 4:
-
-[cols="1,1,3"]
-|===
-| Node Type | Count | Description
-
-| Sensor | 160 | Monitoring equipment (EGT, Vibration, N1Speed, FuelFlow)
-| Airport | 12 | Route network locations
-| Flight | ~800 | Flight operations
-| Delay | ~300 | Delay causes and durations
-| MaintenanceEvent | ~300 | Fault tracking with severity
-| Removal | ~60 | Component removal history
-|===
-
-== Step 8: Explore in Neo4j Aura
-
-1. Open https://console.neo4j.io[console.neo4j.io] in a new browser tab
-2. Sign in and select your instance
-3. Click **Query** to open the query interface
-4. Try a sample query:
-+
-[source,cypher]
-----
-MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System)-[:HAS_COMPONENT]->(c:Component)
-WHERE a.tail_number = 'N95040A'
-RETURN a.tail_number, s.name, collect(c.name) AS components
-----
-
-== What You Loaded
-
-=== Notebook 01: Core Graph Structure
+**Notebook 01** builds the core aircraft topology:
 
 ----
 (Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_COMPONENT]-> (Component)
 ----
 
-=== Notebook 02: Full Dataset
+This loads 20 aircraft, 80 systems (engines, avionics, hydraulics), and 320 components (fans, compressors, turbines, pumps).
 
-----
-(Aircraft) -[:HAS_SYSTEM]-> (System) -[:HAS_SENSOR]-> (Sensor)
-(Aircraft) -[:OPERATES_FLIGHT]-> (Flight) -[:DEPARTS_FROM / :ARRIVES_AT]-> (Airport)
-(Flight) -[:HAS_DELAY]-> (Delay)
-(Component) -[:HAS_EVENT]-> (MaintenanceEvent)
-(Aircraft) -[:HAS_REMOVAL]-> (Removal) -[:REMOVED_COMPONENT]-> (Component)
-----
+**Notebook 02** adds operational and maintenance data on top of that topology: sensors attached to systems, flights operated by aircraft, delays on flights, maintenance events affecting components, and component removals. This brings in approximately 160 sensors, 800 flights, 300 delays, 300 maintenance events, and 60 removals across 12 airports.
 
-== Troubleshooting
+== Key Concepts
 
-**"Connection refused" or timeout errors** -- Verify your Neo4j URI starts with `neo4j+s://`, check your instance is running, confirm credentials are correct.
-
-**"Spark Connector not found"** -- Ensure you are using the workshop cluster (not Serverless). The cluster must be in Dedicated (Single User) access mode.
-
-**"Path does not exist" for data files** -- Verify the DATA_PATH matches your workshop configuration. Ask your instructor for the correct Volume path.
-
-**Duplicate nodes appearing** -- The notebook uses Overwrite mode. If needed, clear your database: `MATCH (n) DETACH DELETE n`
+1. **Unity Catalog Volumes** store files accessible from notebooks
+2. **Nodes first, relationships second** ensures endpoints exist before connections are created
+3. **Cypher queries from Databricks** verify data loaded correctly by checking node and relationship counts against source row counts
 
 == Next Steps
 
-Continue to xref:lab3.adoc[Lab 3: Semantic Search] to add GraphRAG capabilities over maintenance documentation.
+Continue to xref:lab2-instructions.adoc[Lab 2 Instructions] to run the ETL notebooks, or proceed to xref:lab3.adoc[Lab 3: Semantic Search].

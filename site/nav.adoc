@@ -1,10 +1,15 @@
 * xref:index.adoc[Home]
 * Labs
 ** xref:lab1.adoc[Lab 1: Neo4j Aura Setup]
+*** xref:lab1-instructions.adoc[Instructions]
 ** xref:lab2.adoc[Lab 2: Databricks ETL to Neo4j]
+*** xref:lab2-instructions.adoc[Instructions]
 ** xref:lab3.adoc[Lab 3: Semantic Search]
+*** xref:lab3-instructions.adoc[Instructions]
 ** xref:lab4.adoc[Lab 4: Compound AI Agents]
+*** xref:lab4-instructions.adoc[Instructions]
 ** xref:lab5.adoc[Lab 5: Aura Agents]
+*** xref:lab5-instructions.adoc[Instructions]
 * Slides
 ** xref:slides/slides-overview.adoc[Better Together: The Value Proposition]
 ** xref:slides/slides-intro-databricks-neo4j.adoc[Architecture Deep Dive]

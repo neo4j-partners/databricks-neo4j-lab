@@ -1,0 +1,151 @@
+= Lab 4 Instructions: Compound AI Agents for Aircraft Analytics
+
+Follow these steps to build a compound AI agent system using Databricks Agent Bricks.
+
+TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Concepts and Reference].
+
+**Duration:** ~75 minutes (Part A: 30 min, Part B: 45 min)
+
+== Prerequisites
+
+* Running in a **Databricks workspace** with Agent Bricks access
+* Neo4j MCP server connection configured in Unity Catalog
+
+**Recommended:** Complete **Lab 2** (Databricks ETL) before starting this lab. Lab 4 uses shared workshop infrastructure (not your personal Aura instance), but completing Lab 2 gives you familiarity with the data model -- the aircraft topology, sensor relationships, flights, and maintenance events -- that the agents in this lab query.
+
+NOTE: This lab uses **shared** workshop resources -- the Genie space queries shared Lakehouse tables in Unity Catalog, and the Neo4j MCP agent queries the **Reference Aura Instance** (the fully populated graph). You do not need data in your personal Aura instance for this lab.
+
+== Part A: Genie Space for Sensor Analytics
+
+Create an AI/BI Genie space that enables natural language queries over sensor telemetry.
+
+=== Explore the Lakehouse Data
+
+1. Click **Catalog** in the left sidebar.
+2. Expand **databricks-neo4j-lab > lakehouse**.
+3. Browse the available tables:
+
+[cols="1,1,3"]
+|===
+| Table | Rows | Description
+
+| `aircraft` | 20 | Fleet inventory
+| `systems` | 80 | Aircraft systems
+| `sensors` | 160 | Sensor metadata
+| `sensor_readings` | 345,600 | Hourly telemetry over 90 days
+|===
+
+image::lab4-lakehouse-sensor-readings.png[Lakehouse sensor_readings table in Unity Catalog]
+
+=== Create the Genie Space
+
+1. Click **New** > **Genie space**
+2. In the **Connect your data** dialog, select `databricks-neo4j-lab` > `lakehouse` > then select `sensor_readings`, `aircraft`, `sensors`, `systems`
+
+image::lab4-genie-connect-data.png[Connect your data dialog]
+
+=== Configure Basic Settings
+
+Click **Configure** > **Settings**:
+
+image::lab4-configure-genie.png[Genie space Configure Settings panel]
+
+1. **Title:** `Aircraft Sensor Analyst [YOUR_INITIALS]`
+2. **Description:** "Analyzes aircraft engine sensor telemetry including EGT, vibration, N1 speed, and fuel flow metrics"
+3. **Default warehouse:** Select a **Serverless SQL Warehouse**
+
+=== Add Sample Questions
+
+On the **Settings** tab, scroll to **Sample questions** and add:
+
+* "What is the average EGT temperature for aircraft N95040A over the last 30 days?"
+* "Compare average EGT temperatures between Boeing 737 and Airbus A320 aircraft"
+* "Find sensors with readings above their 95th percentile value"
+
+=== Add Instructions
+
+Navigate to **Configure** > **Instructions** and add domain knowledge about sensor types, normal ranges, fleet information, and query conventions. See `Lab_4_Compound_AI_Agents/PART_A.md` for the full instructions text.
+
+=== Test the Genie
+
+Try these queries:
+
+* "What is the average EGT temperature across all sensors?"
+* "Show daily average EGT for aircraft AC1001 in July 2024"
+* "Compare average vibration readings by aircraft model"
+
+Save and note the Genie space name for Part B.
+
+== Part B: Supervisor Agent
+
+Build a supervisor agent that coordinates two specialized sub-agents.
+
+=== Verify Neo4j MCP Connection
+
+The Neo4j MCP connection has been pre-configured by workshop administrators.
+
+1. Click **Catalog** > **External connections**
+2. Locate `neo4j_agentcore_mcp`
+3. Verify the connection status
+
+image::lab4-mcp-connection.png[MCP Connection Configuration]
+
+=== Create the Multi-Agent Supervisor
+
+1. Click **Agents** in the left navigation
+2. Find the **Multi-Agent Supervisor** tile
+3. Click **Build**
+4. **Name:** `Aircraft Intelligence Hub [YOUR_INITIALS]`
+
+=== Add the Neo4j Graph Agent
+
+1. Under **Configure Agents**, click **+ Add**
+2. Select **External MCP Server** as the type
+3. Select `neo4j_agentcore_mcp` from the Unity Catalog connection dropdown
+4. Add the agent description from `Lab_4_Compound_AI_Agents/PART_B.md`
+
+=== Add the Genie Space Agent
+
+1. Click **+ Add** again
+2. Select **Genie Space** as the type
+3. Select your Genie space from Part A
+4. **Agent Name:** `sensor_data_agent`
+5. Add the agent description from `Lab_4_Compound_AI_Agents/PART_B.md`
+
+=== Configure Supervisor Instructions
+
+Expand the **Optional** section and add routing instructions. See `Lab_4_Compound_AI_Agents/PART_B.md` for the full instructions text.
+
+Click **Create Agent** to deploy.
+
+=== Test the Multi-Agent System
+
+**Sensor Analytics (routes to Genie):**
+----
+What is the average EGT temperature across the fleet?
+----
+
+**Graph Relationships (routes to Neo4j):**
+----
+What systems does aircraft AC1001 have?
+----
+
+**Combined Query (routes to both):**
+----
+Find aircraft with EGT readings above 680 degrees and show their maintenance history
+----
+
+== Query Routing Strategy
+
+[cols="2,1,3"]
+|===
+| Question Type | Route To | Example
+
+| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?"
+| Relationship traversals | Neo4j | "Which components are connected to Engine 1?"
+| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events"
+|===
+
+== Next Steps
+
+Continue to xref:lab5.adoc[Lab 5: Aura Agents] to build an agent using Neo4j's "Create with AI" workflow.

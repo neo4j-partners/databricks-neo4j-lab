@@ -1,0 +1,71 @@
+= Lab 3 Instructions: Semantic Search for Aircraft Maintenance
+
+Follow these steps to add semantic search capabilities to your aircraft knowledge graph.
+
+TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Concepts and Reference].
+
+**Duration:** ~45 minutes
+
+== Prerequisites
+
+* Completed **Lab 2** (Databricks ETL) -- aircraft graph loaded in Neo4j
+* Neo4j Aura credentials from Lab 1
+* Running in a **Databricks notebook environment** (for Foundation Model API access)
+* **Maintenance manual** already uploaded to the Unity Catalog Volume (pre-loaded by workshop administrators)
+
+== Notebooks
+
+This lab has two core notebooks plus an optional third:
+
+[cols="2,4"]
+|===
+| Notebook | Description
+
+| `03_data_and_embeddings.ipynb`
+| Load the A320-200 Maintenance Manual, create Document and Chunk nodes, generate embeddings using Databricks Foundation Model APIs (BGE-large), create a vector index, and perform similarity search.
+
+| `04_graphrag_retrievers.ipynb`
+| Set up a VectorRetriever, use GraphRAG to combine vector search with LLM-generated answers, create custom Cypher queries with VectorCypherRetriever, and compare standard vs. graph-enhanced retrieval.
+
+| `05_hybrid_retrievers.ipynb` _(Optional)_
+| Combine vector similarity with keyword-based fulltext search using HybridRetriever and HybridCypherRetriever. Compare hybrid retrieval against pure vector search.
+|===
+
+== Configuration
+
+Each notebook has a **Configuration** cell at the top where you enter your Neo4j credentials:
+
+[source,python]
+----
+NEO4J_URI = ""  # e.g., "neo4j+s://xxxxxxxx.databases.neo4j.io"
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = ""  # Your password from Lab 1
+----
+
+The embedding and LLM models use Databricks Foundation Model APIs which are pre-deployed and require no additional configuration.
+
+== Getting Started
+
+1. Ensure Lab 2 is complete (aircraft topology loaded)
+2. Open `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` from your cloned workspace folder
+3. Attach your personal compute cluster
+4. Enter your Neo4j credentials in the Configuration cell
+5. Run all cells sequentially
+6. Open `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` and repeat
+
+== Sample Queries
+
+After completing this lab, you can ask questions like:
+
+* "How do I troubleshoot engine vibration?"
+* "What are the EGT limits during takeoff?"
+* "What causes hydraulic pressure loss?"
+* "When should I replace the fuel filter?"
+
+Copy and paste queries from the Sample Queries page to explore the Document-Chunk structure and fulltext search in the Neo4j Query Workspace.
+
+NOTE: Vector similarity search is not included in the sample queries because it requires embedding the query text with the same model used to generate the stored embeddings (Databricks BGE-large). The notebooks handle this automatically via the Databricks Foundation Model APIs. See notebooks 04 and 05 for hands-on semantic search examples.
+
+== Next Steps
+
+Continue to xref:lab4.adoc[Lab 4: Compound AI Agents] to build a multi-agent system that combines Genie sensor analytics with Neo4j graph queries.
