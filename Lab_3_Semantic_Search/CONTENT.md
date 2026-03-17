@@ -12,15 +12,13 @@ Large language models generate the most probable continuation of a prompt, not t
 
 **Relationship blindness.** LLMs process text sequentially and treat each piece of information in isolation. Questions like "which aircraft have engines with critical maintenance events?" require reasoning across chains of connected entities. Similarity search over document chunks cannot reconstruct those chains.
 
-All three limitations share a common remedy: providing the right context at inference time. Graph databases ground responses in verified, structured data (hallucination). RAG retrieval surfaces proprietary information at query time (knowledge cutoff). Knowledge graph traversal preserves and exposes the relationships between entities (relationship blindness).
+All three limitations point to the same remedy: providing the right context at inference time. Graph databases ground responses in verified, structured data (hallucination). RAG retrieval surfaces proprietary information at query time (knowledge cutoff). Knowledge graph traversal preserves and exposes the relationships between entities (relationship blindness).
 
-> **Context ROT: when more context makes things worse.**
->
-> Research from Chroma demonstrates that irrelevant context doesn't just fail to help; it actively degrades LLM accuracy. As retrieved chunks increase in volume but decrease in relevance, the model's responses get worse, not better. Quality of context matters more than quantity. This is the core argument for GraphRAG over traditional RAG: graph-structured retrieval returns connected, relevant context rather than similar but unrelated chunks, because it follows explicit relationships between entities instead of relying solely on embedding distance.
+But providing context is only half the problem. Traditional RAG and other retrieval approaches often made things worse by introducing context rot. As retrieved chunks increase in volume but decrease in relevance, the model's responses degrade. Irrelevant context doesn't just fail to help; it actively misleads the model, producing worse answers than providing no context at all. The hard problem is not pulling in content but pulling in relevant and focused content. GraphRAG addresses this directly: graph-structured retrieval returns connected, relevant context rather than similar but unrelated chunks, because it follows explicit relationships between entities instead of relying solely on embedding distance.
 
 ## Embeddings and Vector Search
 
-Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Engine overheating" and "thermal runaway in turbine" produce similar vectors because they mean similar things, even though they share no keywords. This enables semantic similarity search: given a question, find the stored text whose meaning is most similar.
+Before GraphRAG can enrich retrieval with graph traversal, the system needs a way to find relevant starting points. That's what embeddings provide. Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Engine overheating" and "thermal runaway in turbine" produce similar vectors because they mean similar things, even though they share no keywords. This enables semantic similarity search: given a question, find the stored text whose meaning is most similar.
 
 Vector search is what makes RAG work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The next step is preparing documents for this process.
 
@@ -44,28 +42,19 @@ An LLM reads each chunk and extracts entities: regulations, thresholds, procedur
 
 ## Knowledge Graph Structure
 
-After completing this lab, the graph combines structured data from Lab 2 with unstructured maintenance documentation:
+After completing this lab, the graph combines structured data from Lab 2 with unstructured maintenance documentation.
 
-```
-(:Document)--[:FROM_DOCUMENT]-->(:Chunk {text, embedding})--[:NEXT_CHUNK]-->(:Chunk)
-                                         |
-                                   [:FROM_CHUNK]
-                                         |
-                                         v
-                          (:Regulation)  (:Threshold)  (:Procedure)
-                                              |
-                                        [:APPLIES_TO]
-                                              v
-              (:Aircraft)-[:HAS_SYSTEM]->(:System)-[:HAS_COMPONENT]->(:Component)
-```
+![Knowledge Graph Structure](images/knowledge-graph-structure.png)
 
-The top half is what Lab 3 adds. The bottom is what the Spark Connector built in Lab 2. Entity extraction bridges them: entities extracted from maintenance documentation link to the same aircraft, system, and component nodes loaded from structured data.
+The diagram shows both layers and how they connect. The top half is what Lab 3 adds: documents chunked and embedded for vector search, with entities extracted and linked back to source chunks. The bottom half is the operational graph from Lab 2. The `APPLIES_TO` relationships bridge them, connecting regulatory and procedural entities to the aircraft, systems, and components they govern.
 
 ## GraphRAG: Graph-Enriched Retrieval
 
 With the data pipeline complete and knowledge graph constructed, the graph holds both structured connections and documentary knowledge. Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them.
 
-When search returns a chunk about turbine overheating procedures, graph traversal follows the extracted entities to find the specific components, maintenance events, and systems connected to that chunk. The agent receives all of this as context, not just the chunk text. Without extracted entities linked to chunks and cross-linked to the operational graph, there would be nothing for the traversal to follow.
+![GraphRAG Retrieval Flow](images/graphrag-retrieval-flow.png)
+
+A user question enters as text, and vector or fulltext search finds the matching Chunk nodes. Graph traversal then follows the entities and relationships surrounding those chunks, gathering the specific components, maintenance events, and systems connected to them. The result is graph-enriched context that reaches the agent or LLM, not just the chunk text. Without extracted entities linked to chunks and cross-linked to the operational graph, there would be nothing for the traversal to follow.
 
 ## Retriever Comparison: Vector vs. VectorCypher
 
