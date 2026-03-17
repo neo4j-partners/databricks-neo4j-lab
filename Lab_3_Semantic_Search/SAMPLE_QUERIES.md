@@ -16,7 +16,6 @@ Copy and paste these queries into the [Neo4j Aura Query interface](https://conso
 | `substring(str, start, len)` | Extract part of a string — handy for previewing long text |
 | `ORDER BY ... DESC` | Sort results (ascending by default) |
 | `LIMIT n` | Cap the number of returned rows |
-| `db.index.vector.queryNodes()` | Run a vector similarity search against a named vector index |
 | `db.index.fulltext.queryNodes()` | Run a keyword search against a named fulltext index |
 | `CALL { ... }` | Subquery block — used to scope intermediate results or call procedures |
 
@@ -86,12 +85,6 @@ ORDER BY c.index
 
 ---
 
-## Vector Similarity Search and Graph-Enhanced Retrieval
-
-> **Note:** Vector similarity search and graph-enhanced retrieval queries are demonstrated interactively in **notebooks 04 and 05**. These notebooks use the `VectorRetriever`, `VectorCypherRetriever`, `HybridRetriever`, and `HybridCypherRetriever` from the `neo4j-graphrag` library, which handle embedding generation via Databricks Foundation Model APIs automatically. Refer to those notebooks for hands-on examples of semantic search over the maintenance manual.
-
----
-
 ## Fulltext Keyword Search
 
 > **Prerequisite:** These queries require the `maintenanceChunkText` fulltext index, created in notebook 03.
@@ -135,17 +128,6 @@ SHOW INDEXES
 ```
 
 > **Concepts**: Shows all indexes in the database including the `maintenanceChunkEmbeddings` vector index and `maintenanceChunkText` fulltext index created in notebook 03.
-
-### Verify the vector index
-
-```sql
-SHOW INDEXES
-YIELD name, type, labelsOrTypes, properties, options
-WHERE type = 'VECTOR'
-RETURN name, labelsOrTypes, properties, options
-```
-
-> **Concepts**: Filters index metadata to show only vector indexes. The `options` column reveals the configured dimensions and similarity function (cosine).
 
 ### Verify the fulltext index
 

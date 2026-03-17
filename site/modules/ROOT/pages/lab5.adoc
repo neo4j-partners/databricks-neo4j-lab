@@ -6,6 +6,7 @@ Neo4j Aura Agents combine semantic search, graph traversal, and natural language
 
 == Prerequisites
 
+* Completed **Lab 1** (Neo4j Aura setup)
 * Completed **Lab 2** (Databricks ETL -- both notebooks)
 * Completed **Lab 3** (Semantic Search -- embeddings and vector index)
 
@@ -81,15 +82,22 @@ The generated tools fall into three categories:
 
 == Step 5: Test the Agent
 
+Test your agent with the sample questions below. After each test, observe which tool the agent selected, the context retrieved from the knowledge graph, and how the agent synthesized the response.
+
+NOTE: The Cypher Template tools use internal identifiers (e.g., aircraft ID `AC1001` rather than tail number `N95040A`). You can ask the agent to look up an aircraft by tail number first, then use the returned aircraft ID in follow-up questions.
+
 === Cypher Template Questions
 
 Try: **"What systems does aircraft AC1001 have?"**
 
+The agent selects the Get Aircraft Systems tool and traverses the HAS_SYSTEM relationships from the Aircraft node to return the engines, avionics suite, and hydraulic system.
+
 Other questions to try:
 
-* "What components are in system AC1001-S04?"
-* "Show maintenance events for aircraft AC1001"
-* "Show details for flight EX370"
+* "What components are in system AC1001-S04?" -- Uses Get System Components to traverse HAS_COMPONENT relationships and list pumps, reservoirs, and actuators.
+* "Show maintenance events for aircraft AC1001" -- Uses Get Aircraft Maintenance Events to find faults, severity levels, and corrective actions.
+* "Show details for flight EX370" -- Uses Get Flight Details by Number to retrieve the route, schedule, and operator.
+* "Show component removals for component AC1001-S01-C04" -- Uses Get Component Removals to list removal reasons, part numbers, and dates.
 
 === Semantic Search Questions
 
@@ -103,16 +111,18 @@ Other questions to try:
 
 === Text2Cypher Questions
 
+CAUTION: Text2Cypher can silently return wrong answers. Try this experiment: first ask _"Which aircraft had the highest number of maintenance events?"_ The agent correctly identifies AC1014 with 26 events. Now ask _"How many critical maintenance events does aircraft AC1014 have?"_ You may get a confident answer of zero -- even though AC1014 actually has 7 CRITICAL events. Run the same question again and you might get the correct answer. Text2Cypher generates a different Cypher query each time, and subtle bugs (e.g., filtering on `"critical"` instead of `"CRITICAL"`) can produce incorrect results. **Cypher Templates are deterministic and always return correct results.**
+
 Try: **"Which aircraft have the most maintenance events?"**
+
+The agent translates this natural language question into a Cypher aggregation query that counts MaintenanceEvent nodes per Aircraft and returns the top results.
 
 image::lab5-agent-chat.png[Agent Query]
 
 Other questions to try:
 
-* "What are the most common fault types across all maintenance events?"
-* "Which airports have the most departing flights?"
-
-CAUTION: Text2Cypher can silently return wrong answers. It generates a different Cypher query each time, and subtle bugs (e.g., filtering on `"critical"` instead of `"CRITICAL"`) can produce incorrect results. **Cypher Templates are deterministic and always return correct results.** Text2Cypher is powerful for ad-hoc exploration but should be cross-checked.
+* "What are the most common fault types across all maintenance events?" -- Generates a query grouping and counting maintenance events by fault type.
+* "Which airports have the most departing flights?" -- Aggregates flights by departure airport to show the busiest hubs.
 
 == Step 6: (Optional) Deploy to API
 

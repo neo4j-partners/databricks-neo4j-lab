@@ -12,7 +12,7 @@ Before starting, make sure you have:
 - Completed **Lab 2** (Databricks ETL) to load the aircraft graph (Aircraft, System, Component nodes)
 - Neo4j Aura credentials from Lab 1 (URI, username, password)
 - Running in a **Databricks notebook environment** (for Foundation Model API access)
-- **Maintenance manual uploaded** to the Unity Catalog Volume
+- **Maintenance manual** already uploaded to the Unity Catalog Volume (pre-loaded by workshop administrators)
 
 ## Lab Overview
 
@@ -82,4 +82,6 @@ The embedding and LLM models use Databricks Foundation Model APIs which are pre-
 
 Congratulations! You've completed the Semantic Search lab. You can now combine vector search with graph traversal to build powerful GraphRAG retrievers.
 
-Copy and paste queries from the [Sample Queries](SAMPLE_QUERIES.md) page to explore the Document-Chunk structure and verify your vector indexes in the Neo4j Query Workspace.
+Copy and paste queries from the [Sample Queries](SAMPLE_QUERIES.md) page to explore the Document-Chunk structure and fulltext search in the Neo4j Query Workspace.
+
+> **Note:** Vector similarity search is not included in the sample queries because it requires embedding the query text with the same model used to generate the stored embeddings (Databricks BGE-large). The notebooks handle this automatically via the Databricks Foundation Model APIs. See notebooks 04 and 05 for hands-on semantic search examples.

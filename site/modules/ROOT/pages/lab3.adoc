@@ -8,7 +8,8 @@ In this lab you will add semantic search capabilities to your aircraft knowledge
 
 * Completed **Lab 2** (Databricks ETL) -- aircraft graph loaded in Neo4j
 * Neo4j Aura credentials from Lab 1
-* Running in a **Databricks notebook environment**
+* Running in a **Databricks notebook environment** (for Foundation Model API access)
+* **Maintenance manual** already uploaded to the Unity Catalog Volume (pre-loaded by workshop administrators)
 
 == Notebooks
 
@@ -23,11 +24,16 @@ This lab has two notebooks:
 
 | `04_graphrag_retrievers.ipynb`
 | Set up a VectorRetriever, use GraphRAG to combine vector search with LLM-generated answers, create custom Cypher queries with VectorCypherRetriever, and compare standard vs. graph-enhanced retrieval.
+
+| `05_hybrid_retrievers.ipynb` _(Optional)_
+| Combine vector similarity with keyword-based fulltext search using HybridRetriever and HybridCypherRetriever. Compare hybrid retrieval against pure vector search.
 |===
 
 == Knowledge Graph Structure
 
-After completing this lab, your graph combines structured and unstructured data:
+After completing this lab, your graph combines structured data from Lab 2 with unstructured maintenance documentation. Documents are chunked and embedded for vector search, with entities extracted and linked back to source chunks. The `APPLIES_TO` relationships bridge the two layers, connecting regulatory and procedural entities to the aircraft, systems, and components they govern.
+
+image::lab3-knowledge-graph-structure.png[Knowledge graph combining structured operational data with unstructured maintenance documentation]
 
 **From Lab 2 (Structured Data):**
 ----
@@ -39,13 +45,27 @@ After completing this lab, your graph combines structured and unstructured data:
 (:Document) <-[:FROM_DOCUMENT]- (:Chunk) -[:NEXT_CHUNK]-> (:Chunk)
 ----
 
+== Configuration
+
+Each notebook has a **Configuration** cell at the top where you enter your Neo4j credentials:
+
+[source,python]
+----
+NEO4J_URI = ""  # e.g., "neo4j+s://xxxxxxxx.databases.neo4j.io"
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = ""  # Your password from Lab 1
+----
+
+The embedding and LLM models use Databricks Foundation Model APIs which are pre-deployed and require no additional configuration.
+
 == Getting Started
 
-1. Open `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` from your cloned workspace folder
-2. Attach your personal compute cluster
-3. Enter your Neo4j credentials in the Configuration cell
-4. Run all cells sequentially
-5. Open `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` and repeat
+1. Ensure Lab 2 is complete (aircraft topology loaded)
+2. Open `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` from your cloned workspace folder
+3. Attach your personal compute cluster
+4. Enter your Neo4j credentials in the Configuration cell
+5. Run all cells sequentially
+6. Open `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` and repeat
 
 == Sample Queries
 
@@ -55,6 +75,12 @@ After completing this lab, you can ask questions like:
 * "What are the EGT limits during takeoff?"
 * "What causes hydraulic pressure loss?"
 * "When should I replace the fuel filter?"
+
+== GraphRAG: Graph-Enriched Retrieval
+
+Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them, providing graph-enriched context to the agent or LLM.
+
+image::lab3-graphrag-retrieval-flow.png[GraphRAG retrieval flow from user question through vector search and graph traversal to enriched context]
 
 == Key Concepts
 
@@ -66,5 +92,9 @@ After completing this lab, you can ask questions like:
 * **GraphRAG** -- combining retrieval with LLM generation for context-aware answers
 
 == Next Steps
+
+Copy and paste queries from the Sample Queries page to explore the Document-Chunk structure and fulltext search in the Neo4j Query Workspace.
+
+NOTE: Vector similarity search is not included in the sample queries because it requires embedding the query text with the same model used to generate the stored embeddings (Databricks BGE-large). The notebooks handle this automatically via the Databricks Foundation Model APIs. See notebooks 04 and 05 for hands-on semantic search examples.
 
 Continue to xref:lab4.adoc[Lab 4: Compound AI Agents] to build a multi-agent system that combines Genie sensor analytics with Neo4j graph queries.

@@ -27,9 +27,12 @@ The multi-agent approach lets users ask questions in natural language without kn
 
 == Prerequisites
 
-* Completed **Lab 2** (Databricks ETL) -- run **both** notebooks
-* Sensor readings data loaded in your Databricks lakehouse (Unity Catalog)
 * Running in a **Databricks workspace** with Agent Bricks access
+* Neo4j MCP server connection configured in Unity Catalog
+
+**Recommended:** Complete **Lab 2** (Databricks ETL) before starting this lab. Lab 4 uses shared workshop infrastructure (not your personal Aura instance), but completing Lab 2 gives you familiarity with the data model -- the aircraft topology, sensor relationships, flights, and maintenance events -- that the agents in this lab query.
+
+NOTE: This lab uses **shared** workshop resources -- the Genie space queries shared Lakehouse tables in Unity Catalog, and the Neo4j MCP agent queries the **Reference Aura Instance** (the fully populated graph). You do not need data in your personal Aura instance for this lab.
 
 == Part A: Genie Space for Sensor Analytics
 
