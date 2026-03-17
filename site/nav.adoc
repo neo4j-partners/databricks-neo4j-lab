@@ -10,7 +10,3 @@
 *** xref:lab4-instructions.adoc[Instructions]
 ** xref:lab5.adoc[Lab 5: Aura Agents]
 *** xref:lab5-instructions.adoc[Instructions]
-* Slides
-** xref:slides/slides-overview.adoc[Better Together: The Value Proposition]
-** xref:slides/slides-intro-databricks-neo4j.adoc[Architecture Deep Dive]
-** xref:slides/slides-power-of-graphrag.adoc[GraphRAG: Graph-Enhanced Retrieval]
