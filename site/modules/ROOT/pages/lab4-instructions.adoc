@@ -499,18 +499,7 @@ print(response.json())
 
 == Query Routing Strategy
 
-[cols="2,1,3"]
-|===
-| Question Type | Route To | Example
-
-| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?"
-| Statistical analysis | Genie | "Show sensors with readings above 95th percentile"
-| Trend analysis | Genie | "Compare fuel flow rates between 737 and A320"
-| Relationship traversals | Neo4j | "Which components are connected to Engine 1?"
-| Pattern matching | Neo4j | "Find all aircraft with maintenance delays"
-| Topology exploration | Neo4j | "Show the system hierarchy for N95040A"
-| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events"
-|===
+For the full routing table showing which question types route to Genie, Neo4j, or both, see the xref:lab4.adoc#_query_routing_strategy[Query Routing Strategy] in the concepts page.
 
 == Troubleshooting
 

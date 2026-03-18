@@ -158,12 +158,16 @@ View the complete graph schema:
 CALL db.schema.visualization()
 ----
 
+NOTE: Introspects the database and returns every node label, relationship type, and how they connect. Useful for understanding the full data model at any point in the workshop.
+
 List all indexes:
 
 [source,cypher]
 ----
 SHOW INDEXES
 ----
+
+NOTE: Shows all indexes in the database -- useful for verifying what's been created so far.
 
 '''
 
@@ -187,6 +191,8 @@ RETURN d.documentId AS DocumentId,
        count(c) AS ChunkCount
 ----
 
+NOTE: `OPTIONAL MATCH` keeps documents even if they have no chunks yet. `count()` aggregates the matched chunks per document.
+
 Browse the first few chunks of a document:
 
 [source,cypher]
@@ -199,6 +205,8 @@ RETURN c.index AS ChunkIndex,
 ORDER BY c.index
 LIMIT 10
 ----
+
+NOTE: `substring()` truncates long text for readable output. `WHERE c.index IS NOT NULL` filters nulls before sorting -- always required when using `ORDER BY`.
 
 Walk the chunk chain:
 
@@ -214,7 +222,7 @@ ORDER BY c.index
 LIMIT 10
 ----
 
-NOTE: `OPTIONAL MATCH` on `NEXT_CHUNK` keeps the last chunk in the chain (which has no successor). This shows the linked-list structure that preserves reading order.
+NOTE: `OPTIONAL MATCH` on `NEXT_CHUNK` keeps the last chunk in the chain (which has no successor). `WHERE c.index IS NOT NULL` ensures clean sorting. This shows the linked-list structure that preserves reading order.
 
 Find the first and last chunks:
 
@@ -283,7 +291,7 @@ RETURN ol.name AS source, substring(c.text, 0, 60) AS chunk,
 LIMIT 10
 ----
 
-NOTE: These cross-links connect the knowledge graph (extracted entities from maintenance manuals) back to the operational aircraft graph. The provenance chain traces an operating limit through its source chunk, document, and the aircraft it applies to.
+NOTE: These cross-links connect the knowledge graph (extracted entities from maintenance manuals) back to the operational aircraft graph. The provenance chain traces an operating limit all the way back through its source chunk, document, and the aircraft it applies to.
 
 === Fulltext Keyword Search
 
@@ -315,7 +323,7 @@ ORDER BY score DESC
 LIMIT 5
 ----
 
-NOTE: Multiple keywords are OR'd together by default -- chunks matching more keywords score higher.
+NOTE: Multiple keywords are OR'd together by default -- chunks matching more keywords score higher. This is useful for domain-specific terminology where exact terms matter.
 
 === Vector Similarity Search
 
@@ -338,7 +346,7 @@ RETURN substring(seed.text, 0, 100) AS seed_text,
        substring(node.text, 0, 100) AS match_text
 ----
 
-NOTE: Picks a random chunk and uses its embedding to find the most similar chunks via the vector index. No API key needed -- reuses stored embeddings.
+NOTE: Picks a random chunk and uses its embedding to find the most similar chunks via the vector index. No API key needed -- reuses stored embeddings. `WHERE node <> seed` excludes the seed from its own results.
 
 Vector search with document context:
 

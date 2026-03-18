@@ -168,7 +168,7 @@ WHERE a.tail_number = 'N95040A'
 RETURN a.tail_number, s.name, collect(c.name) AS components
 ----
 
-For more sample queries exploring schema, fleet analytics, and multi-hop traversals, see the Sample Queries reference (`SAMPLE_QUERIES.md`) in the lab materials.
+For more sample queries exploring schema, fleet analytics, and multi-hop traversals, see the xref:lab1-sample-queries.adoc[Sample Queries] reference.
 
 == What You Loaded
 
