@@ -20,13 +20,12 @@ import mlflow.deployments
 from neo4j import GraphDatabase
 from neo4j_graphrag.embeddings.base import Embedder
 from neo4j_graphrag.experimental.components.text_splitters.base import TextSplitter
-from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import (
-    FixedSizeSplitter,
-)
+from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import FixedSizeSplitter
 from neo4j_graphrag.experimental.components.types import TextChunks
 from neo4j_graphrag.llm.base import LLMInterface, LLMInterfaceV2
 from neo4j_graphrag.llm.types import LLMResponse
 from neo4j_graphrag.types import LLMMessage
+
 
 # =============================================================================
 # Default Model Configuration
@@ -405,9 +404,14 @@ class ContextPrependingSplitter(TextSplitter):
 
     SimpleKGPipeline passes document_metadata only to the graph builder for
     storage on Document nodes -- it is never injected into the LLM extraction
-    prompt. The LLM sees only raw chunk text. This wrapper prepends a short
-    context header to every chunk so the LLM always has access to the
-    document-level aircraft type.
+    prompt. The LLM sees only raw chunk text. After splitting a 30,000-character
+    manual into ~40 chunks, most chunks land deep in engine-specific sections
+    where the engine designation (e.g. "LEAP-1A") dominates and the aircraft
+    model (e.g. "A321neo") is never mentioned. Without explicit context, the LLM
+    confuses engine types for aircraft types.
+
+    This wrapper solves the problem by prepending a short context header to
+    every chunk so the LLM always has access to the document-level aircraft type.
 
     Set ``context`` before each call to ``pipeline.run_async()``.
     """

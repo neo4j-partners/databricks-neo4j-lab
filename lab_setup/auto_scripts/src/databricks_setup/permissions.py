@@ -89,7 +89,7 @@ _CATALOG_PRIVILEGES = (
 # Name of the Unity Catalog connection for the Neo4j MCP server (Lab 4 Part B).
 _MCP_CONNECTION_NAME = "neo4j_agentcore_mcp"
 
-# Foundation Model API endpoints used by Lab 3 (notebooks 03–05).
+# Foundation Model API endpoints used by Lab 3 (notebooks 03, 04, 06).
 _FOUNDATION_MODEL_ENDPOINTS = (
     "databricks-bge-large-en",
     "databricks-meta-llama-3-3-70b-instruct",

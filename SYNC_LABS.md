@@ -17,59 +17,58 @@ SimpleKGPipeline (V1) and GraphRAG (V2).
 
 ## Three copies of Lab 3 files
 
+All three locations are now synced. `Lab_3_Semantic_Search/` is the source
+of truth — the other two are copies.
+
 | Location | Purpose | Status |
 |----------|---------|--------|
 | `Lab_3_Semantic_Search/` | Source of truth (student-facing notebooks) | Updated |
-| `lab_setup/notebook_validation/agent_modules/` | Automated cluster testing scripts | Updated |
-| `vocareum/courseware/data/Lab_3_Semantic_Search/` | Vocareum LMS distribution | Stale — still has old approach |
+| `lab_setup/notebook_validation/agent_modules/` | Automated cluster testing scripts | Synced |
+| `vocareum/courseware/data/Lab_3_Semantic_Search/` | Vocareum LMS distribution | Synced |
 
 ## Sync checklist
 
 ### 1. Vocareum data_utils.py
 
-- [ ] Copy updated `Lab_3_Semantic_Search/data_utils.py` to
+- [x] Copied `Lab_3_Semantic_Search/data_utils.py` to
       `vocareum/courseware/data/Lab_3_Semantic_Search/data_utils.py`
-- The vocareum copy currently uses LLMInterfaceV2-only (no dual inheritance)
-  and is missing all SimpleKGPipeline-related code: TextSplitter,
-  ContextPrependingSplitter, FixedSizeSplitter, TextChunks,
-  build_extraction_schema, EXTRACTION_PROMPT, run_pipeline, split_text
-- Decision needed: the vocareum copy deliberately stripped SimpleKGPipeline
-  code. If vocareum notebooks are also being updated to use SimpleKGPipeline,
-  copy the full file. If vocareum keeps the manual approach, leave it as-is.
 
 ### 2. Vocareum notebook 03
 
-- [ ] Copy updated `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` to
+- [x] Copied `Lab_3_Semantic_Search/03_data_and_embeddings.ipynb` to
       `vocareum/courseware/data/Lab_3_Semantic_Search/03_data_and_embeddings.ipynb`
-- The vocareum copy still uses the old manual approach (split_text,
-  upsert_vectors, no entity extraction, no APPLIES_TO/HAS_LIMIT)
 
 ### 3. Vocareum notebook 04
 
-- [ ] Copy updated `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` to
+- [x] Copied `Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb` to
       `vocareum/courseware/data/Lab_3_Semantic_Search/04_graphrag_retrievers.ipynb`
-- The vocareum copy still uses the old Example 3 (keyword-based system
-  matching via CALL subquery) instead of the APPLIES_TO traversal
-- The vocareum copy is missing Example 4 (OperatingLimit queries)
 
-### 4. Vocareum notebook 05
+### 4. Vocareum notebook 05/06 renumbering
 
-- [ ] Verify `Lab_3_Semantic_Search/05_hybrid_retrievers.ipynb` matches
-      `vocareum/courseware/data/Lab_3_Semantic_Search/05_hybrid_retrievers.ipynb`
-- Notebook 05 imports only `Neo4jConnection, get_llm, get_embedder` from
-  data_utils — no SimpleKGPipeline dependencies. Should work with either
-  version of data_utils.py as long as the KG is built.
+- [x] Renamed `vocareum/.../05_hybrid_retrievers.ipynb` to `06_hybrid_retrievers.ipynb`
+- [x] Copied `Lab_3_Semantic_Search/05_mcp_graph_queries.ipynb` to vocareum
+- Vocareum now has: 03, 04, 05 (MCP), 06 (hybrid) — matches source of truth
 
-### 5. Minor data_utils.py drift between Lab_3 and notebook_validation
+### 5. notebook_validation data_utils.py
 
-- [ ] Decide whether to keep or reconcile the minor differences between
-      `Lab_3_Semantic_Search/data_utils.py` and
+- [x] Copied `Lab_3_Semantic_Search/data_utils.py` to
       `lab_setup/notebook_validation/agent_modules/data_utils.py`
-- Differences are cosmetic: import line wrapping and a longer docstring on
-  ContextPrependingSplitter in the Lab_3 copy. Functionally identical.
+- All three copies are now byte-identical
 
-### 6. Lab 6 notebook reference
+### 6. Site documentation (Antora)
 
-- [ ] Verify `Lab_6_MCP_Queries/06_mcp_graph_queries.ipynb` works with the
-      updated KG (it was referenced in notebook 04's summary cell)
-- This is a new untracked directory — confirm it is complete and tested
+- [x] Verified — no changes needed
+- `site/modules/ROOT/pages/lab3.adoc` already references SimpleKGPipeline
+- `site/modules/ROOT/pages/lab3-instructions.adoc` already has correct
+  notebook numbering (03, 04, 05 MCP, 06 hybrid) and Path A / Path B structure
+- No references to old approach (split_text, upsert_vectors) in site docs
+
+### 7. notebook_validation script updates
+
+- [x] Renamed `verify_lab6.py` to `run_lab3_05.py` (matches Lab 3 notebook 05
+      naming convention, consistent with `run_lab3_03.py`)
+- [x] Created `run_lab3_04.py` — validates all retriever patterns from
+      notebook 04: VectorRetriever, GraphRAG, VectorCypherRetriever with
+      document context, adjacent chunks, APPLIES_TO topology, and
+      OperatingLimit queries
+- [ ] Upload and run `run_lab3_04.py` on Databricks cluster to validate

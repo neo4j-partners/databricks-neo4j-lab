@@ -1,13 +1,13 @@
-"""Lab 6 MCP Server verification — read-only checks via MCP protocol.
+"""MCP Server verification — read-only checks via MCP protocol.
 
 Validates that the Neo4j MCP server is accessible and returns expected data
 by calling get-schema and read-cypher tools over HTTP JSON-RPC. Mirrors the
-queries from Lab_6_MCP_Queries/06_mcp_graph_queries.ipynb.
+queries from Lab_3_Semantic_Search/05_mcp_graph_queries.ipynb.
 
 Uses only stdlib (urllib, json) — no fastmcp or other dependencies required.
 
 Usage:
-    ./upload.sh verify_lab6.py && ./submit.sh verify_lab6.py
+    ./upload.sh run_lab3_05.py && ./submit.sh run_lab3_05.py
 """
 
 import argparse

@@ -20,7 +20,7 @@ Aura Agents supports two creation paths. **From scratch**, users manually select
 
 === Cypher Templates
 
-Pre-defined graph traversal patterns that map to specific relationships in the knowledge graph. Each template takes parameters (an aircraft ID, a flight number) and executes a fixed Cypher query. Because the query never varies, results are deterministic given valid input.
+Pre-defined graph traversal patterns that map to specific relationships in the knowledge graph. Each template takes parameters (such as an aircraft ID) and executes a fixed Cypher query. Because the query never varies, results are deterministic given valid input.
 
 === Similarity Search
 
