@@ -18,6 +18,13 @@ Each Component node carries properties like name and type. Each HAS_EVENT relati
 
 Where relational databases represent connections implicitly through foreign keys and join tables, graphs make them explicit and traversable. Questions that require following chains of connections become single traversal patterns rather than nested JOINs or recursive CTEs.
 
+image::lab1-property-graph.png[Aircraft Digital Twin property graph showing Aircraft, System, and Maintenance nodes connected by typed relationships]
+
+[NOTE]
+====
+**Graph Insight — Maintenance Impact Chain.** A single maintenance event connects to both the affected engine _and_ the aircraft through typed relationships (`AFFECTS_SYSTEM`, `AFFECTS_AIRCRAFT`). This triangle of connections means you can start from any node and traverse to the others: "Which aircraft have critical faults?" or "What maintenance events affect Engine #1?" — queries that would require multiple JOINs in a relational database are single traversal patterns in the graph.
+====
+
 == Neo4j Aura
 
 Neo4j Aura is a fully managed cloud graph database service. It provides the Neo4j graph engine without the operational overhead of running infrastructure: automatic backups, high availability, and deployment across AWS, GCP, and Azure. Each participant provisions their own Aura instance to hold the Aircraft Digital Twin graph. The data loaded in Lab 2 persists in this instance and is queried by notebooks in Labs 3 and 4.

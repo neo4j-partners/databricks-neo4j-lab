@@ -52,7 +52,7 @@ image::lab3-knowledge-graph-structure.png[Knowledge graph combining structured o
 
 With the data pipeline complete and knowledge graph constructed, the graph holds both structured connections and documentary knowledge. Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them.
 
-image::lab3-graphrag-retrieval-flow.png[GraphRAG retrieval flow from user question through vector search and graph traversal to enriched context]
+image::lab3-graphrag-retrieval-flow.png[Aircraft maintenance GraphRAG retrieval flow showing vector/hybrid search through chunk, document, aircraft topology, and operating limit traversal to graph-enriched context]
 
 A user question enters as text, and vector or fulltext search finds the matching Chunk nodes. Graph traversal then follows the entities and relationships surrounding those chunks, gathering the specific components, maintenance events, and systems connected to them. The result is graph-enriched context that reaches the agent or LLM, not just the chunk text. Without extracted entities linked to chunks and cross-linked to the operational graph, there would be nothing for the traversal to follow.
 
