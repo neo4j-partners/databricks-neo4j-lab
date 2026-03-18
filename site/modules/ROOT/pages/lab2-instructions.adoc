@@ -9,7 +9,7 @@ TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Concepts and Referen
 == Prerequisites
 
 * Neo4j Aura credentials from Lab 1 (URI, username, password)
-* Databricks workspace invitation email from your workshop admin
+* Vocareum lab environment access
 
 == Notebooks
 
@@ -28,147 +28,9 @@ This lab has two notebooks. Run both before proceeding. Notebook 01 loads the co
 | Lab 4
 |===
 
-== Quick Start
+== Instructions
 
-1. **Accept** the workspace invitation from your email
-2. **Verify** your personal compute is running
-3. **View** the CSV data files in the Unity Catalog Volume
-4. **Clone** the lab notebooks into your home directory
-5. **Attach** your compute to the notebook
-6. **Run notebook 01**: Enter your Neo4j credentials and **Run All** cells
-7. **Run notebook 02**: Enter your Neo4j credentials and **Run All** cells
-8. **Explore** the graph in Neo4j Aura
-
-== Step 1: Accept the Workspace Invitation
-
-1. Click the link in the invitation email to open the Databricks sign-in page.
-2. Select **Sign in with email**.
-3. Databricks sends a one-time passcode (OTP) to your email address.
-4. Check your inbox, copy the 6-digit code, and enter it on the sign-in page.
-
-TIP: The passcode expires after a few minutes. If it expires, click **Resend code** to get a new one.
-
-NOTE: Sometimes after entering the passcode you may see an error. Simply refresh the page and you will be logged in.
-
-image::lab2-dbx-login-error.png[Databricks login error -- refresh to resolve]
-
-== Step 2: Verify Your Compute
-
-Your workshop admin has pre-configured a personal compute with Apache Spark, the Neo4j Spark Connector, and Python packages needed by the lab notebooks.
-
-1. Click **Compute** in the left sidebar.
-2. Look for a compute resource named with your identifier (e.g., `lab-<yourname>`).
-3. Confirm it shows a green dot or **Running** status.
-
-If the compute is stopped, the workshop administrator will need to start it.
-
-image::lab2-compute-overview.png[Compute overview showing your personal compute]
-
-== Step 3: View the CSV Data
-
-1. Click **Catalog** in the left sidebar.
-2. Navigate to **databricks-neo4j-lab > lab-schema > lab-volume**.
-3. Browse the CSV files -- aircraft, airports, components, flights, delays, sensors, systems, and other data files.
-
-image::lab2-csv-volume-data.png[CSV data files in the Unity Catalog Volume]
-
-NOTE: You do not need to modify or upload any data. The notebooks will read directly from this Volume path.
-
-== Step 4: Clone the Lab Notebooks
-
-1. Click **Workspace** in the left sidebar.
-2. Expand **Shared > databricks-neo4j-lab**.
-3. Right-click on the **Lab_2_Databricks_ETL_Neo4j** folder and select **Clone**.
-
-image::lab2-clone-menu.png[Right-click the folder and select Clone]
-
-The Clone dialog lets you place a personal copy of the notebooks in your home directory.
-
-1. Update the **New name** to include your initials (e.g., `labs-rk`) so it is easy to identify.
-2. Select the **For you** tab.
-3. Choose your home directory as the destination.
-4. Click **Clone**.
-
-image::lab2-clone-dialog.png[Clone dialog -- rename and select your home directory]
-
-== Step 5: Attach Your Compute
-
-A notebook by itself is just a document -- it needs to be **attached** to a compute resource before any code can run. Attaching tells Databricks which compute should execute the notebook's cells. By attaching your personal compute, you get the pre-installed Neo4j Spark Connector and Python libraries that the lab requires.
-
-1. Open `01_aircraft_etl_to_neo4j.ipynb` from your cloned folder.
-2. Click the **compute selector** in the top-right corner.
-3. Under **Active resources**, select your personal compute.
-
-NOTE: Do not use **Serverless** compute -- it does not have the Neo4j Spark Connector installed.
-
-image::lab2-change-compute.png[Select your personal compute]
-
-== Step 6: Run Notebook 01
-
-1. Scroll to the **Configuration** cell and enter your Neo4j Aura credentials:
-+
-[source,python]
-----
-NEO4J_URI = "neo4j+s://xxxxxxxx.databases.neo4j.io"
-NEO4J_USERNAME = "neo4j"
-NEO4J_PASSWORD = "<your-password>"
-----
-+
-IMPORTANT: The URI must start with `neo4j+s://` (the `+s` enables TLS encryption required by Aura).
-
-2. Click **Run All** in the notebook toolbar.
-
-=== Verify Results
-
-[cols="2,1"]
-|===
-| Check | Expected
-
-| Aircraft nodes | 20
-| System nodes | 80
-| Component nodes | 320
-| HAS_SYSTEM relationships | 80
-| HAS_COMPONENT relationships | 320
-|===
-
-== Step 7: Run Notebook 02
-
-Open `02_load_neo4j_full.ipynb` from your cloned folder:
-
-1. Attach your compute
-2. Enter your Neo4j credentials
-3. Set `CLEAR_DATABASE = True` for a clean load (recommended)
-4. Click **Run All**
-
-This loads additional node types and relationships required by Lab 4:
-
-[cols="1,1,3"]
-|===
-| Node Type | Count | Description
-
-| Sensor | 160 | Monitoring equipment (EGT, Vibration, N1Speed, FuelFlow)
-| Airport | 12 | Route network locations
-| Flight | ~800 | Flight operations
-| Delay | ~300 | Delay causes and durations
-| MaintenanceEvent | ~300 | Fault tracking with severity
-| Removal | ~60 | Component removal history
-|===
-
-== Step 8: Explore in Neo4j Aura
-
-1. Open https://console.neo4j.io[console.neo4j.io] in a new browser tab
-2. Sign in and select your instance
-3. Click **Query** to open the query interface
-4. Try a sample query:
-+
-[source,cypher]
-----
-MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System)-[:HAS_COMPONENT]->(c:Component)
-WHERE a.tail_number = 'N95040A'
-RETURN a.tail_number, s.name, collect(c.name) AS components
-----
-
-For more sample queries exploring schema, fleet analytics, and multi-hop traversals, see the xref:lab1-sample-queries.adoc[Sample Queries] reference.
+Use the Vocareum lab setup to complete the Databricks workspace configuration and run the ETL notebooks.
 
 == What You Loaded
 
