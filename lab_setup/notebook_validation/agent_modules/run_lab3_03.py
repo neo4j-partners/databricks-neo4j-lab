@@ -28,6 +28,10 @@ def main():
         default="/Volumes/databricks-neo4j-lab/lab-schema/lab-volume",
         help="Unity Catalog Volume path containing maintenance manual",
     )
+    # Accept MCP args for submit.sh compatibility (unused by this script)
+    parser.add_argument("--mcp-endpoint", default="", help="(unused)")
+    parser.add_argument("--mcp-api-key", default="", help="(unused)")
+    parser.add_argument("--mcp-path", default="", help="(unused)")
     args = parser.parse_args()
 
     from data_utils import (

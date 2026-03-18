@@ -67,6 +67,16 @@ NEO4J_USERNAME = "neo4j"
 NEO4J_PASSWORD = "<your-password>"
 ```
 
+### Restore the Aircraft Maintenance Data
+
+5. Once your instance is running, restore the pre-built aircraft maintenance database from a backup file. Click the **three dots** (`...`) menu on your instance and select **Backup & restore**.
+
+   ![Instance menu showing Backup & restore option](images/010_backup_restore.png)
+
+6. In the Backup & restore panel, upload the `aircraft_maintenance_v2.backup` file (provided in the `data/` folder of this lab) and follow the prompts to restore it to your instance.
+
+> **Note:** The restore process may take a few minutes. Wait for the instance status to return to **Running** before proceeding.
+
 ## Part 2: Introduction to Cypher
 
 Cypher is Neo4j's query language. Before you load data in Lab 2, practice the basics by creating and querying a small graph.

@@ -24,6 +24,9 @@ def main():
         help="Unity Catalog Volume path containing CSV data files",
     )
     parser.add_argument("--skip-clear", action="store_true", help="Skip database clearing")
+    parser.add_argument("--mcp-endpoint", default="", help="(unused)")
+    parser.add_argument("--mcp-api-key", default="", help="(unused)")
+    parser.add_argument("--mcp-path", default="", help="(unused)")
     args = parser.parse_args()
 
     from pyspark.sql import SparkSession

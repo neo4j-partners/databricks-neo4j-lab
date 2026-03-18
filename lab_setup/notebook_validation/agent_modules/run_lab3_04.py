@@ -23,8 +23,11 @@ def main():
     parser.add_argument("--neo4j-uri", required=True, help="Neo4j Aura URI")
     parser.add_argument("--neo4j-username", default="neo4j", help="Neo4j username")
     parser.add_argument("--neo4j-password", required=True, help="Neo4j password")
-    # Accept data-path for submit.sh compatibility (unused by this script)
+    # Accept extra args for submit.sh compatibility (unused by this script)
     parser.add_argument("--data-path", default="", help="(unused)")
+    parser.add_argument("--mcp-endpoint", default="", help="(unused)")
+    parser.add_argument("--mcp-api-key", default="", help="(unused)")
+    parser.add_argument("--mcp-path", default="", help="(unused)")
     args = parser.parse_args()
 
     from data_utils import get_embedder, get_llm

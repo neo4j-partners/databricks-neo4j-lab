@@ -183,6 +183,9 @@ def main():
         default="/Volumes/databricks-neo4j-lab/lab-schema/lab-volume",
         help="(unused, accepted for submit.sh compatibility)",
     )
+    parser.add_argument("--mcp-endpoint", default="", help="(unused)")
+    parser.add_argument("--mcp-api-key", default="", help="(unused)")
+    parser.add_argument("--mcp-path", default="", help="(unused)")
     args = parser.parse_args()
 
     from neo4j import GraphDatabase
