@@ -88,7 +88,7 @@ _Section title slide — no speaker notes._
 
 We'll use financial fraud to walk through each pipeline stage. Money laundering moves funds through chains of accounts and back to the origin. Each individual transfer looks legitimate in isolation. The circular pattern is only visible when you follow the connections.
 
-This is where graph structure pays off. Detecting A transferred to B transferred to C transferred back to A is a single Cypher pattern match. In SQL, the same detection requires recursive CTEs that self-join the transactions table at each hop, with explicit visited-node tracking to prevent infinite loops. The graph represents the cycle directly; the table has to reconstruct it.
+This is where graph structure pays off. Detecting A transferred to B transferred to C transferred back to A is a single Cypher pattern match. In SQL, the same detection requires complex nested joins that self-join the transactions table at each hop, with explicit visited-node tracking to prevent infinite loops. The graph represents the cycle directly; the table has to reconstruct it.
 
 ---
 
@@ -118,7 +118,7 @@ The combination of nodes, relationships, and their properties is what makes grap
 
 Each question maps to the platform built to answer it. The third row shows why you need both: Neo4j detects the fraud ring through cycle traversal, Databricks computes transfer totals for the identified accounts. Neither platform can answer that question alone.
 
-Cypher detects the cycle in the graph: a single query finds 2-6 hop loops in milliseconds. The equivalent SQL in the lakehouse requires recursive CTEs with explicit cycle-detection guards. Both platforms contribute, neither can answer alone.
+Cypher detects the cycle in the graph: a single query finds 2-6 hop loops in milliseconds. The equivalent SQL in the lakehouse requires complex nested joins with explicit cycle-detection guards. Both platforms contribute, neither can answer alone.
 
 ---
 
@@ -134,9 +134,9 @@ Mapping tables dissolve into relationships. A junction table like account_device
 
 Shared attribute values surface implicit connections. Two accounts with the same SSN have no foreign key between them. Discovering that link in the lakehouse requires a self-join. In the graph, SSN becomes a shared node and both accounts connect to it — the hidden connection is now explicit and traversable without any join. This is often the highest-value mapping because it reveals hidden networks that were invisible in the tabular model.
 
-Self-referential columns become relationship chains. from_account and to_account in the transactions table point to two entities in the same table. In the graph this becomes an Account-to-Account TRANSFERRED_TO relationship. Chains of these are natural traversals in the graph but require recursive CTEs with cycle-detection guards in SQL.
+Self-referential columns become relationship chains. from_account and to_account in the transactions table point to two entities in the same table. In the graph this becomes an Account-to-Account TRANSFERRED_TO relationship. Chains of these are natural traversals in the graph but require complex nested joins with cycle-detection guards in SQL.
 
-The value compounds as you move down the list. Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace recursive CTEs. The further down you go, the more the graph pays off relative to SQL.
+The value compounds as you move down the list. Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace complex nested joins. The further down you go, the more the graph pays off relative to SQL.
 
 The practical test: if you'd need three or more self-joins to answer a question, that data probably belongs in the graph. If you're counting, summing, or averaging, it stays in the lakehouse.
 

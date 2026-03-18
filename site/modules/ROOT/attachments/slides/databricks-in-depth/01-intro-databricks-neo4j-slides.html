@@ -528,7 +528,7 @@ the connections.
 
 This is where graph structure pays off. Detecting A transferred
 to B transferred to C transferred back to A is a single Cypher
-pattern match. In SQL, the same detection requires recursive CTEs
+pattern match. In SQL, the same detection requires complex nested joins
 that self-join the transactions table at each hop, with explicit
 visited-node tracking to prevent infinite loops. The graph
 represents the cycle directly; the table has to reconstruct it.</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>Each question maps to the platform built to answer it. SQL is

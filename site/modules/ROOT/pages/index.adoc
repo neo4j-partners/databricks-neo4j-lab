@@ -2,9 +2,7 @@
 
 == Welcome
 
-This workshop teaches you to build a production architecture that combines Neo4j graph databases with Databricks AI/ML. You will work with an Aircraft Digital Twin dataset, loading data into Neo4j, adding semantic search, and building a multi-agent system that routes questions to the right data source.
-
-image::dual-database-architecture.png[Dual-database architecture showing Neo4j and Databricks responsibilities]
+This workshop teaches you to build a production architecture that combines Neo4j graph databases with Databricks AI/ML. You will work with an Aircraft Digital Twin dataset, loading data into Neo4j, adding semantic search, and building a multi-agent system that routes questions to the right data source. See the xref:lab1.adoc[Lab 1] overview for the dual-database architecture.
 
 == Data Intelligence Meets Graph Intelligence
 

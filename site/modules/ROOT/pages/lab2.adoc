@@ -26,9 +26,9 @@ image::step3-connected-graph.png[The resulting connected graph with a SQL vs Cyp
 
 **Shared attributes become shared nodes.** Two accounts sharing the same SSN have no foreign key between them. Discovering that link in the Lakehouse requires a self-join. In the graph, SSN becomes a shared node and both accounts connect to it, making the hidden connection explicit and traversable.
 
-**Self-referential columns become chains.** `from_account` and `to_account` in a transactions table point to two entities in the same table. In the graph this becomes a `TRANSFERRED_TO` relationship. Chains of these are natural traversals in the graph but require recursive CTEs in SQL.
+**Self-referential columns become chains.** `from_account` and `to_account` in a transactions table point to two entities in the same table. In the graph this becomes a `TRANSFERRED_TO` relationship. Chains of these are natural traversals in the graph but require complex nested joins in SQL.
 
-Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace recursive CTEs. The further down the list, the more the graph pays off relative to SQL.
+Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace complex nested joins. The further down the list, the more the graph pays off relative to SQL.
 
 == ELT: Lakehouse to Graph
 

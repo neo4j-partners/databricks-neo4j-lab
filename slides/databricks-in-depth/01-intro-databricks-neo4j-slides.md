@@ -240,7 +240,7 @@ the connections.
 
 This is where graph structure pays off. Detecting A transferred
 to B transferred to C transferred back to A is a single Cypher
-pattern match. In SQL, the same detection requires recursive CTEs
+pattern match. In SQL, the same detection requires complex nested joins
 that self-join the transactions table at each hop, with explicit
 visited-node tracking to prevent infinite loops. The graph
 represents the cycle directly; the table has to reconstruct it.
@@ -333,12 +333,12 @@ Self-referential columns become relationship chains. from_account
 and to_account in the transactions table point to two entities in
 the same table. In the graph this becomes a TRANSFERRED_TO
 relationship. Chains of these are natural traversals in the graph
-but require recursive CTEs in SQL.
+but require complex nested joins in SQL.
 
 The value compounds as you move down the list. Foreign keys are
 simple one-hop lookups. Mapping tables eliminate multi-table joins.
 Shared attributes reveal hidden networks. Self-referential chains
-replace recursive CTEs. The further down you go, the more the
+replace complex nested joins. The further down you go, the more the
 graph pays off relative to SQL.
 -->
 
