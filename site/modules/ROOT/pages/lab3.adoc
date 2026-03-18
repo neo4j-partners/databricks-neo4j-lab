@@ -4,11 +4,23 @@ Lab 2 loaded structured data into Neo4j: aircraft, systems, components, sensors,
 
 TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step setup.
 
+.**At a Glance**
+
+* **Embeddings** convert text to numerical vectors that capture meaning — "engine overheating" and "thermal runaway in turbine" match by similarity, not keywords
+* **SimpleKGPipeline** chunks the maintenance manual, extracts entities, generates embeddings, and stores everything in Neo4j
+* **GraphRAG** adds graph traversal after vector search — chunks anchor the search, then Cypher gathers connected entities and relationships
+* **VectorRetriever** vs **VectorCypherRetriever**: pure text retrieval vs graph-enriched context
+* **Databricks Foundation Model APIs** provide hosted embedding and LLM models (BGE-large, Llama 3.3)
+
 == Embeddings and Vector Search
 
-Before GraphRAG can enrich retrieval with graph traversal, the system needs a way to find relevant starting points. That's what embeddings provide. Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Engine overheating" and "thermal runaway in turbine" produce similar vectors because they mean similar things, even though they share no keywords. This enables semantic similarity search: given a question, find the stored text whose meaning is most similar.
+Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Engine overheating" and "thermal runaway in turbine" produce similar vectors because they mean similar things, even though they share no keywords. This enables semantic similarity search: given a question, find the stored text whose meaning is most similar.
 
+.How vector search powers RAG
+[%collapsible]
+====
 Vector search is what makes RAG work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The next step is preparing documents for this process.
+====
 
 == From Documents to a Knowledge Graph
 
@@ -18,15 +30,23 @@ The `neo4j-graphrag` Python package provides `SimpleKGPipeline` to orchestrate t
 
 Documents split into Chunk nodes with raw text, linked to their source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order. An embedding model converts each chunk's text into a vector. A vector index over these embeddings enables semantic search by meaning rather than keyword matching.
 
-**Chunking trade-offs.** Larger chunks give the LLM more context during entity extraction, improving its ability to resolve references like "the engine" to a specific component. Smaller chunks produce more precise retrieval results, returning only the relevant passage rather than a block of mixed content. A moderate chunk size (500-1000 characters) with overlap at boundaries is a reasonable starting point, tuned by evaluating results.
+.Chunking trade-offs
+[%collapsible]
+====
+Larger chunks give the LLM more context during entity extraction, improving its ability to resolve references like "the engine" to a specific component. Smaller chunks produce more precise retrieval results, returning only the relevant passage rather than a block of mixed content. A moderate chunk size (500-1000 characters) with overlap at boundaries is a reasonable starting point, tuned by evaluating results.
+====
 
 === Chunks to Graph Structure
 
 An LLM reads each chunk and extracts entities: regulations, thresholds, procedures, components. These become graph nodes linked to their source chunks via `FROM_CHUNK`. Entity resolution deduplicates: the same regulation mentioned across five different chunks becomes one node with five links, not five separate nodes. Cross-linking connects extracted entities to the existing operational graph built in Lab 2, so a procedure that applies to a specific system links directly to that system's node.
 
+.Schema design and entity resolution
+[%collapsible]
+====
 **Schema design.** SimpleKGPipeline supports three schema modes: User-Provided (you define the entity and relationship types), Extracted (the LLM discovers the schema), and Free (no constraints). This workshop uses User-Provided because the aircraft domain has known entity types (Aircraft, System, Component, Sensor, MaintenanceEvent) and known relationship patterns. Constraining extraction to these types produces a consistent, queryable graph.
 
 **Entity resolution.** The same real-world component can surface under different names ("HP Turbine," "High-pressure Turbine," "HPT"). Entity resolution merges these duplicates so that queries return complete results. Without it, maintenance event counts and relationship traversals silently miss data.
+====
 
 == Knowledge Graph Structure
 
@@ -36,21 +56,29 @@ image::lab3-knowledge-graph-structure.png[Knowledge graph combining structured o
 
 == GraphRAG: Graph-Enriched Retrieval
 
-With the data pipeline complete and knowledge graph constructed, the graph holds both structured connections and documentary knowledge. Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them.
+Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them.
 
 image::lab3-graphrag-retrieval-flow.png[Aircraft maintenance GraphRAG retrieval flow showing vector/hybrid search through chunk, document, aircraft topology, and operating limit traversal to graph-enriched context]
 
+.How GraphRAG retrieval works
+[%collapsible]
+====
 A user question enters as text, and vector or fulltext search finds the matching Chunk nodes. Graph traversal then follows the entities and relationships surrounding those chunks, gathering the specific components, maintenance events, and systems connected to them. The result is graph-enriched context that reaches the agent or LLM, not just the chunk text. Without extracted entities linked to chunks and cross-linked to the operational graph, there would be nothing for the traversal to follow.
+====
 
 == Retriever Comparison: Vector vs. VectorCypher
 
 The `neo4j-graphrag` package provides two retriever patterns relevant to this lab.
 
-**VectorRetriever** performs pure semantic search. It converts the user's question to an embedding, finds the most similar chunks by vector index lookup, and returns their text. This works well for conceptual questions ("How do I troubleshoot engine vibration?") where the answer lives within the matched chunks themselves. The limitation is that it returns text only, with no awareness of the entities or relationships surrounding those chunks.
+**VectorRetriever** performs pure semantic search. It converts the user's question to an embedding, finds the most similar chunks by vector index lookup, and returns their text. This works well for conceptual questions ("How do I troubleshoot engine vibration?") where the answer lives within the matched chunks themselves.
 
-**VectorCypherRetriever** adds a graph traversal step after vector search. It finds semantically similar chunks the same way, then executes a custom Cypher query that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it. This is the retriever to reach for when answers require both the passage content and the entities connected to it.
+**VectorCypherRetriever** adds a graph traversal step after vector search. It finds semantically similar chunks the same way, then executes a custom Cypher query that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it.
 
+.When to use which retriever
+[%collapsible]
+====
 The key constraint: traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of graph traversal compensates. Questions targeting a specific entity by name ("How many faults affect AC1001?") may be better served by direct Cypher queries.
+====
 
 == Databricks Foundation Model APIs
 

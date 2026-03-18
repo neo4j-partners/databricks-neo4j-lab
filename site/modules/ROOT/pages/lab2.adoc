@@ -4,6 +4,14 @@ In this lab you move data from Databricks Lakehouse into Neo4j using the Spark C
 
 TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for step-by-step setup.
 
+.**At a Glance**
+
+* **Table rows become graph nodes**, foreign keys become relationships — the Spark Connector handles the mapping
+* **Nodes load first**, then relationships — both endpoints must exist before edges can be created
+* **Notebook 01** builds aircraft topology (20 aircraft, 80 systems, 320 components); **Notebook 02** adds sensors, flights, delays, and maintenance events
+* **Graph insights flow back** to the Lakehouse as enrichment columns in Gold Delta tables
+* **Validation** compares node/relationship counts against source row counts to catch silent failures
+
 == From the Lakehouse to the Graph
 
 Not everything moves to the graph. Aggregates, metrics, logs, and documents stay in Delta where they belong. Only the subset with connection patterns worth traversing projects into Neo4j. The Lakehouse remains the system of record; the graph is a projection of the connections that matter.
@@ -18,21 +26,31 @@ image::step2-spark-connector-mapping.png[Spark Connector mapping DataFrame rows 
 
 image::step3-connected-graph.png[The resulting connected graph with a SQL vs Cypher comparison]
 
-**Rows become nodes.** A row in the accounts table becomes an Account node, with columns like account_id, customer_name, and status as node properties.
+**Rows become nodes.** A row in the aircraft table becomes an Aircraft node, with columns like `aircraft_id`, `model`, and `status` as node properties.
 
-**Foreign keys become relationships.** A column like `account.address_id` pointing to `addresses.id` becomes `(:Account)-[:REGISTERED_AT]->(:Address)`. These are straightforward one-hop lookups that SQL also handles well.
+**Foreign keys become relationships.** A column like `system.aircraft_id` pointing to `aircraft.aircraft_id` becomes `(:Aircraft)-[:HAS_SYSTEM]->(:System)`. These are straightforward one-hop lookups that SQL also handles well.
 
-**Mapping tables become relationships.** A junction table like `account_devices` doesn't become nodes. Each row becomes a `USED_DEVICE` relationship with `first_seen` and `last_seen` as relationship properties. The mapping table disappears entirely.
+**Mapping tables become relationships.** A junction table like `component_removals` doesn't become nodes. Each row becomes a `REMOVED_FROM` relationship with `removal_date` and `reason` as relationship properties. The mapping table disappears entirely.
 
-**Shared attributes become shared nodes.** Two accounts sharing the same SSN have no foreign key between them. Discovering that link in the Lakehouse requires a self-join. In the graph, SSN becomes a shared node and both accounts connect to it, making the hidden connection explicit and traversable.
+.Shared attributes and self-referential patterns
+[%collapsible]
+====
+**Shared attributes become shared nodes.** Two aircraft operating at the same airport have no foreign key between them. Discovering that link in the Lakehouse requires a self-join. In the graph, Airport becomes a shared node and both aircraft connect to it, making the hidden connection explicit and traversable.
 
-**Self-referential columns become chains.** `from_account` and `to_account` in a transactions table point to two entities in the same table. In the graph this becomes a `TRANSFERRED_TO` relationship. Chains of these are natural traversals in the graph but require complex nested joins in SQL.
+**Self-referential columns become chains.** `origin_airport` and `destination_airport` in a flights table point to two entities in the same table. In the graph this becomes `(:Airport)<-[:DEPARTED_FROM]-(:Flight)-[:ARRIVED_AT]->(:Airport)`. Chains of these are natural traversals in the graph but require complex nested joins in SQL.
 
 Foreign keys are simple one-hop lookups. Mapping tables eliminate multi-table joins. Shared attributes reveal hidden networks. Self-referential chains replace complex nested joins. The further down the list, the more the graph pays off relative to SQL.
+====
 
 == ELT: Lakehouse to Graph
 
-Raw data lands in cloud storage (S3, ADLS Gen2, GCS) as the unprocessed landing zone. Databricks processes that raw data into Delta tables via Jobs, Notebooks, or Spark Declarative Pipelines. Delta Lake enforces schema and rejects bad data at ingestion: column renaming, type casting, and validation happen here so that graph properties are clean without extra transformation downstream. Delta tables are the interchange format; the Neo4j Spark Connector reads from these governed tables.
+Raw data lands in cloud storage (S3, ADLS Gen2, GCS) as the unprocessed landing zone. Databricks processes that raw data into Delta tables via Jobs, Notebooks, or Spark Declarative Pipelines. Delta tables are the interchange format; the Neo4j Spark Connector reads from these governed tables.
+
+.Delta Lake schema enforcement
+[%collapsible]
+====
+Delta Lake enforces schema and rejects bad data at ingestion: column renaming, type casting, and validation happen here so that graph properties are clean without extra transformation downstream.
+====
 
 === The Neo4j Spark Connector
 
@@ -44,15 +62,31 @@ The Spark Connector is the officially supported bridge between Databricks and Ne
 
 === Design Decision: Relationship Types vs. Properties
 
+.When to use typed relationships vs. generic relationships with properties
+[%collapsible]
+====
 A common modeling choice: use one relationship type per connection kind (`:TRANSFERRED_TO`, `:SHARED_DEVICE`) with indexed type lookups and faster traversal, or use a generic type with a property (`:CONNECTED {type: "transfer"}`) for a simpler schema but slower property filters. Default to type per connection when traversals follow specific connection types. Neo4j relationships are directional, so bidirectional flows require writing in both directions.
+====
 
 === Validation
 
-The connector reads from Neo4j just as easily as it writes, returning Cypher results as standard DataFrames. Three checks cover the common failure modes: node counts should match source row counts, relationship counts should fall within expected ranges, and high-connectivity nodes should reflect known patterns from the source data. If counts don't match, the most common causes are failed node loads or key value mismatches. The connector silently drops relationships when the MATCH clause can't find the target node.
+The connector reads from Neo4j just as easily as it writes, returning Cypher results as standard DataFrames. Three checks cover the common failure modes: node counts should match source row counts, relationship counts should fall within expected ranges, and high-connectivity nodes should reflect known patterns from the source data.
+
+.Debugging count mismatches
+[%collapsible]
+====
+If counts don't match, the most common causes are failed node loads or key value mismatches. The connector silently drops relationships when the MATCH clause can't find the target node.
+====
 
 == Graph Insights Flow Back to the Lakehouse
 
-Graph intelligence flows back as standard DataFrames. Graph-derived metrics become columns in Delta Gold tables, available for dashboards, ML features, and downstream analytics. Cycle detection identifies entities involved in circular chains. PageRank scores influential nodes for risk prioritization. Louvain community detection clusters tightly connected entities into groups. Degree centrality counts connections as ML features. Once in Delta Lake, these insights join with operational data that never left the Lakehouse. This is the Gold layer in action: graph intelligence enriching data intelligence.
+Graph-derived metrics become columns in Delta Gold tables, available for dashboards, ML features, and downstream analytics.
+
+.Graph algorithm examples
+[%collapsible]
+====
+Cycle detection identifies entities involved in circular chains. PageRank scores influential nodes for risk prioritization. Louvain community detection clusters tightly connected entities into groups. Degree centrality counts connections as ML features. Once in Delta Lake, these insights join with operational data that never left the Lakehouse. This is the Gold layer in action: graph intelligence enriching data intelligence.
+====
 
 == Databricks Compute and Notebooks
 
