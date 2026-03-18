@@ -10,6 +10,14 @@ Not everything moves to the graph. Aggregates, metrics, logs, and documents stay
 
 The mapping from tables to graph follows a few recurring patterns, and the value compounds as the mappings get more structural.
 
+The three diagrams below walk through this transformation using the aircraft data from Notebook 01.
+
+image::step1-flat-tables-foreign-keys.png[Flat CSV tables with foreign key columns linking rows across tables]
+
+image::step2-spark-connector-mapping.png[Spark Connector mapping DataFrame rows to graph nodes and relationship rows to edges]
+
+image::step3-connected-graph.png[The resulting connected graph with a SQL vs Cypher comparison]
+
 **Rows become nodes.** A row in the accounts table becomes an Account node, with columns like account_id, customer_name, and status as node properties.
 
 **Foreign keys become relationships.** A column like `account.address_id` pointing to `addresses.id` becomes `(:Account)-[:REGISTERED_AT]->(:Address)`. These are straightforward one-hop lookups that SQL also handles well.
