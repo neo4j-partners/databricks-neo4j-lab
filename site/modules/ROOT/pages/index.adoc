@@ -77,9 +77,9 @@ The rule of thumb: counting things stays in SQL. Following connections moves to 
 
 == Architecture
 
-image::lab-architecture-overview.png[Multi-agent supervisor routing to Genie and Neo4j MCP agents]
+The final architecture is a **Supervisor Agent** built with Databricks Agent Bricks that routes questions to specialized subagents: a **Genie space** for sensor telemetry analytics (natural language to SQL) and a **Neo4j MCP Agent** for graph relationship queries (natural language to Cypher).
 
-The workshop culminates in a **Supervisor Agent** built with Databricks Agent Bricks that routes questions to specialized subagents: a **Genie space** for sensor telemetry analytics (natural language to SQL) and a **Neo4j MCP Agent** for graph relationship queries (natural language to Cypher).
+image::lab-architecture-overview.png[Multi-agent supervisor routing to Genie and Neo4j MCP agents]
 
 == Labs
 
