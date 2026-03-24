@@ -47,13 +47,13 @@ Click **Configure Workspace** → **Files** in the Assignment tab.
 
 ### Complete File Mapping
 
-Upload from `vocareum/` in this repo to Vocareum filesystem:
+Use `./upload.sh` to build and upload all files automatically, or upload manually:
 
 | Local file | Upload to | Purpose |
 |------------|-----------|---------|
 | `courseware/neo4j-databricks-workshop.cfg` | `/voc/private/courseware/` | Course config |
-| `courseware/neo4j-databricks-workshop.dat` | `/voc/private/courseware/` | Lab notebooks (`.dat` prevents Vocareum auto-extract) |
-| `courseware/aircraft_digital_twin_data.dat` | `/voc/private/courseware/` | CSV data, 3.4MB (`.dat` prevents auto-extract) |
+| *(built by upload.sh from repo root notebooks)* | `/voc/private/courseware/neo4j-databricks-workshop.zip` | Lab notebooks |
+| `courseware/aircraft_digital_twin_data.zip` | `/voc/private/courseware/aircraft_digital_twin_data.dat` | CSV data, 3.4MB (`.dat` prevents auto-extract) |
 | `scripts/workspace_init.sh` | `/voc/scripts/` | Shell wrapper |
 | `scripts/user_setup.sh` | `/voc/scripts/` | Shell wrapper |
 | `scripts/lab_setup.sh` | `/voc/scripts/` | Shell wrapper |
