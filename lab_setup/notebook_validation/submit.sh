@@ -40,36 +40,23 @@ echo "  Script:   $REMOTE_PATH"
 ensure_cluster_running "$PROFILE" "$CLUSTER_ID"
 echo "  Run name: $RUN_NAME"
 
-# Build parameters: inject credentials from .env.
+# Build parameters: inject Neo4j credentials if available in .env.
 # Uses Python to safely handle special characters in passwords.
 PARAMS="[]"
-if [[ -n "${NEO4J_URI:-}" && -n "${NEO4J_PASSWORD:-}" ]] || [[ -n "${MCP_ENDPOINT:-}" && -n "${MCP_API_KEY:-}" ]]; then
+if [[ -n "${NEO4J_URI:-}" && -n "${NEO4J_PASSWORD:-}" ]]; then
     PARAMS=$(python3 -c "
 import json, os
-params = []
-# Neo4j credentials
-if os.environ.get('NEO4J_URI') and os.environ.get('NEO4J_PASSWORD'):
-    params += [
-        '--neo4j-uri', os.environ['NEO4J_URI'],
-        '--neo4j-username', os.environ.get('NEO4J_USERNAME', 'neo4j'),
-        '--neo4j-password', os.environ['NEO4J_PASSWORD'],
-    ]
+params = [
+    '--neo4j-uri', os.environ['NEO4J_URI'],
+    '--neo4j-username', os.environ.get('NEO4J_USERNAME', 'neo4j'),
+    '--neo4j-password', os.environ['NEO4J_PASSWORD'],
+]
 data_path = os.environ.get('DATA_PATH', '')
 if data_path:
     params += ['--data-path', data_path]
-# MCP credentials
-if os.environ.get('MCP_ENDPOINT') and os.environ.get('MCP_API_KEY'):
-    params += [
-        '--mcp-endpoint', os.environ['MCP_ENDPOINT'],
-        '--mcp-api-key', os.environ['MCP_API_KEY'],
-    ]
-    mcp_path = os.environ.get('MCP_PATH', '')
-    if mcp_path:
-        params += ['--mcp-path', mcp_path]
 print(json.dumps(params))
 ")
-    [[ -n "${NEO4J_URI:-}" ]] && echo "  Neo4j:    credentials injected from .env"
-    [[ -n "${MCP_ENDPOINT:-}" ]] && echo "  MCP:      credentials injected from .env"
+    echo "  Neo4j:    credentials injected from .env"
 fi
 
 echo "---"

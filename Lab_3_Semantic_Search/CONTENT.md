@@ -1,10 +1,8 @@
-= Lab 3: Semantic Search for Aircraft Maintenance
+# Lab 3: Concepts and Reference
 
 Lab 2 loaded structured data into Neo4j: aircraft, systems, components, sensors, flights. The graph captures topology and operational history, but it cannot answer questions about maintenance procedures, troubleshooting steps, or fault diagnostics. That knowledge lives in unstructured documentation. Lab 3 bridges this gap by ingesting the A320-200 Maintenance Manual into the knowledge graph and enabling semantic search over it.
 
-TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step setup.
-
-== GenAI Limitations
+## GenAI Limitations
 
 Large language models generate the most probable continuation of a prompt, not the most accurate. Three structural limitations make them unreliable for enterprise applications without additional architecture.
 
@@ -18,23 +16,23 @@ All three limitations point to the same remedy: providing the right context at i
 
 But providing context is only half the problem. Traditional RAG and other retrieval approaches often made things worse by introducing context rot. As retrieved chunks increase in volume but decrease in relevance, the model's responses degrade. Irrelevant context doesn't just fail to help; it actively misleads the model, producing worse answers than providing no context at all. The hard problem is not pulling in content but pulling in relevant and focused content. GraphRAG addresses this directly: graph-structured retrieval returns connected, relevant context rather than similar but unrelated chunks, because it follows explicit relationships between entities instead of relying solely on embedding distance.
 
-== Embeddings and Vector Search
+## Embeddings and Vector Search
 
 Before GraphRAG can enrich retrieval with graph traversal, the system needs a way to find relevant starting points. That's what embeddings provide. Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Engine overheating" and "thermal runaway in turbine" produce similar vectors because they mean similar things, even though they share no keywords. This enables semantic similarity search: given a question, find the stored text whose meaning is most similar.
 
 Vector search is what makes RAG work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The next step is preparing documents for this process.
 
-== From Documents to a Knowledge Graph
+## From Documents to a Knowledge Graph
 
 The `neo4j-graphrag` Python package provides `SimpleKGPipeline` to orchestrate the full transformation from raw text to a queryable knowledge graph. The pipeline reads the maintenance manual, chunks it, uses an LLM to extract entities and relationships, stores the results in Neo4j, and generates vector embeddings for semantic search.
 
-=== Documents to Chunks
+### Documents to Chunks
 
 Documents split into Chunk nodes with raw text, linked to their source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order. An embedding model converts each chunk's text into a vector. A vector index over these embeddings enables semantic search by meaning rather than keyword matching.
 
 **Chunking trade-offs.** Larger chunks give the LLM more context during entity extraction, improving its ability to resolve references like "the engine" to a specific component. Smaller chunks produce more precise retrieval results, returning only the relevant passage rather than a block of mixed content. A moderate chunk size (500-1000 characters) with overlap at boundaries is a reasonable starting point, tuned by evaluating results.
 
-=== Chunks to Graph Structure
+### Chunks to Graph Structure
 
 An LLM reads each chunk and extracts entities: regulations, thresholds, procedures, components. These become graph nodes linked to their source chunks via `FROM_CHUNK`. Entity resolution deduplicates: the same regulation mentioned across five different chunks becomes one node with five links, not five separate nodes. Cross-linking connects extracted entities to the existing operational graph built in Lab 2, so a procedure that applies to a specific system links directly to that system's node.
 
@@ -42,21 +40,23 @@ An LLM reads each chunk and extracts entities: regulations, thresholds, procedur
 
 **Entity resolution.** The same real-world component can surface under different names ("HP Turbine," "High-pressure Turbine," "HPT"). Entity resolution merges these duplicates so that queries return complete results. Without it, maintenance event counts and relationship traversals silently miss data.
 
-== Knowledge Graph Structure
+## Knowledge Graph Structure
 
-After completing this lab, the graph combines structured data from Lab 2 with unstructured maintenance documentation. Documents are chunked and embedded for vector search, with entities extracted and linked back to source chunks. The `APPLIES_TO` relationships bridge the two layers, connecting regulatory and procedural entities to the aircraft, systems, and components they govern.
+After completing this lab, the graph combines structured data from Lab 2 with unstructured maintenance documentation.
 
-image::lab3-knowledge-graph-structure.png[Knowledge graph combining structured operational data with unstructured maintenance documentation]
+![Knowledge Graph Structure](images/knowledge-graph-structure.png)
 
-== GraphRAG: Graph-Enriched Retrieval
+The diagram shows both layers and how they connect. The top half is what Lab 3 adds: documents chunked and embedded for vector search, with entities extracted and linked back to source chunks. The bottom half is the operational graph from Lab 2. The `APPLIES_TO` relationships bridge them, connecting regulatory and procedural entities to the aircraft, systems, and components they govern.
+
+## GraphRAG: Graph-Enriched Retrieval
 
 With the data pipeline complete and knowledge graph constructed, the graph holds both structured connections and documentary knowledge. Vector or fulltext search finds the chunks most relevant to the user's question. That's standard RAG. GraphRAG adds graph traversal from those chunks through the entities and relationships surrounding them.
 
-image::lab3-graphrag-retrieval-flow.png[GraphRAG retrieval flow from user question through vector search and graph traversal to enriched context]
+![GraphRAG Retrieval Flow](images/graphrag-retrieval-flow.png)
 
 A user question enters as text, and vector or fulltext search finds the matching Chunk nodes. Graph traversal then follows the entities and relationships surrounding those chunks, gathering the specific components, maintenance events, and systems connected to them. The result is graph-enriched context that reaches the agent or LLM, not just the chunk text. Without extracted entities linked to chunks and cross-linked to the operational graph, there would be nothing for the traversal to follow.
 
-== Retriever Comparison: Vector vs. VectorCypher
+## Retriever Comparison: Vector vs. VectorCypher
 
 The `neo4j-graphrag` package provides two retriever patterns relevant to this lab.
 
@@ -66,41 +66,27 @@ The `neo4j-graphrag` package provides two retriever patterns relevant to this la
 
 The key constraint: traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of graph traversal compensates. Questions targeting a specific entity by name ("How many faults affect AC1001?") may be better served by direct Cypher queries.
 
-== Databricks Foundation Model APIs
+## Databricks Foundation Model APIs
 
 This lab uses Databricks-hosted embedding and LLM models, pre-deployed and accessible via the MLflow deployments client.
 
-[cols="2,2,3"]
-|===
-| Model | Type | Details
+| Model | Type | Details |
+|-------|------|---------|
+| `databricks-bge-large-en` | Embedding (1024-dim) | 512 token context, used for chunk embeddings |
+| `databricks-gte-large-en` | Embedding (1024-dim) | 8192 token context, for longer documents |
+| `databricks-meta-llama-3-3-70b-instruct` | LLM | Llama 3.3 70B (default) |
+| `databricks-llama-4-maverick` | LLM | Llama 4 Maverick |
 
-| `databricks-bge-large-en`
-| Embedding (1024-dim)
-| 512 token context, used for chunk embeddings
+The maintenance manual is loaded from the Unity Catalog Volume at:
+```
+/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/MAINTENANCE_A320.md
+```
 
-| `databricks-gte-large-en`
-| Embedding (1024-dim)
-| 8192 token context, for longer documents
-
-| `databricks-meta-llama-3-3-70b-instruct`
-| LLM
-| Llama 3.3 70B (default)
-
-| `databricks-llama-4-maverick`
-| LLM
-| Llama 4 Maverick
-|===
-
-== Sample Questions
+## Sample Questions
 
 After completing this lab, you can ask questions like:
-
-* "How do I troubleshoot engine vibration?"
-* "What are the EGT limits during takeoff?"
-* "What causes hydraulic pressure loss?"
-* "When should I replace the fuel filter?"
-* "What oil analysis levels indicate bearing wear?"
-
-== Next Steps
-
-Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to run the notebooks, or proceed to xref:lab4.adoc[Lab 4: Compound AI Agents].
+- "How do I troubleshoot engine vibration?"
+- "What are the EGT limits during takeoff?"
+- "What causes hydraulic pressure loss?"
+- "When should I replace the fuel filter?"
+- "What oil analysis levels indicate bearing wear?"

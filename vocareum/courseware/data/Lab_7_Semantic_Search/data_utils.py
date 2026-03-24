@@ -100,7 +100,8 @@ class DatabricksLLM(LLMInterfaceV2):
 
     Supports Databricks-hosted LLM endpoints like:
     - databricks-meta-llama-3-3-70b-instruct
-    - databricks-llama-4-maverick
+    - databricks-dbrx-instruct
+    - databricks-mixtral-8x7b-instruct
 
     Uses MLflow deployments client for API calls.
     """
@@ -212,7 +213,7 @@ class Neo4jConnection:
         return self
 
     def clear_chunks(self):
-        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 2)."""
+        """Remove all Document and Chunk nodes (preserves aircraft graph from Lab 5)."""
         records, _, _ = self.driver.execute_query("""
             MATCH (n) WHERE n:Document OR n:Chunk
             DETACH DELETE n
@@ -247,7 +248,7 @@ class Neo4jConnection:
 # =============================================================================
 
 # Default Volume path for workshop data
-DEFAULT_VOLUME_PATH = "/Volumes/databricks-neo4j-lab/lab-schema/lab-volume"
+DEFAULT_VOLUME_PATH = "/Volumes/databricks_neo4j_lab/lab_schema/lab_volume"
 
 
 class DataLoader:
@@ -298,7 +299,7 @@ class VolumeDataLoader:
         Args:
             file_name: Name of the file in the Volume (e.g., "maintenance_manual.md")
             volume_path: Path to the Unity Catalog Volume.
-                        Defaults to /Volumes/databricks-neo4j-lab/lab-schema/lab-volume
+                        Defaults to /Volumes/databricks_neo4j_lab/lab_schema/lab_volume
         """
         self.volume_path = Path(volume_path)
         self.file_name = file_name

@@ -61,132 +61,20 @@ On the **Settings** tab, scroll to **Sample questions** and add:
 * "What is the average EGT temperature for aircraft N95040A over the last 30 days?"
 * "Compare average EGT temperatures between Boeing 737 and Airbus A320 aircraft"
 * "Find sensors with readings above their 95th percentile value"
-* "Show the trend of EGT temperatures over the 90-day period for aircraft N95040A"
 
 === Add Instructions
 
-Navigate to **Configure** > **Instructions** and add domain knowledge about sensor types, normal ranges, fleet information, and query conventions. Enter the following:
-
-----
-# Aircraft Sensor Analytics Domain Knowledge
-
-## Sensor Types and Normal Ranges
-- EGT (Exhaust Gas Temperature): Normal range 640-700 degrees Celsius, measured in C
-- Vibration: Normal range 0.05-0.50 inches per second, measured in ips
-- N1Speed (Fan Speed N1): Normal range 4,300-5,200 RPM, measured in rpm
-- FuelFlow: Normal range 0.85-1.95 kg/s, measured in kg/s
-
-## Fleet Information
-- 20 aircraft in the fleet
-- 4 operators: ExampleAir, SkyWays, RegionalCo, NorthernJet
-- Models: B737-800 (Boeing), A320-200 (Airbus), A321neo (Airbus), E190 (Embraer)
-
-## Sensor Configuration
-- Each aircraft has 2 engines
-- Each engine has 4 sensors: EGT, Vibration, N1Speed, FuelFlow
-- Total: 160 sensors across the fleet (20 aircraft x 2 engines x 4 sensors)
-
-## Data Conventions
-- Timestamps are stored as timestamp type in the `timestamp` column
-- Data period: July 1, 2024 to September 29, 2024 (90 days)
-- Readings are hourly (24 per day per sensor)
-- 2,160 readings per sensor over the 90-day period
-
-## Sensor ID Format
-- Format: AC{aircraft_number}-S{system_number}-SN{sensor_number}
-- Example: AC1001-S01-SN01 = Aircraft 1001, Engine 1 (S01), EGT sensor (SN01)
-- S01 and S02 are always engines; S03 is Avionics; S04 is Hydraulics
-- SN01=EGT, SN02=Vibration, SN03=N1Speed, SN04=FuelFlow
-
-## Engine Names by Model
-- B737-800: CFM56-7B engines
-- A320-200: V2500-A1 engines
-- A321neo: PW1100G engines
-- E190: CF34-10E engines
-
-## Query Conventions
-- When asked about "Engine 1", filter by systems where name contains "#1"
-- When asked about "Engine 2", filter by systems where name contains "#2"
-- Use tail_number for human-readable aircraft references (e.g., N95040A)
-- Use aircraft_id for internal references (e.g., AC1001)
-- Always include units in results (C, ips, rpm, kg/s)
-----
+Navigate to **Configure** > **Instructions** and add domain knowledge about sensor types, normal ranges, fleet information, and query conventions. See `Lab_4_Compound_AI_Agents/PART_A.md` for the full instructions text.
 
 === Test the Genie
 
-Try these progressively complex queries:
+Try these queries:
 
-**Simple Aggregation:**
-----
-What is the average EGT temperature across all sensors?
-----
+* "What is the average EGT temperature across all sensors?"
+* "Show daily average EGT for aircraft AC1001 in July 2024"
+* "Compare average vibration readings by aircraft model"
 
-**Filtering by Aircraft:**
-----
-Show the average EGT for aircraft N95040A
-----
-
-**Time-Series Trend:**
-----
-Show daily average EGT for aircraft AC1001 in July 2024
-----
-
-**Cross-Table Join:**
-----
-Compare average vibration readings by aircraft model
-----
-
-**Statistical Analysis:**
-----
-Find the top 5 sensors with the highest average readings for their type
-----
-
-=== Additional Sample Queries
-
-Want to add more sample questions to your Genie space or test further? Here are additional queries organized by category:
-
-**Time-Series Analytics:**
-
-* "Show daily average vibration readings for Engine 1 on aircraft AC1001"
-* "What was the maximum fuel flow recorded in August 2024?"
-
-**Fleet Comparisons:**
-
-* "Which aircraft has the highest average vibration readings?"
-* "Show fuel flow rates by operator"
-
-**Anomaly Detection:**
-
-* "Show all EGT readings above 690 degrees Celsius"
-* "Which engines have N1 speed readings outside the normal range of 4500-5000 rpm?"
-
-**Trend Analysis:**
-
-* "Calculate the 7-day rolling average of vibration for Engine 1 on AC1001"
-
-=== View the SQL Generation
-
-For each query, click **View Code** to see the generated SQL is correct:
-
-Example for "Compare average vibration by aircraft model":
-[source,sql]
-----
-SELECT
-    a.model,
-    AVG(r.value) as avg_vibration,
-    COUNT(*) as reading_count
-FROM sensor_readings r
-JOIN sensors sen ON r.sensor_id = sen.sensor_id
-JOIN systems s ON sen.system_id = s.system_id
-JOIN aircraft a ON s.aircraft_id = a.aircraft_id
-WHERE sen.type = 'Vibration'
-GROUP BY a.model
-ORDER BY avg_vibration DESC
-----
-
-=== Save and Note the Genie Space
-
-Click **Save** to preserve your Genie space configuration. Note the exact name of your Genie space (e.g., `Aircraft Sensor Analyst RK`). You will need this in Part B when configuring the multi-agent supervisor.
+Save and note the Genie space name for Part B.
 
 == Part B: Supervisor Agent
 
@@ -202,20 +90,6 @@ The Neo4j MCP connection has been pre-configured by workshop administrators.
 
 image::lab4-mcp-connection.png[MCP Connection Configuration]
 
-=== Test MCP Tools in Playground
-
-You can verify the MCP tools work before building the supervisor:
-
-1. Navigate to **Playground** in the left navigation
-2. Select **GPT OSS 120B**
-3. Click **Add your own tool** > **+ Add tool** > **MCP Servers** > **External MCP Servers** > **neo4j_agentcore_mcp**
-4. Ask:
-
-----
-What is the schema of the database?
-Which aircraft had critical maintenance events?
-----
-
 === Create the Multi-Agent Supervisor
 
 1. Click **Agents** in the left navigation
@@ -228,325 +102,49 @@ Which aircraft had critical maintenance events?
 1. Under **Configure Agents**, click **+ Add**
 2. Select **External MCP Server** as the type
 3. Select `neo4j_agentcore_mcp` from the Unity Catalog connection dropdown
-4. The **Agent Name** `mcp-neo4j-agentcore-mcp` will auto-populate
-
-In the **Describe the content** field, paste the following. The supervisor uses this description to decide which agent handles each question, so detail matters:
-
-----
-Queries the Neo4j knowledge graph to explore aircraft relationships, topology, and operational data.
-
-BEST FOR:
-- Aircraft topology: "What systems does aircraft AC1001 have?"
-- Component hierarchy: "Show all components in the hydraulics system"
-- Maintenance events: "Which aircraft had critical maintenance events?"
-- Flight operations: "Find flights delayed due to maintenance"
-- Relationship patterns: "Which airports does ExampleAir fly to?"
-- Graph traversals: "Show the path from aircraft to sensor"
-
-DATA AVAILABLE (loaded from /Volumes/databricks-neo4j-lab/lab-schema/lab-volume/):
-- Aircraft (20): Fleet inventory with tail numbers, models, operators
-- Systems (~80): Engines, Avionics, Hydraulics per aircraft
-- Components (320): Turbines, Compressors, Pumps, etc.
-- Sensors (160): Monitoring equipment metadata
-- MaintenanceEvents (300): Faults, severity, corrective actions
-- Flights (800): Operations with departure/arrival
-- Delays (~300): Delay causes and durations
-- Airports (12): Route network locations
-
-RELATIONSHIP TYPES:
-- HAS_SYSTEM: Aircraft -> System
-- HAS_COMPONENT: System -> Component
-- HAS_SENSOR: System -> Sensor
-- HAS_EVENT: Component -> MaintenanceEvent
-- OPERATES_FLIGHT: Aircraft -> Flight
-- DEPARTS_FROM / ARRIVES_AT: Flight -> Airport
-- HAS_DELAY: Flight -> Delay
-
-DO NOT USE FOR:
-- Time-series sensor readings (use sensor_data_agent instead)
-- Statistical aggregations over readings
-- Trend analysis or rolling averages
-----
+4. Add the agent description from `Lab_4_Compound_AI_Agents/PART_B.md`
 
 === Add the Genie Space Agent
 
 1. Click **+ Add** again
 2. Select **Genie Space** as the type
 3. Select your Genie space from Part A
-4. **Agent Name:** `sensor_data_agent` (edit the auto-populated name if needed)
-5. In the **Description** field, paste the following:
-
-----
-Analyzes aircraft sensor telemetry data using SQL queries over Unity Catalog tables.
-
-DATA LOCATION:
-- Catalog: databricks-neo4j-lab
-- Schema: lakehouse
-- Tables: sensor_readings, sensors, systems, aircraft
-
-BEST FOR:
-- Time-series analytics: "What is the average EGT over the last 30 days?"
-- Statistical analysis: "Show sensors above the 95th percentile"
-- Trend detection: "Show daily vibration trends for Engine 1"
-- Fleet comparisons: "Compare fuel flow between Boeing and Airbus"
-- Anomaly detection: "Find EGT readings above 690 degrees"
-- Aggregations: "What was the maximum N1 speed recorded?"
-
-DATA AVAILABLE:
-- sensor_readings (345,600+ rows): Hourly telemetry over 90 days
-- sensors (160 rows): Sensor metadata (type, unit, system)
-- systems (~80 rows): Aircraft system information
-- aircraft (20 rows): Fleet metadata (model, operator)
-
-SENSOR TYPES:
-- EGT: Exhaust Gas Temperature (640-700 C)
-- Vibration: Engine vibration (0.05-0.50 ips)
-- N1Speed: Fan speed (4,300-5,200 rpm)
-- FuelFlow: Fuel consumption (0.85-1.95 kg/s)
-
-DO NOT USE FOR:
-- Relationship queries (use mcp-neo4j-agentcore-mcp)
-- Maintenance event details
-- Flight operations or delays
-- Component-level fault tracking
-----
-
-=== Create the Agent
-
-Click **Create Agent** to deploy the supervisor.
-
-NOTE: Deployment may take several minutes to complete. The status will update when ready.
+4. **Agent Name:** `sensor_data_agent`
+5. Add the agent description from `Lab_4_Compound_AI_Agents/PART_B.md`
 
 === Configure Supervisor Instructions
 
-1. Scroll to the bottom of the agent configuration page
-2. Expand the **Optional** section
-3. In the **Instructions** field, enter the following:
+Expand the **Optional** section and add routing instructions. See `Lab_4_Compound_AI_Agents/PART_B.md` for the full instructions text.
 
-----
-# Aircraft Intelligence Hub - Routing Instructions
-
-You are an intelligent coordinator for aircraft analytics. Your role is to understand user questions and route them to the appropriate specialized agent.
-
-## Available Agents
-
-### sensor_data_agent (Genie space - Unity Catalog SQL)
-Use for questions about:
-- Sensor readings and telemetry data
-- Time-series analytics (averages, trends, rolling windows)
-- Statistical analysis (percentiles, standard deviation)
-- Fleet-wide comparisons of sensor metrics
-- Anomaly detection based on readings
-- Questions containing: EGT, vibration, N1, fuel flow, temperature, readings, averages, trends
-
-### mcp-neo4j-agentcore-mcp (Neo4j Knowledge Graph - Cypher)
-Use for questions about:
-- Aircraft structure and topology
-- Component relationships and hierarchy
-- Maintenance events and fault history
-- Flight operations, routes, delays
-- "Which", "what systems", "connected to", "related to" questions
-- Questions about maintenance, flights, delays, airports
-
-## Routing Rules
-
-1. **Sensor values/readings** -> sensor_data_agent
-   - "What is the EGT for..."
-   - "Show vibration readings..."
-   - "Average fuel flow..."
-
-2. **Relationships/structure** -> mcp-neo4j-agentcore-mcp
-   - "What systems does aircraft X have?"
-   - "Which components..."
-   - "Show maintenance events..."
-
-3. **Flights/operations** -> mcp-neo4j-agentcore-mcp
-   - "Which flights were delayed?"
-   - "What airports does..."
-   - "Show flight routes..."
-
-4. **Maintenance history** -> mcp-neo4j-agentcore-mcp
-   - "What maintenance events..."
-   - "Which components had faults?"
-   - "Critical maintenance..."
-
-5. **Statistical aggregations on readings** -> sensor_data_agent
-   - "Average", "maximum", "minimum", "percentile"
-   - "Trend", "over time", "daily", "monthly"
-   - "Compare", "between", "by model"
-
-## Complex Queries (Multi-Agent)
-
-For questions that need BOTH sources, process sequentially:
-
-1. **"Find aircraft with high vibration AND recent maintenance"**
-   - First: sensor_data_agent -> Get aircraft with high vibration
-   - Then: mcp-neo4j-agentcore-mcp -> Get maintenance events for those aircraft
-
-2. **"Which engines have abnormal EGT and what components were serviced?"**
-   - First: sensor_data_agent -> Find abnormal EGT readings
-   - Then: mcp-neo4j-agentcore-mcp -> Find maintenance events for those engines
-
-3. **"Compare sensor trends for aircraft that had delays"**
-   - First: mcp-neo4j-agentcore-mcp -> Get aircraft with delays
-   - Then: sensor_data_agent -> Get sensor trends for those aircraft
-
-## Response Guidelines
-
-1. For single-agent queries: Return the agent's response directly
-2. For multi-agent queries: Synthesize a combined response that integrates both perspectives
-3. Always cite which data source provided each piece of information
-4. If a query cannot be answered by either agent, explain what data would be needed
-----
-
-Click **Update Agent** to save the instructions.
+Click **Create Agent** to deploy.
 
 === Test the Multi-Agent System
 
-Once deployment completes, use the **Test your Agent** panel on the right side of the Build tab, or click **Open in Playground** for expanded testing.
-
-==== Test 1: Sensor Analytics (should route to sensor_data_agent)
+**Sensor Analytics (routes to Genie):**
 ----
 What is the average EGT temperature across the fleet?
 ----
-Verify: The query is routed to sensor_data_agent and returns a numerical average.
 
-==== Test 2: Graph Relationships (should route to mcp-neo4j-agentcore-mcp)
+**Graph Relationships (routes to Neo4j):**
 ----
 What systems does aircraft AC1001 have?
 ----
-Verify: The query is routed to mcp-neo4j-agentcore-mcp and returns engine, avionics, hydraulics systems.
 
-==== Test 3: Maintenance Events (should route to mcp-neo4j-agentcore-mcp)
-----
-Show me all critical maintenance events in the last month
-----
-Verify: Returns maintenance events with severity=CRITICAL.
-
-==== Test 4: Fleet Comparison (should route to sensor_data_agent)
-----
-Compare average vibration readings between Boeing and Airbus aircraft
-----
-Verify: Returns grouped statistics by manufacturer.
-
-==== Test 5: Combined Query
+**Combined Query (routes to both):**
 ----
 Find aircraft with EGT readings above 680 degrees and show their maintenance history
-----
-Expected behavior:
-
-1. Supervisor routes to sensor_data_agent for high EGT aircraft
-2. Supervisor routes to mcp-neo4j-agentcore-mcp for maintenance history
-3. Response synthesizes both data sources
-
-==== Test 6: Another Combined Query
-----
-Which engines had above-average vibration, and what components were recently serviced on those engines?
-----
-Expected behavior:
-
-1. Get high-vibration engines from sensor_data_agent
-2. Get maintenance events from mcp-neo4j-agentcore-mcp
-3. Combine and present results
-
-== Step 8: Improve Through Feedback
-
-=== Add Example Questions
-
-1. Navigate to the **Examples** tab
-2. Click **+ Add** to introduce test questions
-3. Enter questions that represent common user queries
-
-=== Share with Subject Matter Experts
-
-1. Share the configuration page link with domain experts
-2. Grant experts `CAN_MANAGE` permission on the supervisor
-3. Ensure experts have appropriate access to each subagent
-
-=== Add Guidelines
-
-1. Select each example question
-2. Add **Guidelines** labels that refine routing behavior
-3. Test again to validate improvements
-4. Click **Update Agent** to save changes
-
-== Step 9: Optional -- Query the Endpoint Programmatically
-
-1. Click **See Agent status** or **Open in Playground**
-2. Select **Get code** to retrieve API examples
-3. Choose between **Curl API** or **Python API**
-
-Example Python usage:
-[source,python]
-----
-import requests
-
-# Get your endpoint URL from the agent status page
-ENDPOINT_URL = "https://<workspace>.databricks.com/serving-endpoints/<agent-name>/invocations"
-
-headers = {
-    "Authorization": f"Bearer {DATABRICKS_TOKEN}",
-    "Content-Type": "application/json"
-}
-
-response = requests.post(
-    ENDPOINT_URL,
-    headers=headers,
-    json={"messages": [{"role": "user", "content": "What systems does AC1001 have?"}]}
-)
-print(response.json())
 ----
 
 == Query Routing Strategy
 
-For the full routing table showing which question types route to Genie, Neo4j, or both, see the xref:lab4.adoc#_query_routing_strategy[Query Routing Strategy] in the concepts page.
+[cols="2,1,3"]
+|===
+| Question Type | Route To | Example
 
-== Troubleshooting
-
-**"Agent not responding"** -- Check MCP connection status in **Catalog** > **Connections**. Verify Neo4j instance is running. Test Genie space independently in AI Playground. Ensure user has `USE CONNECTION` permission on the MCP connection.
-
-**"Wrong agent selected"** -- Review and enhance agent descriptions with more specific keywords. Add explicit routing patterns in supervisor instructions. Use the Examples tab to add labeled training questions.
-
-**"Cypher query failed"** -- Check that Neo4j data was loaded correctly (Lab 2). Verify node labels and relationship types match documentation. Review Cypher syntax for errors. Test queries directly in Neo4j Aura console first.
-
-**"SQL query failed"** -- Verify table names in Unity Catalog: `databricks-neo4j-lab.lakehouse`. Check column names match documentation. Ensure Genie space has access to all required tables. Test queries directly in SQL Editor first.
-
-**"Permission denied"** -- For Genie space: User needs access to the space AND underlying data tables. For MCP server: User needs `USE CONNECTION` permission on the Unity Catalog connection. For supervisor: User needs `CAN QUERY` permission on the agent endpoint.
-
-== Sample Queries Reference
-
-=== Sensor Analytics (sensor_data_agent)
-----
-What is the average EGT temperature for aircraft N95040A?
-Show daily vibration trends for Engine 1 in August 2024
-Find all sensors with readings above the 95th percentile
-Compare fuel flow rates by aircraft model
-What was the maximum N1 speed recorded?
-----
-
-=== Graph Queries (mcp-neo4j-agentcore-mcp)
-----
-What systems does aircraft AC1001 have?
-Show all components in the hydraulics system
-Which aircraft had critical maintenance events?
-Find flights that were delayed due to maintenance
-What airports are in the route network?
-----
-
-=== Combined Queries (both agents)
-----
-Find aircraft with high EGT and show their recent maintenance
-Which engines have abnormal vibration and what was serviced?
-Compare sensor trends for aircraft that had delays vs. those that didn't
-Show maintenance events for aircraft with the lowest fuel efficiency
-----
-
-== References
-
-* https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor[Multi-Agent Supervisor Documentation]
-* https://docs.databricks.com/aws/en/generative-ai/mcp/external-mcp[External MCP Servers]
-* https://docs.databricks.com/aws/en/generative-ai/agent-bricks/[Agent Bricks Overview]
-* https://docs.databricks.com/en/data-governance/unity-catalog/index.html[Unity Catalog Connections]
+| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?"
+| Relationship traversals | Neo4j | "Which components are connected to Engine 1?"
+| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events"
+|===
 
 == Next Steps
 

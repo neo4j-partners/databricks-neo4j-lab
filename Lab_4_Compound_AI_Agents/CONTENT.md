@@ -1,10 +1,8 @@
-= Lab 4: Compound AI Agents for Aircraft Analytics
+# Lab 4: Concepts and Reference
 
 Lab 3 built a knowledge graph from maintenance documentation and enabled semantic search over it. GraphRAG grounds LLM answers in retrieved content enriched with graph context: entities, relationships, connected chunks. But GraphRAG can only reach data in the graph. The full sensor telemetry ledger (345,600+ hourly readings across 90 days) stays in Delta Lake. GraphRAG cannot answer "what is the average EGT for aircraft N95040A?" because that requires SQL aggregation over rows that never entered the graph. To answer questions that span both platforms, the architecture needs agents.
 
-TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for step-by-step setup.
-
-== What Are Agents
+## What Are Agents
 
 An AI agent is more than a language model answering questions. It perceives its environment (the user's question, available tools, conversation history), reasons about what to do, takes action by calling tools, and returns a response. These four stages run in a loop: after observing the result of one action, the agent can reason again and take another.
 
@@ -12,17 +10,17 @@ This loop is the **ReAct pattern** (Reason + Act). The agent receives a question
 
 Tools are what give agents their capabilities. Each tool has a description that the agent matches against the user's question during the reasoning phase. The quality of these descriptions directly affects routing accuracy.
 
-== Databricks AI Solutions
+## Databricks AI Solutions
 
 Building production agents requires more than a reasoning loop and a set of tools. The agent needs a way to translate natural language into the right query language for each data store, a platform to handle deployment and governance, and an orchestration layer to coordinate multiple specialists. Databricks provides three capabilities that address these concerns: Mosaic AI as the foundational AI platform, AI/BI Genie for natural language analytics over structured data, and Agent Bricks for building and deploying the agents themselves.
 
-=== Mosaic AI
+### Mosaic AI
 
 Mosaic AI is the AI platform within Databricks that provides the infrastructure for building, deploying, and monitoring generative AI applications. It spans the full lifecycle: foundation model serving through managed endpoints, vector search for unstructured data retrieval, AI Gateway for managing access across model providers, and MLflow integration for tracing, evaluation, and production monitoring. Unity Catalog provides governance across all of these capabilities, so that models, tools, data, and agent endpoints share a single permission and lineage model.
 
 Rather than a single product, Mosaic AI is the layer that the agent-specific tools build on. Genie uses Mosaic AI's model serving infrastructure to run its compound AI pipeline. Agent Bricks deploys agents to Mosaic AI's serverless compute and monitors them through MLflow tracing. The platform handles the operational concerns (model hosting, authentication, scaling, observability) so that agent development can focus on the reasoning and tool-calling logic that makes each agent useful.
 
-=== AI/BI Genie
+### AI/BI Genie
 
 Genie specializes in one problem: turning natural language questions into correct SQL. It is purpose-built for structured data analytics, translating conversational questions into queries, executing them against a SQL warehouse, and returning results as tables, summaries, and visualizations.
 
@@ -32,7 +30,7 @@ The accuracy of any natural-language-to-SQL system depends on how much context t
 
 Genie also provides a **Knowledge Store** where space authors can define structured business semantics: column-level synonyms, local join relationships, SQL measures with filters and dimensions, and prompt-matching rules. These refinements stay local to the space and do not alter the underlying Unity Catalog metadata, so multiple spaces can present different views of the same tables for different audiences. Every query Genie generates is read-only, which makes it safe to expose to business users who need answers without writing SQL themselves.
 
-=== Agent Bricks
+### Agent Bricks
 
 Agent Bricks is the platform layer for building, deploying, and governing AI agents within Databricks. It handles the operational concerns that sit outside an agent's reasoning loop: authentication, tool registration, model selection, deployment to serverless compute, and monitoring through MLflow.
 
@@ -40,75 +38,85 @@ The platform offers managed agent builders for common patterns. **Knowledge Assi
 
 The Supervisor Agent supports up to 20 subagents of four types: Genie spaces for natural language analytics over structured data, agent endpoints for document-based Q&A, Unity Catalog functions for custom tool logic, and MCP servers for external services. Each subagent is registered with a name and a detailed description of its capabilities. The supervisor reads these descriptions to determine which subagent should handle each incoming question. When a question requires multiple subagents, the supervisor delegates to each and synthesizes a unified response. Access control flows through the platform: end users only reach subagents they have explicit permissions for.
 
-== Specialized Agents for Different Data Structures
+Teams that need more control can build agents with frameworks like LangChain, LangGraph, or LlamaIndex and deploy them through Agent Bricks to inherit Unity Catalog governance and MLflow evaluation without adopting the managed builders.
+
+## Specialized Agents for Different Data Structures
 
 Two schemas, two query languages, and two sets of conventions in one prompt dilute focus. An agent that only knows about graph structure writes precise graph queries; an agent that knows about both starts mixing idioms. SQL thinks in rows, filters, and aggregations. Cypher thinks in paths, patterns, and traversals. A generalist agent spread across both produces queries that mix these idioms, like attempting a JOIN where a traversal belongs.
 
 The architecture separates concerns: one agent per platform, a supervisor to coordinate them.
 
-=== Genie Space: Sensor Telemetry Analytics
+### Genie Space: Sensor Telemetry Analytics
 
 The Genie space in this lab is configured against the Lakehouse sensor data: `sensor_readings`, `sensors`, `systems`, and `aircraft` tables registered in Unity Catalog. Domain instructions teach Genie the aircraft terminology (EGT, fuel flow, vibration amplitude) and the JOIN paths between tables. Example queries demonstrate the aggregation patterns that sensor analytics requires: daily averages, percentile calculations, cross-aircraft comparisons.
 
 When a user asks "What is the average EGT temperature for aircraft N95040A?", Genie matches the question against its configured context, generates a SQL query that joins `sensor_readings` to `sensors` to `aircraft`, applies the appropriate aggregation, and returns the result. The compound AI system handles the full translation from conversational English to correct SQL without the user needing to know the schema.
 
-=== Neo4j Graph Agent: Natural Language to Cypher
+### Neo4j Graph Agent: Natural Language to Cypher
 
 The Neo4j agent is purpose-built for connected data: paths, multi-hop traversals, cycle detection, shared-attribute matching. It inspects every node label, relationship type, and property key before querying, so the graph's schema becomes a constraint that guides generation rather than a suggestion to ignore. Every generated query is read-only.
 
 The agent accesses Neo4j through MCP (Model Context Protocol), an open standard that exposes data sources as tools any agent framework can discover and call. Neo4j exposes three MCP tools:
 
-* **`get-schema`** introspects the live database using APOC, returning a token-efficient representation of every node label, relationship type, and property key.
-* **`read-cypher`** executes read-only Cypher queries with parameterized inputs.
-* **`list-gds-procedures`** discovers available graph algorithms (PageRank, community detection, similarity) when GDS is installed.
+- **`get-schema`** introspects the live database using APOC, returning a token-efficient representation of every node label, relationship type, and property key.
+- **`read-cypher`** executes read-only Cypher queries with parameterized inputs.
+- **`list-gds-procedures`** discovers available graph algorithms (PageRank, community detection, similarity) when GDS is installed.
 
 Write operations are hidden entirely, so agents can never modify production data.
 
-== Multi-Agent Architecture
+## Multi-Agent Architecture
 
 A supervisor agent sits above both specialists and routes questions based on their nature.
 
-image::lab-architecture-overview.png[Multi-agent supervisor routing to Genie and Neo4j MCP agents]
+```
+User Question
+     |
+     v
+Multi-Agent Supervisor (Agent Bricks)
+     |
+     +---> "sensor readings?" ---> Genie Space ---> Unity Catalog (Lakehouse)
+     |        time-series              SQL           345,600+ sensor readings
+     |        aggregations
+     |
+     +---> "relationships?" ---> Neo4j MCP Agent ---> Knowledge Graph (Aura)
+     |        topology               Cypher            8 node types, 13 relationships
+     |        maintenance
+     |
+     +---> "both needed?" ---> Sequential calls to both agents
+                               |
+                               v
+                         Synthesized Response
+```
 
 The supervisor does not answer questions itself. It reads the question, determines which data shape it targets, and routes to the right specialist. For questions that span both platforms, it decomposes the question into sub-tasks, sends each to the appropriate agent, and synthesizes a single answer.
 
-== Query Routing Strategy
+## Query Routing Strategy
 
-[cols="2,1,3"]
-|===
-| Question Type | Route To | Example
+| Question Type | Route To | Example |
+|---------------|----------|---------|
+| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?" |
+| Statistical analysis | Genie | "Show sensors with readings above 95th percentile" |
+| Trend analysis | Genie | "Compare fuel flow rates between 737 and A320" |
+| Relationship traversals | Neo4j | "Which components are connected to Engine 1?" |
+| Pattern matching | Neo4j | "Find all aircraft with maintenance delays" |
+| Topology exploration | Neo4j | "Show the system hierarchy for N95040A" |
+| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events" |
 
-| Time-series aggregations | Genie | "What's the average EGT over the last 30 days?"
-| Statistical analysis | Genie | "Show sensors with readings above 95th percentile"
-| Trend analysis | Genie | "Compare fuel flow rates between 737 and A320"
-| Relationship traversals | Neo4j | "Which components are connected to Engine 1?"
-| Pattern matching | Neo4j | "Find all aircraft with maintenance delays"
-| Topology exploration | Neo4j | "Show the system hierarchy for N95040A"
-| Combined analytics | Both | "Find aircraft with high vibration AND recent maintenance events"
-|===
+## Sample Questions
 
-== Sample Questions
+### Genie Agent (Sensor Analytics)
+- "What is the average EGT temperature for aircraft N95040A?"
+- "Show daily vibration trends for Engine 1 over the last month"
+- "Which sensors have readings above their 95th percentile?"
+- "Compare fuel flow rates between Boeing and Airbus aircraft"
 
-=== Genie Agent (Sensor Analytics)
+### Neo4j Agent (Graph Relationships)
+- "Which systems does aircraft AC1001 have?"
+- "Show all maintenance events affecting Engine 1"
+- "Find flights that were delayed due to maintenance"
+- "What components are in the hydraulics system?"
 
-* "What is the average EGT temperature for aircraft N95040A?"
-* "Show daily vibration trends for Engine 1 over the last month"
-* "Which sensors have readings above their 95th percentile?"
-* "Compare fuel flow rates between Boeing and Airbus aircraft"
-
-=== Neo4j Agent (Graph Relationships)
-
-* "Which systems does aircraft AC1001 have?"
-* "Show all maintenance events affecting Engine 1"
-* "Find flights that were delayed due to maintenance"
-* "What components are in the hydraulics system?"
-
-=== Multi-Agent (Combined Queries)
-
-* "Find aircraft with high EGT readings and show their recent maintenance history"
-* "Which engines have above-average vibration, and what components were recently serviced?"
-* "Compare sensor trends for aircraft that had delays versus those that didn't"
-
-== Next Steps
-
-Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to build the agents, or proceed to xref:lab5.adoc[Lab 5: Aura Agents].
+### Multi-Agent (Combined Queries)
+- "Find aircraft with high EGT readings and show their recent maintenance history"
+- "Which engines have above-average vibration, and what components were recently serviced?"
+- "Compare sensor trends for aircraft that had delays versus those that didn't"

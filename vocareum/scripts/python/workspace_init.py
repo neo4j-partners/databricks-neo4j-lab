@@ -12,7 +12,7 @@ import os
 import sys
 import zipfile
 
-# dbacademy.py lives in the same directory
+# dbacademy is installed via pip in the Vocareum template environment
 sys.path.insert(0, os.path.dirname(__file__))
 
 from dbacademy import voc_init
@@ -55,9 +55,15 @@ if data_dir is None:
     for data_zip in data_zips:
         if os.path.exists(data_zip):
             print(f"Extracting {data_zip}...")
+            extract_dir = "/tmp/courseware"
             with zipfile.ZipFile(data_zip, "r") as z:
-                z.extractall("/voc/private/courseware/")
-            data_dir = "/voc/private/courseware/aircraft_digital_twin_data"
+                z.extractall(extract_dir)
+            # Check if zip contained a subdirectory or flat CSVs
+            subdir = os.path.join(extract_dir, "aircraft_digital_twin_data")
+            if os.path.isdir(subdir):
+                data_dir = subdir
+            else:
+                data_dir = extract_dir
             print(f"Extracted to {data_dir}")
             break
 

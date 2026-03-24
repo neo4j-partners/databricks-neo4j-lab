@@ -66,15 +66,15 @@ Upload from `vocareum/` in this repo to Vocareum filesystem:
 | `courseware/dlt_fleet_etl.py` | `/voc/private/courseware/` | DLT notebook (bronze→silver→gold) |
 | `docs/README.md` | `/voc/docs/` | Iframe instructions |
 
-**Note:** Upload `scripts/python/dbacademy.py` to `/voc/scripts/python/`. This is a patched version (fixes `delta_sharing_recipient_token_lifetime` and `self.w` None guard). If the template already has one, **overwrite it** with ours.
+**Note:** `dbacademy` is installed via pip (`pip install dbacademy`). It is provided by the Vocareum template's base environment. If the template's version is outdated, you can pin a version in the workspace init script.
 
 ## What Happens Automatically
 
 ### On Workspace Init (`workspace_init.py`)
-1. **dbacademy** creates metastore, default catalog (`databricks-neo4j-lab`), shared warehouse
+1. **dbacademy** creates metastore, default catalog (`databricks_neo4j_lab`), shared warehouse
 2. **workshop_data_setup.py** then:
    - Creates catalog, schemas, and UC volume
-   - Uploads 22 CSV files to `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/`
+   - Uploads 22 CSV files to `/Volumes/databricks_neo4j_lab/lab_schema/lab_volume/`
    - Uploads DLT notebook to `/Shared/workshop/dlt_fleet_etl`
    - Creates and runs a **serverless DLT pipeline** (`Fleet Digital Twin ETL`):
      - **Bronze**: Raw CSV ingestion (10 node tables + 12 relationship tables)
@@ -106,9 +106,9 @@ Upload from `vocareum/` in this repo to Vocareum filesystem:
 ### A. Neo4j Aura
 Each participant creates their own Neo4j Aura instance during Lab 1. No pre-provisioning needed.
 
-### B. Neo4j MCP Server + UC Connection (Lab 4)
+### B. Neo4j MCP Server + UC Connection (Lab 6)
 
-The multi-agent supervisor in Lab 4 needs a Neo4j MCP server and a Unity Catalog HTTP connection. Since each participant creates their own Neo4j Aura instance (Lab 1), the MCP server must point to a **shared** Aura instance or be configured per-participant.
+The multi-agent supervisor in Lab 6 needs a Neo4j MCP server and a Unity Catalog HTTP connection. Since each participant creates their own Neo4j Aura instance (Lab 1), the MCP server must point to a **shared** Aura instance or be configured per-participant.
 
 #### Option 1: Shared Neo4j Aura (Recommended for workshops)
 
@@ -168,7 +168,7 @@ GRANT USE CONNECTION ON CONNECTION neo4j_agentcore_mcp TO `account users`;
 
 #### Option 2: Per-participant MCP (Advanced)
 
-If each participant needs their own MCP connection to their own Aura instance, they would run the MCP setup notebook (`neo4j-mcp-http-connection.ipynb`) themselves during Lab 4. This requires:
+If each participant needs their own MCP connection to their own Aura instance, they would run the MCP setup notebook (`neo4j-mcp-http-connection.ipynb`) themselves during Lab 6. This requires:
 - Each participant deploys their own MCP server (not practical in a timed workshop)
 - OR a shared MCP server that accepts a Neo4j URI as a parameter (not supported by the standard Neo4j MCP server)
 
@@ -187,13 +187,13 @@ SELECT http_request(
 ) AS response;
 ```
 
-### C. Genie Space (Lab 4)
-Create a Genie Space pointed at `databricks-neo4j-lab.lakehouse` tables for the Genie Agent. This is a UI-only step done in the workspace after init.
+### C. Genie Space (Lab 6)
+Create a Genie Space pointed at `databricks_neo4j_lab.lakehouse` tables for the Genie Agent. This is a UI-only step done in the workspace after init.
 
 1. Go to **Genie** in the workspace sidebar
 2. Click **New** to create a Genie Space
 3. Name: `Aircraft Fleet Analytics`
-4. Add tables: `databricks-neo4j-lab.lakehouse.aircraft`, `systems`, `sensors`, `sensor_readings`
+4. Add tables: `databricks_neo4j_lab.lakehouse.aircraft`, `systems`, `sensors`, `sensor_readings`
 5. The tables already have Genie-friendly comments from workspace init
 6. Copy the Genie Space ID (from the URL) — it's needed for the multi-agent supervisor config
 
@@ -203,8 +203,8 @@ Create a Genie Space pointed at `databricks-neo4j-lab.lakehouse` tables for the 
 2. Verify workspace initializes (check logs for errors)
 3. Verify notebooks load in the workspace
 4. Verify cluster starts with Neo4j Spark Connector
-5. Verify Delta tables exist: `SELECT * FROM databricks-neo4j-lab.lakehouse.aircraft`
-6. Run through Lab 2 notebook 1 end-to-end
+5. Verify Delta tables exist: `SELECT * FROM databricks_neo4j_lab.lakehouse.aircraft`
+6. Run through Lab 5 notebook 1 end-to-end
 
 ## Step 6: Enroll Participants
 
@@ -217,7 +217,7 @@ For direct enrollment (LTI disabled):
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `self.w` is None | `VOC_DB_WORKSPACE_URL` or `VOC_DB_API_TOKEN` not set | Vocareum provisioning failed — check workspace exists |
-| `delta_sharing_recipient_token_lifetime_in_seconds` = 0 | Databricks no longer allows infinite token lifetime | Patch dbacademy.py line to use `86400` |
+| `delta_sharing_recipient_token_lifetime_in_seconds` = 0 | Databricks no longer allows infinite token lifetime | Pin a dbacademy version that defaults to `86400` or patch at runtime |
 | `Root storage credential does not exist` | Metastore exists but credential was deleted | Delete metastore and re-run init |
 | `Permission assignment APIs not available` | Workspace not using identity federation | Use workspace-level SCIM instead of account-level |
 | CSV upload fails | Volume doesn't exist yet | Ensure catalog/schema/volume creation SQL runs first |
@@ -227,9 +227,9 @@ For direct enrollment (LTI disabled):
 | Resource | Details |
 |----------|---------|
 | Workspace | Vocareum-provisioned (auto) |
-| Catalog | `databricks-neo4j-lab` |
-| Volume | `/Volumes/databricks-neo4j-lab/lab-schema/lab-volume/` |
-| Lakehouse Schema | `databricks-neo4j-lab.lakehouse` |
+| Catalog | `databricks_neo4j_lab` |
+| Volume | `/Volumes/databricks_neo4j_lab/lab_schema/lab_volume/` |
+| Lakehouse Schema | `databricks_neo4j_lab.lakehouse` |
 | Tables | `aircraft`, `systems`, `sensors`, `sensor_readings` |
 | Cluster | Single-node i3.xlarge, DBR 16.4 |
 | Spark Connector | `org.neo4j:neo4j-connector-apache-spark_2.12:5.3.1_for_spark_3` |

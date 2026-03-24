@@ -145,8 +145,7 @@ class NotebookConfig:
         ("Lab_3_Semantic_Search", (
             "03_data_and_embeddings.ipynb",
             "04_graphrag_retrievers.ipynb",
-            "05_mcp_graph_queries.ipynb",
-            "06_hybrid_retrievers.ipynb",
+            "05_hybrid_retrievers.ipynb",
             "data_utils.py",
         ), "Lab_3_Semantic_Search"),
         ("lab_setup/neo4j_mcp_connection", (

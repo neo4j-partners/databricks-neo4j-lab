@@ -25,7 +25,7 @@ from pyspark.sql.types import DoubleType, IntegerType
 # Configuration
 # ---------------------------------------------------------------------------
 
-VOLUME_PATH = "/Volumes/databricks-neo4j-lab/lab-schema/lab-volume"
+VOLUME_PATH = "/Volumes/databricks_neo4j_lab/lab_schema/lab_volume"
 
 # Enable column mapping for Neo4j CSV headers with special chars like :ID(Aircraft)
 BRONZE_PROPS = {"delta.columnMapping.mode": "name"}

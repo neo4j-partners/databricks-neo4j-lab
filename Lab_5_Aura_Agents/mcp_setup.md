@@ -62,17 +62,13 @@ To persist this, add the export to your shell profile (`~/.zshrc` or `~/.bashrc`
 
 ```bash
 set -a && source Lab_5_Aura_Agents/.env && set +a
+claude
 ```
 
 3. Copy `.mcp.json.template` to `.mcp.json` in your project root:
 
 ```bash
 cp Lab_5_Aura_Agents/.mcp.json.template .mcp.json
-```
-
-4. Start claude
-```
-claude
 ```
 
 This is project-scoped — it only applies when Claude Code is run from this repository.
@@ -99,50 +95,23 @@ Once connected, your MCP client has access to the Aura Agent's tools. Try these 
 
 - "What systems does aircraft AC1001 have?"
 - "Show maintenance events for aircraft AC1001"
-- "What flights has aircraft AC1001 operated?"
+- "Show details for flight EX370"
 - "What are the most common fault types across all maintenance events?"
 - "Which airports have the most departing flights?"
-- "Search for maintenance documentation about engine oil contamination"
 
 The Aura Agent will select the appropriate tool (Cypher Template, Similarity Search, or Text2Cypher) automatically.
 
 ## Available Agent Tools
 
-The "Create with AI" workflow generates tools based on your graph's schema, so the exact tools may vary. The following table shows a typical set of tools generated for the aircraft digital twin graph:
-
-![Agent Tools](images/4_Agent_Tools.png)
-
 | Tool | Type | Description |
 |------|------|-------------|
-| Aircraft Systems and Components | Cypher Template | Systems and components connected to an aircraft by aircraft ID |
-| Aircraft Maintenance Events | Cypher Template | Maintenance events for an aircraft by aircraft ID (faults, severity, corrective actions) |
-| Aircraft Flights and Delays | Cypher Template | Flights operated by an aircraft and associated delays by aircraft ID |
-| Search Maintenance Documentation | Similarity Search | Semantic vector search over maintenance manual chunks |
-| Natural Language to Cypher Tool | Text2Cypher | Ad-hoc Cypher query generation from natural language |
-
-## Optional: Add a Flight Lookup by Number Tool
-
-The AI-generated Cypher Templates take an `aircraft_id` as input, so looking up a specific flight by its flight number (e.g., "EX370") relies on the Text2Cypher tool. If you want a deterministic Cypher Template for flight number lookup, you can add one manually:
-
-1. In the Aura Console, open your agent and click **Add tool** → **Cypher Template**
-2. Name it **Get Flight Details by Number**
-3. Use this Cypher query:
-
-```cypher
-MATCH (f:Flight {flight_number: $flight_number})
-OPTIONAL MATCH (f)<-[:OPERATES_FLIGHT]-(a:Aircraft)
-OPTIONAL MATCH (f)-[:DEPARTS_FROM]->(origin:Airport)
-OPTIONAL MATCH (f)-[:ARRIVES_AT]->(destination:Airport)
-OPTIONAL MATCH (f)-[:HAS_DELAY]->(d:Delay)
-RETURN f.flight_number AS flightNumber, a.aircraft_id AS aircraftId,
-       f.operator AS operator, origin.iata AS origin, destination.iata AS destination,
-       f.scheduled_departure AS scheduledDeparture, f.scheduled_arrival AS scheduledArrival,
-       d.cause AS delayCause, d.minutes AS delayMinutes
-```
-
-4. Set the parameter `flight_number` with a description like "The flight number (e.g., EX370)"
-
-With this tool added, the agent can handle questions like "Show details for flight EX370" deterministically.
+| Get Aircraft Systems | Cypher Template | Systems connected to an aircraft (engines, avionics, hydraulics) |
+| Get System Components | Cypher Template | Components within a system (turbine, compressor, pump, etc.) |
+| Get Aircraft Maintenance Events | Cypher Template | Maintenance events by aircraft (faults, severity, corrective actions) |
+| Get Flight Details by Number | Cypher Template | Flight details by flight number (route, schedule, operator) |
+| Get Component Removals | Cypher Template | Component removal records (reason, part number, dates) |
+| Search Maintenance Documentation Chunks | Similarity Search | Semantic vector search over maintenance manual chunks |
+| Natural Language to Cypher Tool | Text2Cypher | Ad-hoc Cypher query generation |
 
 ## Troubleshooting
 

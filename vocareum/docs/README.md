@@ -12,10 +12,9 @@ Welcome to the hands-on workshop! You'll build production-ready AI agents that c
 |-----|-------|------|
 | **Lab 0** | Sign in to Databricks | Setup |
 | **Lab 1** | Neo4j Aura Setup | Setup (browser) |
-| **Lab 2** | Databricks ETL to Neo4j | Notebooks |
-| **Lab 3** | Semantic Search | Notebooks |
-| **Lab 4** | Compound AI Agents | Notebooks + UI |
-| **Lab 5** | Aura Agents | Notebooks + UI |
+| **Lab 5** | Databricks ETL to Neo4j | Notebooks |
+| **Lab 6** | Multi-Agent Supervisor (AgentBricks) | Notebooks + UI |
+| **Lab 7** | GraphRAG Semantic Search | Notebooks |
 
 ---
 
@@ -35,7 +34,7 @@ Welcome to the hands-on workshop! You'll build production-ready AI agents that c
 ## Getting Started
 
 1. Open the Databricks workspace (left pane)
-2. Navigate to **Lab_2_Databricks_ETL_Neo4j** → `01_aircraft_etl_to_neo4j`
+2. Navigate to **Lab_5_Databricks_ETL_Neo4j** → `01_aircraft_etl_to_neo4j`
 3. Attach to your assigned cluster
 4. Follow the notebook instructions
 

@@ -21,6 +21,22 @@ print("=" * 60)
 print(f"USER SETUP: {user}")
 print("=" * 60)
 
+# Debug: print all VOC_ env vars to discover available identity info
+print("VOC environment variables:")
+for k, v in sorted(os.environ.items()):
+    if k.startswith("VOC") or k.startswith("DATABRICKS") or k.startswith("DB_"):
+        print(f"  {k}={v}")
+
+# Debug: list workspace users to find IDP-provisioned identity
+db_tmp = voc_init()
+try:
+    ws_users = list(db_tmp.w.users.list())
+    print(f"Workspace users ({len(ws_users)}):")
+    for u in ws_users:
+        print(f"  {u.user_name} (id={u.id}, active={u.active})")
+except Exception as e:
+    print(f"Could not list workspace users: {e}")
+
 db = voc_init()
 redirect_url = db.user_setup(user)
 

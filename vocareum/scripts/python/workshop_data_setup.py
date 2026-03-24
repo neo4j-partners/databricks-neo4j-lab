@@ -31,9 +31,9 @@ if not logger.handlers:
 # Configuration
 # ---------------------------------------------------------------------------
 
-CATALOG = os.getenv("WORKSHOP_CATALOG", "databricks-neo4j-lab")
-VOLUME_SCHEMA = os.getenv("WORKSHOP_VOLUME_SCHEMA", "lab-schema")
-VOLUME_NAME = os.getenv("WORKSHOP_VOLUME_NAME", "lab-volume")
+CATALOG = os.getenv("WORKSHOP_CATALOG", "databricks_neo4j_lab")
+VOLUME_SCHEMA = os.getenv("WORKSHOP_VOLUME_SCHEMA", "lab_schema")
+VOLUME_NAME = os.getenv("WORKSHOP_VOLUME_NAME", "lab_volume")
 LAKEHOUSE_SCHEMA = os.getenv("WORKSHOP_LAKEHOUSE_SCHEMA", "lakehouse")
 
 DATA_DIR = os.getenv(

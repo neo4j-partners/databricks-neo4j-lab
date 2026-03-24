@@ -51,7 +51,7 @@
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" lang="en-US">
 <h2 id="slide-financial-fraud-as-a-working-example">Slide: Financial Fraud as a Working Example</h2>
 <p>We'll use financial fraud to walk through each pipeline stage. Money laundering moves funds through chains of accounts and back to the origin. Each individual transfer looks legitimate in isolation. The circular pattern is only visible when you follow the connections.</p>
-<p>This is where graph structure pays off. Detecting A transferred to B transferred to C transferred back to A is a single Cypher pattern match. In SQL, the same detection requires complex nested joins that self-join the transactions table at each hop, with explicit visited-node tracking to prevent infinite loops. The graph represents the cycle directly; the table has to reconstruct it.</p>
+<p>This is where graph structure pays off. Detecting A transferred to B transferred to C transferred back to A is a single Cypher pattern match. In SQL, the same detection requires recursive CTEs that self-join the transactions table at each hop, with explicit visited-node tracking to prevent infinite loops. The graph represents the cycle directly; the table has to reconstruct it.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" lang="en-US">
 <h2 id="slide-fraud-ring--dual-database-architecture">Slide: Fraud Ring — Dual Database Architecture</h2>
@@ -64,7 +64,7 @@
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" lang="en-US">
 <h2 id="slide-data-intelligence-graph-intelligence-or-both">Slide: Data Intelligence, Graph Intelligence, or Both?</h2>
 <p>Each question maps to the platform built to answer it. The third row shows why you need both: Neo4j detects the fraud ring through cycle traversal, Databricks computes transfer totals for the identified accounts. Neither platform can answer that question alone.</p>
-<p>Cypher detects the cycle in the graph: a single query finds 2-6 hop loops in milliseconds. The equivalent SQL in the lakehouse requires complex nested joins with explicit cycle-detection guards. Both platforms contribute, neither can answer alone.</p>
+<p>Cypher detects the cycle in the graph: a single query finds 2-6 hop loops in milliseconds. The equivalent SQL in the lakehouse requires recursive CTEs with explicit cycle-detection guards. Both platforms contribute, neither can answer alone.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" lang="en-US">
 <h2 id="slide-from-the-lakehouse-to-the-graph">Slide: From the Lakehouse to the Graph</h2>
