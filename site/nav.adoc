@@ -1,4 +1,5 @@
 * xref:index.adoc[Home]
+* xref:databricks-platform.adoc[Databricks Intelligence Platform]
 * Labs
 ** xref:lab1.adoc[Lab 1: Neo4j Aura Setup]
 *** xref:lab1-instructions.adoc[Instructions]
