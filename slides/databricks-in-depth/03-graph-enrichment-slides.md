@@ -29,14 +29,14 @@ ol > li {
 
 # Graph Feature Engineering with Neo4j GDS and Databricks
 
-Feature Engineering in Unity Catalog + AutoML
+Feature Engineering in Unity Catalog + scikit-learn + MLflow
 
 ---
 
 ## Partnership Overview and Recap
 
 - **Joint Customer Base:** over 200 shared customers across Aura and Enterprise, including Gilead, iFord, Comcast, and Ashley Furniture
-- **Neo4j Spark Connector (5.x):** bidirectional data transfer between Databricks Lakehouse and Neo4j, supporting Unity Catalog and Delta tables. Silver tables feed the graph; Gold tables capture graph insights
+- **Neo4j Spark Connector (5.x):** bidirectional data transfer between Databricks Lakehouse and Neo4j, supporting Unity Catalog and Delta tables. Silver tables (cleaned, structured data) feed the graph; Gold tables (analytics-ready output) capture graph insights
 - **Connection Patterns:** Spark Connector for batch pipelines, Unity Catalog JDBC for governed SQL and BI federation, Neo4j MCP Server for agent-driven Cypher, neo4j-graphrag-python for knowledge graph construction
 - **Previous webinar:** built a knowledge graph from unstructured documents, then used GraphRAG to combine vector search with graph traversal so agents receive richer context than text search alone
 
@@ -63,7 +63,7 @@ topology.
 
 - What feature engineering is and why graph structure produces features flat tables cannot
 - How Neo4j GDS algorithms generate features from graph topology
-- The bi-directional pattern: GDS features flow to Feature Engineering in Unity Catalog, AutoML predictions flow back to Neo4j
+- The bi-directional pattern: GDS features flow to Feature Engineering in Unity Catalog, classifier predictions flow back to Neo4j
 - How to measure the lift graph features add to a classifier
 - Sync strategies for keeping Neo4j and Databricks aligned
 
@@ -78,123 +78,134 @@ in sync without manual intervention.
 
 ---
 
-## Recap: Graph-Enriched Retrieval
+## The Dual Architecture for This Use Case
 
-- **Data pipeline complete:** Spark Connector projected Delta tables into graph nodes and relationships
-- **KG construction complete:** documents chunked, embedded, entity-extracted into the graph
-- **Search finds the starting points:** chunks closest in meaning to the question
-- **Graph traversal enriches:** follows entities and relationships from those chunks into the operational graph
-- **Agents receive richer context** than text search alone: structured data alongside document content
+- **Databricks holds the analytical layer:** Delta tables with customer demographics and transaction history, plus UC Volumes with unstructured documents like customer profiles and investment research
+- **Neo4j holds the relationship layer:** the Customer → Account → Position → Stock portfolio topology, plus document nodes with vector embeddings that bridge unstructured content into the graph
 
 <!--
-Quick recap of what graph-enriched retrieval gives us. The data
-pipeline used the Spark Connector to project governed Delta tables
-into Neo4j as nodes and relationships. Knowledge graph construction
-added the unstructured layer: documents chunked, embedded, and
-entity-extracted into the same graph.
+Let's start with what lives where. This is the same dual
+architecture from the first webinar, applied to the portfolio
+use case.
+
+Databricks holds the analytical layer. Delta tables contain
+customer demographics and transaction history. UC Volumes store
+unstructured documents: customer profiles and investment research.
+
+Neo4j holds the relationship layer. The portfolio topology runs
+from Customer to Account to Position to Stock. Document nodes
+with vector embeddings bridge unstructured content into the
+graph, so text and structure live side by side.
+-->
+
+---
+
+## Graph-Enriched Retrieval
+
+- **The graph data pipeline** analyzed customer profiles to extract interests, goals, and concerns, then linked them to customer nodes with relationships like INTERESTED_IN, HAS_GOAL, and CONCERNED_ABOUT
+- **GraphRAG combines both layers:** vector search finds relevant document chunks, graph traversal follows extracted entities into operational data
+- **Agents receive richer context** than text search alone: structured holdings alongside document content
+
+<!--
+The graph data pipeline analyzed customer profiles to extract
+interests, goals, and concerns. Those entities became nodes
+linked to customers with relationships like INTERESTED_IN,
+HAS_GOAL, and CONCERNED_ABOUT. These relationships didn't exist
+in the raw data.
 
 GraphRAG combines both layers. Vector search finds the chunks
 most relevant to the user's question. Graph traversal follows
-extracted entities from those chunks through cross-links into the
-operational data. The agent receives structured holdings alongside
-document context in a single response.
+extracted entities from those chunks into the operational data.
+The agent receives structured holdings alongside document context
+in a single response.
 
-This works well for questions that documents can answer. The next
-slide shows where it stops.
+This works well for questions that documents can answer. But it
+has a coverage limit, which is where we're headed next.
 -->
 
 ---
 
-## The Dual Architecture for This Use Case
+![bg contain](graphrag-retrieval-flow.png)
 
-- **Databricks holds the analytical layer:** Delta tables with customer demographics (income, credit score, portfolio value) and transaction history, plus UC Volumes with unstructured documents (customer profiles, investment guides, market analyses)
-- **Neo4j holds the relationship layer:** Customer → Account → Position → Stock portfolio topology, plus enrichment relationships from document analysis (INTERESTED_IN, HAS_GOAL, CONCERNED_ABOUT)
-- **The Spark Connector bridges both directions:** Silver tables seed the graph; graph algorithm results flow back to Gold tables
-- **Each system does what it's best at:** Databricks runs SQL aggregations, AutoML, and Feature Engineering. Neo4j runs GDS algorithms, pattern matching, and GraphRAG retrieval
+---
+
+## The GraphRAG Gap
+
+- **Semantic search now finds customers by risk profile.** The pipeline linked profiles to customers, and GraphRAG retrieves across that structure
+- **Only some customers have profile documents.** For the remaining customers, there are no documents to retrieve and no chunks to traverse from
+- **The graph still holds structural information** about those customers: who they connect to, what they hold, how they cluster. But GraphRAG can't surface it because it starts from text, not topology
 
 <!--
-Before we dive into graph features, let's be clear about what
-lives where and why. This is the same dual architecture pattern
-from the first webinar, applied to the portfolio use case.
+Here is the concrete problem. Semantic search can now find
+customers by risk profile because the pipeline linked profiles
+to customer nodes. GraphRAG retrieves across that structure
+beautifully.
 
-Databricks holds the analytical layer. Delta tables contain
-customer demographics: income, credit score, portfolio value,
-transaction history. UC Volumes store the unstructured documents:
-customer profiles, investment guides, and market analyses. This
-is where AutoML trains and Feature Engineering registers tables.
+But only some customers have profile documents. For the
+remaining customers, there is nothing for vector search to find, which
+means there are no starting points for graph traversal.
 
-Neo4j holds the relationship layer. The Spark Connector projected
-Silver tables into the portfolio topology: Customer to Account to
-Position to Stock. Document analysis added enrichment
-relationships: INTERESTED_IN, HAS_GOAL, CONCERNED_ABOUT. These
-connect customers to sectors and themes that no Delta column
-encodes.
-
-The Spark Connector bridges both directions. Silver tables seed
-the graph. GDS algorithm results flow back to Gold tables. Model
-predictions flow back to Neo4j. Each system does what it is built
-for: Databricks handles tabular analytics and ML training, Neo4j
-handles relationship traversal and graph algorithms.
+The graph itself still encodes useful information about those
+remaining customers: their portfolio connections, account
+structures, and relationships to stocks and sectors. But GraphRAG
+cannot surface structural patterns because it enters the graph
+through text, not through topology. We need a different approach
+for the rest.
 -->
 
 ---
 
-## What the Graph Contains: Three Layers
+## What's Missing: Structural Similarity
 
-- **Operational graph (from Delta tables):** 103 Customers, their Accounts, Positions, and the Stocks those positions hold. The Spark Connector built this from governed Silver tables
-- **Enrichment layer (from document analysis):** INTERESTED_IN, HAS_GOAL, CONCERNED_ABOUT — relationships LLM agents extracted from customer profiles and market documents. Only 3 of 103 customers have profile documents
-- **Document layer (for GraphRAG):** Document → Chunk nodes with embeddings and extracted entities (Interest, Goal, Sector) cross-linked to operational nodes
-- **GDS operates on any combination** of these layers through projection configuration. The projection you build determines the features you get
-
-<!-- TODO: create diagram of graph model -->
+- **The customers without documents** still have rich graph structure: accounts, positions, stocks, sectors. The same topology as the labeled customers
+- **Customers with similar portfolios likely share similar risk profiles.** If Alice holds the same stocks as Bob and Alice is high-risk, Bob probably is too
+- **We need a way to measure structural similarity** across the graph and use it to classify the unlabeled customers
 
 <!--
-The graph has three distinct layers, each built by a different
-pipeline stage. The operational graph is what the Spark Connector
-built from Delta tables: 103 customers, their accounts, the
-positions in those accounts, and the stocks those positions hold.
-This is the portfolio topology that GDS algorithms will operate
-on.
+The unlabeled customers are not empty rows. They have accounts,
+positions, stocks, sector connections. The same topology as the
+labeled customers. The structure is there,
+just no documents.
 
-The enrichment layer is what LLM agents added by analyzing
-documents against the graph. INTERESTED_IN, HAS_GOAL, and
-CONCERNED_ABOUT are relationship types that connect customers to
-sectors and investment themes. Only 3 of 103 customers have
-profile documents, so this layer is sparse. That sparsity is
-exactly why we need GDS: algorithms can propagate those signals
-across the full graph.
+The intuition is straightforward: customers with similar
+portfolios likely share similar risk profiles. If Alice holds
+the same stocks as Bob and Alice is labeled high-risk, Bob
+probably is too. The pattern is in the graph structure, not
+in any document.
 
-The document layer supports GraphRAG retrieval. Documents split
-into chunks with embeddings for vector search, and entities
-extracted from those chunks cross-link into the operational
-graph. This layer answered questions in the previous webinar.
-
-GDS can project any combination of these layers. A projection
-including only the operational graph produces features based on
-portfolio structure. A projection including enrichment
-relationships produces richer features that encode customer
-intent alongside holdings. The projection configuration
-determines the features you get.
+What we need is a way to measure that structural similarity
+across the entire graph and use it to classify the unlabeled
+customers. That is exactly what graph feature engineering does.
 -->
 
 ---
 
-## What Graph-Enriched Search Doesn't Capture
+## The Solution: Graph Feature Engineering
 
-- **GraphRAG works well for documents:** chunking, embedding, entity extraction, retrieval with graph context
-- **Structural patterns are missing:** which customers cluster together, who holds similar portfolios, what risk categories apply
-- **These patterns live in graph topology,** not in document text: no amount of vector search will find them
+- **What if we could group customers by the structure of their connections?** Customers who hold similar stocks, connect to similar sectors, and share neighbors likely belong in the same category
+- **Graph Data Science measures these patterns:** which group a customer belongs to, how influential they are, and a numeric fingerprint of their connections. Measurements an ML model can use to make predictions
+- **An ML model trained on these measurements** learns the patterns from labeled customers and predicts labels for the rest. Predictions write back to Neo4j, closing the coverage gap
 
 <!--
-Graph-enriched search provides better context for what documents
-contain, but critical information is still missing from the
-unstructured text. Structural patterns like which customers
-cluster together, who holds similar portfolios, and what risk
-categories apply are encoded in graph topology, not in words.
+This is the core idea for the rest of the webinar. What if we
+could group customers by the structure of their connections?
+Customers who hold similar stocks, connect to similar sectors,
+and share graph neighbors likely belong in the same risk
+category.
 
-No amount of vector search will surface these patterns. You need
-algorithms that operate on the graph's structure directly. That
-is what GDS feature engineering does.
+Neo4j Graph Data Science measures these patterns: which group
+a customer belongs to, how influential they are in the network,
+and a numeric fingerprint of their connections. Think of it as
+a summary of who they're connected to, compressed into numbers.
+Customers with similar fingerprints have similar connection
+patterns. These measurements become columns an ML model can use to
+make predictions.
+
+An ML model trained on the labeled customers learns which
+patterns correspond to which risk category, then predicts
+labels for the rest. Those predictions write back to
+Neo4j through the Spark Connector. Now every customer has a
+risk classification, even without a profile document.
 -->
 
 ---
@@ -260,50 +271,7 @@ engineering adds.
 
 ---
 
-## The Problem: The 3-of-103 Gap
-
-- **The 3-of-103 problem:** a standard agent can discover customer interests by reading profile documents, but only 3 of 103 customers have documents. The other 100 have holdings data and tabular attributes with no text
-- **What a classifier needs:** features that capture structural patterns: which customers cluster together, who holds similar portfolios, who bridges separate groups
-- **The gap:** we need features that capture network position, not just individual attributes
-
-<!--
-Here is the concrete problem. An LLM-based agent could discover
-customer interests by reading profile documents. But only 3 of
-103 customers have documents. The other 100 have holdings data
-and tabular attributes with no text for the agent to analyze.
-
-A classifier needs numeric and categorical features. Tabular data
-alone misses structural patterns. We need features that capture
-a customer's position in the network: how they connect to other
-customers, stocks, and sectors through the graph.
--->
-
----
-
-## The Solution: Neo4j GDS + Feature Engineering in Unity Catalog
-
-- **Neo4j GDS:** 65+ graph algorithms that turn topology into features: embeddings, scores, community IDs
-- **Feature Engineering in Unity Catalog + AutoML:** consumes graph features alongside tabular data, trains classifiers, selects the best model
-- **Neo4j Spark Connector:** the bridge: bidirectional data transfer between the two systems
-- **Together:** GDS computes what flat tables cannot see; Feature Engineering + AutoML trains models on the combined picture
-
-<!--
-Two systems, complementary strengths. Neo4j GDS has over 65 graph
-algorithms that turn topology into numeric features: embeddings,
-centrality scores, community IDs. Feature Engineering in Unity
-Catalog consumes those features alongside tabular data. AutoML
-trains classifiers across multiple model families and selects the
-best performer.
-
-The Neo4j Spark Connector is the bridge. It moves data
-bidirectionally between the two systems. GDS computes what flat
-tables cannot see; Databricks trains models on the combined
-picture.
--->
-
----
-
-# GDS Feature Engineering
+# Graph Data Science Feature Engineering
 
 ---
 
@@ -362,101 +330,23 @@ library gives you options to match your domain.
 
 ## FastRP: What Graph Structure Captures
 
-- **Structural vs semantic:** FastRP encodes graph topology (who holds what, who shares neighbors), not word meaning. Both produce vectors, but they capture fundamentally different information
-- **What it captures for a customer:** which stocks held, which companies those belong to, how many neighbors share the same holdings
-- **Every customer gets a feature vector,** including the 100 with no documents
+- **Graph fingerprint for each customer:** FastRP compresses a customer's connections into numbers capturing which stocks are held, which accounts link where, and how their neighbors overlap
+- **Similar connections, similar fingerprints:** two customers who hold the same stocks through similar account structures produce similar fingerprints because they occupy similar positions in the graph
+- **Every customer gets a fingerprint,** including those with no profile documents. Graph structure exists for every node, not just the ones with text
 
 <!--
-The critical distinction before we look at the algorithm. FastRP
-embeddings are structural, not semantic. A text embedding encodes
-the meaning of words. A FastRP embedding encodes graph topology.
-It does not know what "renewable energy" means. It knows that
-Customer A is two hops from Stock X through Account Y and shares
-three holding-neighbors with Customer B.
+FastRP compresses a customer's connections into numbers: which
+stocks they hold, which accounts link where, how their neighbors
+overlap with other customers.
 
-For each customer, FastRP captures the shape of their connections:
-which stocks they hold, which companies those stocks belong to,
-how many other customers hold the same stocks, and how those
-neighbors connect outward in turn.
+Two customers who hold the same stocks through similar account
+structures produce similar fingerprints because they occupy
+similar positions in the graph.
 
-Every customer gets a feature vector. All 103, including the 100
-with no profile documents. This is the key advantage over
-document-based approaches: graph structure exists for every node,
-not just the ones with text.
--->
-
----
-
-## FastRP: Configuration and Output
-
-- **Why FastRP:** works on any graph topology, requires no text, produces dense vectors encoding neighborhood structure
-- **What it produces:** a 128-dimensional vector stored as a single `ArrayType` column. Each dimension captures some aspect of neighborhood structure
-- **AutoML consumes array columns natively** for tree-based models (XGBoost, LightGBM). No manual flattening required — AutoML expands arrays internally during trial generation
-
-<!--
-FastRP, Fast Random Projection, works on any graph topology and
-requires no text input. It produces a fixed-length dense vector
-for every node in the projection.
-
-A 128-dimensional embedding is stored as a single ArrayType column
-containing 128 floats. No need to explode it into 128 separate
-columns. Each dimension encodes some aspect of the node's
-neighborhood: shared holdings, company connections, neighbor
-overlap.
-
-AutoML in Databricks consumes array columns natively. It expands
-them internally during trial generation. You register the feature
-table with the embedding column and AutoML handles the rest.
--->
-
----
-
-## Additional Algorithms: PageRank, Louvain, Jaccard
-
-- **PageRank centrality:** scores each node by influence. On the portfolio graph weighted by position value, high-PageRank stocks are broadly held at high values
-- **Louvain community detection:** assigns every node to a community by optimizing modularity. Produces a single categorical feature column: the community ID
-- **Node Similarity (Jaccard):** measures overlap in targets between pairs. Two customers sharing 3 of 4 interest sectors are more similar than two sharing 1 of 10
-- These layer on top of FastRP: more features for the same classifier pipeline
-
-<!--
-FastRP captures neighborhood structure, but the graph has more
-to say. PageRank centrality scores each node by influence.
-Customers connected to many high-interest sectors score higher.
-On the portfolio graph weighted by position value, high-PageRank
-stocks are the ones broadly held at high values.
-
-Louvain community detection assigns every node to a community by
-optimizing modularity. It produces a single categorical feature
-column: the community ID. On the base graph, communities form
-around shared holdings. On the enriched graph, communities
-incorporate interest and goal relationships.
-
-Jaccard similarity measures overlap in targets between pairs. Two
-customers sharing 3 of 4 interest sectors are more similar than
-two sharing 1 of 10. All three algorithms layer on top of FastRP,
-adding more features to the same classifier pipeline.
--->
-
----
-
-## Chaining Algorithms with Mutate Mode
-
-- **Mutate mode:** adds results to the in-memory projection without persisting to the database
-- **Pipeline chaining:** PageRank output feeds into community detection, which feeds into similarity scoring
-- **The entire feature pipeline runs in-memory** before writing final results
-- **Write mode at the end** persists all results as node properties: `gds.fastRP.write`, `gds.pageRank.write`, `gds.louvain.write`
-
-<!--
-Mutate mode is the key to efficient algorithm chaining. Instead
-of writing each algorithm's results to the database and reading
-them back, mutate adds results to the in-memory projection. The
-next algorithm in the chain consumes them directly.
-
-PageRank output feeds into community detection, which feeds into
-similarity scoring. The entire feature pipeline runs in-memory
-on the projection. At the end, write mode persists all results
-as node properties in a single pass. This avoids repeated disk
-I/O and keeps the pipeline fast.
+And every customer gets a fingerprint, including those with no
+profile documents. Graph structure exists for every node, not
+just the ones with text. That is what closes the coverage gap
+we identified earlier.
 -->
 
 ---
@@ -533,19 +423,76 @@ Lake Gold tables in the next step.
 
 ---
 
-## Example: What the Feature Table Looks Like
+## Example: What a Node Looks Like After GDS
 
-| Customer | Income | Portfolio Value | Embedding (128d)       | PageRank | Community |
-|----------|--------|-----------------|------------------------|----------|-----------|
-| Alice    | 95K    | 240K            | [0.12, -0.34, 0.71, ...] | 0.042    | 3         |
-| Bob      | 88K    | 310K            | [0.11, -0.31, 0.68, ...] | 0.039    | 3         |
-| Carol    | 62K    | 85K             | [-0.45, 0.22, -0.18, ...] | 0.008   | 7         |
-| Dave     | 91K    | 275K            | [0.13, -0.29, 0.65, ...] | 0.037    | 3         |
+```
+(:Customer {
+  name: 'Alice',
+  customerId: 'C001',
+  income: 95000,
+  portfolioValue: 240000,
+  embedding: [0.12, -0.34, 0.71, ...],   // FastRP (128d)
+  pageRank: 0.042,                         // Centrality
+  communityId: 3                           // Louvain
+})
+```
 
-- **Tabular features** (income, portfolio value) come from Delta Lake
-- **Graph features** (embedding, PageRank, community) come from GDS
-- **Alice, Bob, and Dave** have similar embeddings: they share holdings and neighbors in the graph
-- **Carol's embedding points a different direction:** different neighborhood, different community
+- **Original properties** (name, income, portfolioValue) unchanged
+- **GDS write mode added three new properties** directly to the node
+- **Every Customer node** now carries its graph fingerprint, influence score, and community assignment
+- **Immediately queryable:** Cypher, GraphRAG, and agent tools can use these properties right away
+
+<!--
+After the algorithm pipeline completes, each Customer node carries
+three new properties alongside its original attributes. The
+embedding array is the FastRP graph fingerprint. The pageRank
+score reflects influence in the portfolio network. The communityId
+is the Louvain cluster assignment.
+
+These properties are written directly to Neo4j by the GDS write
+calls we just saw. They are immediately queryable. A Cypher query
+can filter customers by community. A GraphRAG traversal can use
+pageRank to prioritize high-influence nodes. An agent tool can
+retrieve the embedding for similarity comparison.
+
+In the next section, the Spark Connector reads these enriched
+nodes back into Delta Lake Gold tables, combining graph properties
+with tabular features for classifier training.
+-->
+
+---
+
+# The Bi-Directional Loop: Neo4j and Databricks
+
+---
+
+## Spark Connector Brings Results to Gold Tables
+
+- **Spark Connector reads enriched nodes** back into Delta Lake Gold tables. Embeddings become columns alongside original customer attributes
+- **The result is a feature table** that combines graph-derived columns (embeddings, PageRank, community ID) with tabular attributes (income, portfolio value) in a single governed table in Unity Catalog
+- **Feature tables carry lineage and versioning:** you know which algorithm run produced which features, and every downstream model records which feature table version it trained on
+
+<!--
+The Spark Connector then reads those enriched nodes back into
+Delta Lake Gold tables. The embedding array, PageRank score,
+and community ID become columns alongside original customer
+attributes like income and portfolio value.
+
+The result is a feature table in Unity Catalog that combines
+graph-derived and tabular columns. That feature table is what
+the classifier trains on in the next step. Unity Catalog tracks
+lineage and versioning, so you know which algorithm run produced
+which features and which model version consumed them.
+-->
+
+---
+
+## What the Feature Table Looks Like
+
+- **Each row is a customer** with tabular features from Delta Lake (income, portfolio value) and graph features from GDS (embedding, PageRank, community ID) side by side
+- **Customers with similar graph structure have similar embeddings.** Customers who share holdings and neighbors end up with embedding values pointing in the same direction
+- **Community ID confirms the grouping.** Customers in the same community share dense connections in the graph
+- **This combined table is what the ML model receives.** Tabular and graph features together, ready for prediction
 
 <!--
 This is what the combined feature table looks like after the
@@ -563,150 +510,104 @@ in community 3. Carol is in community 7. The classifier sees
 both the continuous signal from embeddings and the categorical
 signal from community ID.
 
-This is the table that AutoML receives. Tabular and graph
+This is the table the classifier receives. Tabular and graph
 features side by side, ready for classification.
 -->
 
 ---
 
-# The Bi-Directional Loop: Neo4j and Databricks
+## What Is a Classifier?
 
----
-
-## GDS Results Flow to Gold Tables
-
-- **Write mode to Neo4j:** `gds.fastRP.write` persists embedding vectors as node properties
-- **Spark Connector to Gold tables:** reads enriched nodes back into Delta Lake Gold tables. Embedding vectors become columns alongside original customer attributes
-- **Feature Engineering registration:** graph-derived features register in Feature Engineering in Unity Catalog alongside tabular features using `FeatureEngineeringClient`
-- **Versioning:** Feature Engineering tracks which algorithm run produced which features
+- **Pattern matcher:** learns which combinations of features correspond to which categories from labeled examples
+- **Prediction:** applies those learned patterns to unlabeled rows, assigning each a category and a confidence score
+- **In our example:** the classifier learns from customers whose risk category an analyst already assigned, then predicts risk categories (High, Medium, Low) for the customers who have no profile documents
 
 <!--
-Once algorithms complete, write mode persists results as node
-properties in Neo4j. FastRP embedding vectors, PageRank scores,
-Louvain community IDs all become queryable properties immediately.
-Cypher queries, GraphRAG traversals, and agent tools can use them.
+A classifier is a type of ML model that assigns categories to
+data. You give it examples where you already know the answer,
+and it learns which feature patterns map to which categories.
+Once trained, it applies those patterns to rows where the answer
+is unknown.
 
-The Spark Connector then reads those scored nodes back into
-Delta Lake Gold tables. The FastRP embedding array, PageRank
-score, and Louvain community ID become columns alongside
-original customer attributes like income, credit score, and
-portfolio value.
-
-Graph-derived features register in Feature Engineering in Unity
-Catalog using FeatureEngineeringClient. This gives you lineage,
-governance, and versioning: you know which algorithm run
-produced which features.
+In our portfolio example, some customers already have risk
+categories assigned by an analyst through their profile documents.
+The classifier learns from those labeled customers and predicts
+High, Medium, or Low risk for the remaining customers who have
+no documents. That is how we close the coverage gap from earlier.
 -->
 
 ---
 
-## The Bi-Directional Data Flow
+## Training a Classifier on Graph Features
 
-```
-Neo4j GDS                    Spark Connector                  Databricks
-+-----------------+          +---------------+          +-------------------+
-| FastRP          |          |               |          | Gold Tables       |
-| PageRank        |--write-->| Neo4j Spark   |--read--->| (Delta Lake)      |
-| Louvain         |          | Connector     |          |                   |
-| Node properties |          |               |<--write--| AutoML            |
-+-----------------+          +---------------+          | predictions       |
-                                                        +-------------------+
-                                                               |
-                                                        +-------------------+
-                                                        | Feature           |
-                                                        | Engineering in    |
-                                                        | Unity Catalog     |
-                                                        +-------------------+
-```
+- **Input:** the feature table from the previous step, with graph-derived features (embeddings, community IDs) alongside tabular attributes (income, portfolio value)
+- **The classifier learns from labeled customers** and predicts risk categories for the rest
+- **Multiple classifiers compete:** several different classifiers each train on the same data. Each finds patterns differently, and the best performer wins
 
 <!--
-This diagram shows the full data flow. GDS algorithms write
-results as node properties in Neo4j. The Spark Connector reads
-those properties into Delta Lake Gold tables. Graph-derived
-features register in Feature Engineering in Unity Catalog
-alongside tabular features.
+The classifier receives the feature table we just built. Some
+customers already have risk categories assigned by an analyst.
+The classifier learns which feature patterns correspond to each
+category, then predicts categories for the remaining customers.
 
-AutoML trains on the combined feature table. The best model's
-predictions write back through the Spark Connector as node
-properties in Neo4j. The loop is fully bidirectional: graph
-topology produces features, features train models, model
-predictions become graph properties.
+Several classifiers each train on the same data. Each finds
+patterns differently. Running them all reveals which approach
+fits best for this dataset.
 -->
 
 ---
 
-## What AutoML Does and Why We Use It
+## What Is MLflow?
 
-- **The problem:** we have a table of customers with feature columns (graph embeddings, PageRank scores, community IDs, tabular attributes). Some customers already have a risk category assigned. Most do not
-- **What AutoML does:** it learns the pattern from labeled customers and predicts risk categories for the rest. You point it at the table and tell it which column to predict
-- **Why AutoML:** it evaluates multiple model families (XGBoost, LightGBM, logistic regression, random forests, decision trees), tunes hyperparameters, and selects the best performer automatically
-- **No ML expertise required:** AutoML handles model selection, training, and evaluation. You provide the data and the target column
+- **The problem:** we just trained several classifiers on the feature table. How do we know which one performed best, and whether graph features actually helped?
+- **MLflow:** Databricks' experiment tracking platform that automatically logs parameters, accuracy metrics, and the trained model for every run
+- **Why it matters here:** we want to compare classifiers trained with only tabular features against classifiers trained with graph features added. MLflow makes that comparison side by side
 
 <!--
-AutoML solves a specific problem. You have a feature table where
-each row is a customer and each column describes something about
-them: their FastRP embedding, PageRank score, Louvain community
-ID, plus tabular attributes like income and portfolio value. Some
-of these customers already have a risk category assigned by an
-analyst. Most do not.
+We just trained several classifiers on the combined feature table.
+That raises two questions: which classifier performed best, and
+did the graph features actually help? MLflow answers both.
 
-AutoML learns the pattern from the labeled customers: what
-combination of features correlates with each risk category. Then
-it predicts risk categories for the unlabeled customers.
+MLflow is Databricks' experiment tracking platform. It
+automatically logs parameters, accuracy metrics, and the trained
+model for every run. No manual logging code needed.
 
-The reason we use AutoML rather than picking a model ourselves is
-that it evaluates five model families automatically: XGBoost,
-LightGBM, logistic regression, random forests, and decision
-trees. It tunes hyperparameters for each, runs trials, and
-selects the best performer. You do not need to know which
-algorithm works best for your data. AutoML finds out.
+The key use for us is comparing two experiments side by side:
+one trained with only tabular features, one with graph features
+added. That comparison tells us exactly how much lift graph
+topology contributes.
 -->
 
 ---
 
-## AutoML: Training and Prediction
+## Measuring Graph Feature Lift with MLflow
 
-```python
-from databricks import automl
-
-summary = automl.classify(
-    dataset=feature_table,
-    target_col="risk_category"
-)
-```
-
-- **`target_col="risk_category"`:** the column AutoML learns to predict. AutoML trains on labeled rows only — rows with null targets are dropped
-- **Prediction is a separate step:** load the best model, filter to unlabeled rows, and call `fe.score_batch()` to fill in missing risk categories
-- **Predictions write back to Neo4j** via the Spark Connector, closing the loop
+- **This is that side-by-side comparison.** MLflow tracks two experiments against the same feature table
+- **Baseline experiment:** train classifiers with only tabular features like income and portfolio value. This is the benchmark to beat
+- **Graph-enhanced experiment:** train the same classifiers with graph features (embeddings, community IDs) added. The difference in accuracy shows exactly how much lift graph topology contributes
 
 <!--
-The API is two steps. First, automl.classify takes the feature
-table and the name of the column you want to predict. AutoML
-uses rows that already have a risk category to train. It splits
-those into training and validation sets, evaluates all model
-families, and logs every trial to MLflow.
+This is the comparison we set up on the previous slide. MLflow
+tracks two experiments against the same feature table.
 
-Second, prediction is a separate step. Filter to unlabeled
-customers and call fe.score_batch() with the registered model
-URI. score_batch is a method on FeatureEngineeringClient that
-requires the model to be logged with fe.log_model() first.
-Predictions flow back to Neo4j via the Spark Connector as node
-properties. Now every customer in the graph has a risk category:
-either analyst-assigned or model-predicted.
+The baseline experiment trains classifiers with only tabular
+features: income, portfolio value, and other attributes from
+Delta Lake. This establishes the benchmark.
 
-The loop is fully closed. Graph topology produced the features.
-The features trained a classifier. The classifier's predictions
-become graph properties that agents and algorithms can reason
-over in the next cycle.
+The graph-enhanced experiment trains the same classifiers with
+graph features added: FastRP embeddings and Louvain community
+IDs. MLflow shows both experiments side by side. The difference
+in accuracy tells you exactly how much graph topology
+contributes on top of what tabular features already provide.
 -->
 
 ---
 
-## The Two-System Payoff
+## How Classifiers and LLMs Work Together
 
-- **The classifier fills structural gaps:** missing risk categories predicted from graph topology
-- **The LLM fills semantic gaps:** interests and goals extracted from documents
-- **Each makes the other's job easier** in the next cycle: richer graph features produce better classifiers, better predictions produce richer agent context
+- **Classifiers fill structural gaps:** predict missing risk categories from graph topology. Customers with similar holdings and neighborhood structure likely share a risk category
+- **LLMs fill semantic gaps:** extract interests and goals from unstructured documents that no algorithm can parse
+- **Each improves the other:** richer graph features (from LLM-extracted relationships) produce better classifiers. Better predictions (from classifiers) give agents more structured context to reason over
 
 <!--
 Two systems, complementary contributions. The classifier fills
@@ -716,35 +617,18 @@ holdings, similar neighborhood structure, likely share a risk
 category. The classifier discovers that pattern.
 
 The LLM fills semantic gaps: it extracts interests and goals from
-documents that no algorithm can parse. Together, each makes the
-other's job easier. Richer graph features produce better
-classifiers. Better predictions give agents more structured
-context to reason over. The cycle compounds.
+documents that no algorithm can parse. Together, each improves
+the other. The LLM-extracted relationships from enrichment make
+the graph richer, which gives GDS algorithms more structure to
+work with, which produces better classifier features. The
+classifier's predictions become node properties that give agents
+more structured context to reason over. The cycle compounds with
+each iteration.
 -->
 
 ---
 
-## Key Databricks APIs for the Loop
-
-| Step | API / Tool | Purpose |
-|---|---|---|
-| Register features | `FeatureEngineeringClient` | Register graph-derived features in Unity Catalog |
-| Train classifier | `databricks.automl.classify()` | Evaluate model families on combined feature table |
-| Score predictions | `score_batch()` | Predict labels for unlabeled entities |
-| Write back | Neo4j Spark Connector | Push predictions to Neo4j as node properties |
-
-<!--
-Four key APIs in the Databricks side of the loop.
-FeatureEngineeringClient registers graph-derived features in
-Unity Catalog alongside tabular features. The automl.classify
-call accepts the feature table and evaluates all model families.
-score_batch generates predictions for unlabeled entities using
-the best model. And the Spark Connector writes those predictions
-back to Neo4j as node properties.
-
-This is the complete API surface for the Databricks side of the
-bi-directional loop. Each step is a single function call.
--->
+# Keeping It All in Sync
 
 ---
 
@@ -787,147 +671,6 @@ than full review.
 
 ---
 
-# Quantifying Lift
-
----
-
-## Baseline: Tabular Features Only
-
-- **Train a baseline model:** point AutoML at a feature table with only Delta Lake features: demographics, balances, transaction history
-- **Record AUC, precision, recall:** this is the benchmark to beat
-- **What the baseline sees:** each customer described in isolation by their own attributes
-- **What the baseline misses:** which customers cluster together, who bridges separate groups, who occupies similar network positions
-
-<!--
-The way to prove graph features matter is to measure the
-difference. Start with a baseline. Point AutoML at a feature
-table that contains only tabular features from Delta Lake:
-annual income, credit score, portfolio value, transaction counts.
-Record AUC, precision, and recall.
-
-This baseline sees each customer described in isolation by their
-own attributes. It has no visibility into structural patterns:
-which customers cluster together, who bridges separate groups,
-who shares similar holdings. Those patterns are encoded in graph
-topology, not in table columns.
--->
-
----
-
-## Graph-Augmented: Measuring the Lift
-
-- **Add graph features:** FastRP embeddings, PageRank scores, community ID, Jaccard similarity to the same feature table. Run AutoML again
-- **What graph features capture:** community membership and centrality scores encode structural patterns invisible to flat tables
-- **Published benchmark:** as one reference point, Neo4j's fraud detection benchmark showed significant improvement in detection rates when graph features were added. Lift varies by domain, and the demo measures it directly on the portfolio dataset
-- **MLflow side-by-side:** both runs are MLflow experiments. Feature importance plots show which graph features drove the lift
-
-<!--
-Now add graph features to the same table and run AutoML again.
-FastRP embeddings, PageRank scores, Louvain community IDs, and
-Jaccard similarity scores sit alongside the tabular features.
-The same model families compete on richer data.
-
-Graph features capture structural patterns that flat tables cannot
-see. Community membership reveals which customers cluster together.
-Centrality scores reveal who bridges separate groups. These are
-signals that no column in a Delta table encodes.
-
-As one reference point, Neo4j's fraud detection benchmark showed
-significant improvement in detection rates when graph features
-were added. Lift varies by domain. The demo measures it directly
-on the portfolio dataset so you see the actual numbers for this
-use case.
-
-Both AutoML runs are MLflow experiments. The experiment comparison
-UI shows metrics side-by-side. Feature importance plots show
-exactly which graph features drove the improvement.
--->
-
----
-
-## MLflow Experiment Tracking: Comparing Runs
-
-- **Every AutoML trial is an MLflow run:** parameters, metrics (AUC, precision, recall, F1), and artifacts are logged automatically — no manual instrumentation
-- **Two experiments, one comparison:** the baseline experiment (tabular only) and the graph-augmented experiment appear side by side in the MLflow Experiments UI
-- **Metric comparison across runs:** the Experiments page lets you sort by AUC or any metric and compare the best run from each experiment directly
-- **Trial notebook generation:** AutoML generates a source code notebook for the best trial, so the team can review, reproduce, and modify the winning model
-
-<!--
-This is where you see the lift in concrete terms. Every trial
-AutoML runs becomes an MLflow run with parameters, metrics, and
-artifacts logged automatically. You do not instrument anything
-yourself.
-
-The baseline experiment and the graph-augmented experiment are
-separate MLflow experiments. The Experiments UI shows them side
-by side. You can sort by AUC, F1, or any metric and compare the
-best run from each experiment directly.
-
-AutoML also generates a source code notebook for the best trial
-in each experiment. These notebooks are fully reproducible: you
-can re-run them, modify hyperparameters, or add feature
-engineering steps. Everything is transparent and auditable.
--->
-
----
-
-## Feature Importance with SHAP Values
-
-- **SHAP (Shapley values):** AutoML trial notebooks include SHAP code that scores each feature's contribution to predictions. Game-theory-based — measures how much each feature shifts the model's output
-- **What SHAP reveals for graph features:** do FastRP embedding dimensions, PageRank scores, or Louvain community IDs actually move the needle, or does the model ignore them?
-- **The proof:** if graph features appear in the top SHAP contributors alongside income and portfolio value, graph enrichment is earning its place. If they don't, you know to revisit the projection or algorithm choice
-- **Actionable feedback loop:** SHAP results tell you which GDS algorithms to keep, tune, or replace in the next enrichment cycle
-
-<!--
-MLflow tracking shows the numbers improved. SHAP shows why.
-
-AutoML trial notebooks include SHAP code out of the box. You
-set shap_enabled to True and re-run the cell. SHAP calculates
-each feature's contribution to every prediction using game
-theory: how much does adding this feature change the model's
-output compared to leaving it out?
-
-For graph features specifically, SHAP answers the critical
-question: do FastRP embedding dimensions, PageRank scores, and
-Louvain community IDs actually contribute to the classifier, or
-does the model ignore them? If graph features rank among the top
-SHAP contributors alongside income and portfolio value, graph
-enrichment is earning its place.
-
-If they do not rank highly, that is equally valuable information.
-It tells you to revisit the projection configuration, try
-different algorithm parameters, or add more relationship types.
-SHAP turns model evaluation into an actionable feedback loop for
-the next GDS enrichment cycle.
--->
-
----
-
-## Compounding Returns Across Cycles
-
-- **Each enrichment cycle** produces more relationships for algorithms to operate on
-- **AutoML retraining after Cycle 2** uses richer features than Cycle 1. MLflow experiment tracking compares model performance across cycles
-- **The lift is not static:** embeddings after Cycle 2 encode richer topology than Cycle 1, reflecting relationships that did not exist before enrichment
-
-<!--
-The lift is not a one-time improvement. Each enrichment cycle
-writes new relationships to the graph: INTERESTED_IN, HAS_GOAL,
-and others. Those relationships change what FastRP encodes. The
-embeddings after Cycle 2 are richer than after Cycle 1 because
-they reflect relationships that did not exist before the first
-enrichment pass.
-
-AutoML retraining on the richer feature set produces better
-models. MLflow experiment tracking lets you compare performance
-across cycles. You can see the improvement compound over time.
--->
-
----
-
-# Sync Strategies and Orchestration
-
----
-
 ## Incremental Sync with Change Data Feed
 
 - **Change Data Feed:** enable on Gold tables with `delta.enableChangeDataFeed = true`. Only changes after enablement are captured
@@ -953,68 +696,10 @@ that document type. Costs stay proportional to what changed.
 
 ---
 
-# Scaling and Closing
-
----
-
-## SEC EDGAR: Proving the Pattern at Scale
-
-- **The dataset:** 3,906 asset managers, 28,960 companies, 590,538 equity holdings from 2021 quarterly SEC filings
-- **Structurally identical graph model:** Manager to Holding to Company mirrors Customer to Position to Stock
-- **What it proves:** the same FastRP + classifier pattern scales to a significantly larger graph
-- **Companion notebook:** GDS computes features on 590K holdings, AutoML trains a classifier to predict whether a manager will increase or decrease a holding, predictions flow back
-
-<!--
-Everything demonstrated on 103 customers works at scale. The SEC
-EDGAR dataset contains 3,906 asset managers, 28,960 companies,
-and 590,538 equity holdings from 2021 quarterly filings. The graph
-model is structurally identical: Manager to Holding to Company
-mirrors Customer to Position to Stock.
-
-A companion notebook applies the same pattern. GDS computes
-FastRP embeddings on the full graph. AutoML trains a classifier
-to predict whether a manager will increase or decrease a holding
-in the next quarter. Predictions flow back to Neo4j. Same
-algorithms, same pipeline, significantly more data.
--->
-
----
-
-## Compounding Cycles
-
-- **Cycle 1, obvious gaps:** early cycles capture straightforward missing relationships. INTERESTED_IN makes intent a first-class graph entity alongside transactional data
-- **Cycle 2, algorithmic discovery:** Jaccard similarity identifies clusters. Louvain reveals organic segments no one designed upfront. These algorithms operate on relationships that did not exist before Cycle 1
-- **Cycle 3+, cross-referencing new data:** new documents cross-reference against interest communities that only became visible through earlier enrichments
-- **The distinction:** entity extraction asks "what does this document say?" Agentic enrichment asks "what relationships are missing?" That question, repeated across cycles, compounds
-
-<!--
-Each enrichment cycle changes what the next cycle discovers.
-Cycle 1 captures obvious gaps: INTERESTED_IN relationships make
-customer intent a first-class graph entity alongside transactional
-holdings data.
-
-Cycle 2 starts from a richer graph. Jaccard similarity identifies
-clusters of customers with similar interest profiles. Louvain
-reveals organic segments no one designed upfront. These algorithms
-operate on relationships that did not exist before the first cycle.
-
-Cycle 3 and beyond cross-reference newly ingested documents
-against interest communities that only became visible through
-earlier enrichments. The matches span customer preference,
-portfolio gap, and market opportunity.
-
-The fundamental distinction: entity extraction asks what does
-this document say. Agentic enrichment asks what relationships
-are missing. That question, repeated across cycles, compounds
-into organizational memory.
--->
-
----
-
 ## Key Takeaways
 
 - **Graph features capture what flat tables miss:** network position, community membership, centrality, structural similarity
-- **Feature Engineering in Unity Catalog + AutoML** trains classifiers on the combined picture: graph-derived and tabular features together
+- **Feature Engineering in Unity Catalog + scikit-learn + MLflow** trains classifiers on the combined picture: graph-derived and tabular features together
 - **The loop is bi-directional:** GDS scores flow to Gold tables, model predictions flow back to Neo4j via the Spark Connector
 - **Lift is measurable and compounding:** each enrichment cycle produces richer features, and MLflow tracks the improvement
 - **Lakeflow Jobs orchestrates the full pipeline** end-to-end with incremental sync via Change Data Feed
@@ -1024,8 +709,8 @@ Five things to take away. First, graph features capture structural
 patterns that flat tables miss: network position, community
 membership, centrality scores, and structural similarity.
 
-Second, Feature Engineering in Unity Catalog and AutoML train
-classifiers on the combined picture. Graph-derived features sit
+Second, Feature Engineering in Unity Catalog and scikit-learn
+train classifiers on the combined picture. Graph-derived features sit
 alongside tabular features in the same governed feature table.
 
 Third, the loop is fully bi-directional. GDS scores flow to Gold
