@@ -1,8 +1,9 @@
 {
   "mcpServers": {
-    "neo4j-aura-agent": {
-      "type": "http",
-      "url": "${AURA_AGENT_MCP_SERVER}"
+    "databricks": {
+      "command": "uv",
+      "args": ["run", "--directory", "/Users/ryanknight/projects/databricks/ai-dev-kit", "python", "databricks-mcp-server/run_server.py"],
+      "defer_loading": true
     }
   }
 }
