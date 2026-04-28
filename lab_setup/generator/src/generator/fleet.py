@@ -84,6 +84,7 @@ _ENGINE_NAMES: dict[str, list[str]] = {
     "A320-200": ["CFM56-5B #1", "CFM56-5B #2"],
     "A321neo":  ["LEAP-1A #1",  "LEAP-1A #2"],
     "E190":     ["CF34-10E #1", "CF34-10E #2"],
+    "A220-300": ["PW1500G #1",  "PW1500G #2"],
 }
 
 

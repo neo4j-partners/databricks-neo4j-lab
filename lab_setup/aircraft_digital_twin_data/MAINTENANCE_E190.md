@@ -1,11 +1,11 @@
-# B737-800 Maintenance and Troubleshooting Manual
+# E190 Maintenance and Troubleshooting Manual
 
-**Document Number:** AMM-B737-2024-001
+**Document Number:** AMM-E190-2024-001
 **Revision:** 1.0
 **Effective Date:** October 1, 2024
-**Applicability:** B737-800 series aircraft equipped with CFM56-7B engines
-**Operator:** ExampleAir
-**Fleet:** N95040A, N53032E, N84110I, N26760M, N44342Q
+**Applicability:** E190 series aircraft equipped with CF34-10E engines
+**Operator:** ExampleAir (also SkyWays, NorthernJet, RegionalCo)
+**Fleet:** N10002, N10017, N10023, N10036, N10050, N10068, N10071, N10073, N10084, N10096
 
 ---
 
@@ -16,7 +16,7 @@
 | 1.0 | 2024-10-01 | Initial Release | Engineering Division |
 | 0.9 | 2024-09-15 | Draft for review | Maintenance Planning |
 
-**NOTICE:** This manual contains proprietary information. Maintenance procedures must be performed by certified personnel only. Always refer to the latest revision of Boeing AMM documentation for authoritative guidance.
+**NOTICE:** This manual contains proprietary information. Maintenance procedures must be performed by certified personnel only. Always refer to the latest revision of Embraer AMM documentation for authoritative guidance.
 
 ---
 
@@ -24,7 +24,7 @@
 
 1. [Aircraft Overview](#1-aircraft-overview)
 2. [System Architecture](#2-system-architecture)
-3. [Engine System - CFM56-7B](#3-engine-system---cfm56-7b)
+3. [Engine System - CF34-10E](#3-engine-system---cf34-10e)
 4. [Engine Troubleshooting Procedures](#4-engine-troubleshooting-procedures)
 5. [Avionics System](#5-avionics-system)
 6. [Hydraulics System](#6-hydraulics-system)
@@ -41,28 +41,28 @@
 
 | Parameter | Value |
 |-----------|-------|
-| Aircraft Type | Boeing 737-800 (737NG) |
-| Powerplant | 2x CFM International CFM56-7B26 Turbofan |
-| Maximum Takeoff Weight (MTOW) | 79,010 kg (174,200 lb) |
-| Maximum Landing Weight (MLW) | 66,361 kg (146,300 lb) |
-| Maximum Zero Fuel Weight (MZFW) | 62,732 kg (138,300 lb) |
-| Fuel Capacity | 26,020 liters (6,875 US gal) |
-| Range | 5,436 km (2,935 nm) |
+| Aircraft Type | Embraer E190 (E-Jet series) |
+| Powerplant | 2x GE Aviation CF34-10E Turbofan |
+| Maximum Takeoff Weight (MTOW) | 51,800 kg (114,200 lb) |
+| Maximum Landing Weight (MLW) | 44,000 kg (97,003 lb) |
+| Maximum Zero Fuel Weight (MZFW) | 41,000 kg (90,390 lb) |
+| Fuel Capacity | 13,986 liters (3,694 US gal) |
+| Range | 4,537 km (2,450 nm) |
 | Service Ceiling | 41,000 ft |
-| Cruise Speed | Mach 0.785 (450 ktas) |
+| Cruise Speed | Mach 0.82 |
 
 ### 1.2 Fleet Configuration
 
-The B737-800 fleet operates across four partner carriers configured for short to medium-haul operations. The combined fleet of approximately 40 aircraft is distributed as follows:
+The E190 fleet operates across four partner carriers in regional jet service. The combined fleet of approximately 10 aircraft is distributed as follows:
 
 | Operator | Aircraft Count | Primary Routes |
 |----------|---------------|----------------|
-| ExampleAir | 10 | Domestic short/medium-haul |
-| SkyWays | 10 | Domestic short/medium-haul |
-| RegionalCo | 10 | Mixed domestic/regional |
-| NorthernJet | 10 | Domestic short/medium-haul |
+| ExampleAir | 3 | Domestic regional feeders |
+| SkyWays | 3 | Domestic regional feeders |
+| RegionalCo | 2 | Regional and short-haul |
+| NorthernJet | 2 | Northern domestic regional |
 
-Aircraft entered service between 2016 and 2022, configured in a single-class or dual-class layout for 162–189 passengers.
+Aircraft entered service between 2018 and 2022, configured in a two-class layout for 94–100 passengers. Regional operations result in higher cycle-to-flight-hour ratios compared to wide-body or long-haul fleets, making cycle-based inspection compliance particularly important.
 
 ### 1.3 ATA Chapter Reference
 
@@ -84,19 +84,19 @@ This manual covers the following ATA chapters:
 
 ### 2.1 Major System Groups
 
-Each B737-800 aircraft comprises four primary monitored system groups:
+Each E190 aircraft comprises four primary monitored system groups:
 
 ```
-AIRCRAFT (B737-800)
+AIRCRAFT (E190)
 │
-├── ENGINE SYSTEM #1 (CFM56-7B Left)
+├── ENGINE SYSTEM #1 (CF34-10E Left)
 │   ├── Fan Module
 │   ├── Compressor Stage (High-Pressure)
 │   ├── High-Pressure Turbine
 │   ├── Main Fuel Pump
 │   └── Thrust Bearing Assembly
 │
-├── ENGINE SYSTEM #2 (CFM56-7B Right)
+├── ENGINE SYSTEM #2 (CF34-10E Right)
 │   ├── Fan Module
 │   ├── Compressor Stage (High-Pressure)
 │   ├── High-Pressure Turbine
@@ -105,49 +105,49 @@ AIRCRAFT (B737-800)
 │
 ├── AVIONICS SYSTEM
 │   ├── Flight Management System (FMS)
-│   ├── Air Data Computer (ADC)
-│   └── Navigation Receiver (NAV)
+│   ├── Air Data / Inertial Reference Unit (ADIRU)
+│   └── Multi-Mode Receiver (MMR)
 │
 └── HYDRAULICS SYSTEM
-    ├── Main Hydraulic Pump
+    ├── Engine-Driven Pump
     ├── Hydraulic Reservoir
     └── Flap Actuator Assembly
 ```
 
-#### 2.1.1 Engine Systems (CFM56-7B)
+#### 2.1.1 Engine Systems (CF34-10E)
 
-The B737-800 is powered by two CFM International CFM56-7B high-bypass turbofan engines, mounted in close-coupled underwing nacelles with distinctive flat-bottomed nacelle design characteristic of the 737NG series. Each engine produces 26,300 lbf of thrust at takeoff and operates independently with full redundancy. The CFM56-7B features a single-spool low-pressure system and single-spool high-pressure system, with a 3-stage low-pressure compressor driven by a 4-stage low-pressure turbine, and a 9-stage high-pressure compressor driven by a single-stage high-pressure turbine. The engine incorporates a dual annular combustor (DAC) option for reduced emissions. Engine health is continuously monitored via four dedicated sensors per engine measuring exhaust gas temperature (EGT), vibration levels, fan speed (N1), and fuel flow rate. The engine systems account for approximately 70% of all maintenance events in the fleet, with the most common issues being sensor drift, contamination, and bearing wear.
+The E190 is powered by two GE Aviation CF34-10E high-bypass turbofan engines, mounted on aft-fuselage pylons in the characteristic E-Jet configuration that provides unobstructed underwing space and a low-slung cabin floor. Each engine produces 18,500 lbf of thrust at takeoff and operates independently with full redundancy. The CF34-10E features a two-spool architecture with a single-stage fan driven by a multi-stage low-pressure turbine and a 9-stage high-pressure compressor driven by a single-stage high-pressure turbine, achieving an overall pressure ratio of 27.0:1. The engine incorporates an annular combustor with low-emissions fuel nozzle design. Engine health is continuously monitored via four dedicated sensors per engine measuring exhaust gas temperature (EGT), vibration levels, fan speed (N1), and fuel flow rate. The engine systems account for approximately 69% of all maintenance events in the fleet, with the most common issues being sensor drift, contamination, and bearing wear.
 
 **ATA Reference:** Chapters 71 (Powerplant), 72 (Engine), 73 (Engine Fuel and Control), 77 (Engine Indicating), 79 (Oil)
 
 #### 2.1.2 Avionics System
 
-The avionics system provides flight management, navigation, and air data computation functions essential for safe aircraft operation. The B737-800 features the Honeywell FMC with dual Flight Management Computers providing flight planning, 4D navigation, performance calculations, and VNAV/LNAV guidance. Three Air Data Computers (ADC) supply redundant altitude, airspeed, and Mach calculations via pitot-static inputs integrated with the Digital Flight Control System (DFCS). The multi-mode Navigation Receiver provides VOR/DME, ILS (localizer, glideslope, marker beacon), and GPS position data. All avionics communicate via ARINC 429 and ARINC 629 digital data buses with comprehensive Built-In Test Equipment (BITE). Avionics-related maintenance events comprise approximately 9% of fleet issues, primarily involving sensor drift that is typically resolved through calibration or software updates.
+The avionics system provides flight management, navigation, and air data computation functions essential for safe aircraft operation. The E190 features the Honeywell Primus Epic EFIS with dual Flight Management Systems providing 4D flight planning, performance calculations, and VNAV/LNAV guidance. Three Air Data / Inertial Reference Units (ADIRU) supply redundant altitude, airspeed, Mach, and inertial reference data integrated with the digital fly-by-wire flight control system. Multi-Mode Receivers (MMR) provide VOR/DME, ILS (localizer, glideslope, marker beacon), and GPS position data. All avionics communicate via ARINC 429 digital data buses with comprehensive Built-In Test Equipment (BITE). Avionics-related maintenance events comprise approximately 10% of fleet issues, primarily involving sensor drift and FMS anomalies typically resolved through calibration or software updates.
 
 **ATA Reference:** Chapter 34 (Navigation)
 
 #### 2.1.3 Hydraulics System
 
-The B737-800 hydraulic system provides power for flight control surfaces, leading edge devices, trailing edge flaps, landing gear, wheel brakes, thrust reversers, and nose wheel steering. The aircraft employs two primary hydraulic systems designated System A and System B, each operating at 3,000 psi, plus a standby system for emergency backup. This manual focuses on System A, which is powered by two engine-driven pumps (one per engine) and one AC motor pump. The system includes main hydraulic pumps capable of 28 gpm flow rate at 3,000 psi, a reservoir with 5.5 gallon usable capacity, and multiple actuators including the flap actuator assemblies (inboard and outboard). Hydraulic fluid (MIL-PRF-83282 or Skydrol 5) requires regular monitoring for contamination and proper fluid levels. The hydraulics system represents approximately 21% of maintenance events, with leaks and contamination being the primary concerns.
+The E190 hydraulic system provides power for flight control surfaces, spoilers, leading edge slats, trailing edge flaps, landing gear, wheel brakes, thrust reversers, and nose wheel steering. The aircraft employs two primary hydraulic systems designated Left and Right, each operating at 3,000 psi, plus a standby system for emergency backup. The Left system is powered by two engine-driven pumps (one per engine) and one AC motor pump. Each system reservoir holds 4.0 gallons usable capacity. Hydraulic fluid (MIL-PRF-83282 or Skydrol 5) requires regular monitoring for contamination and proper fluid levels. The hydraulics system represents approximately 21% of maintenance events, with leaks and contamination being the primary concerns.
 
 **ATA Reference:** Chapter 29 (Hydraulic Power)
 
 ### 2.2 Engine Health Monitoring
 
-Each CFM56-7B engine is equipped with four primary monitoring sensors:
+Each CF34-10E engine is equipped with four primary monitoring sensors:
 
 | Sensor Type | Parameter | Unit | Location |
 |-------------|-----------|------|----------|
 | EGT | Exhaust Gas Temperature | °C | Turbine exhaust section |
-| VIB | Engine Vibration | ips (inches/sec) | Fan frame, turbine frame |
-| N1Speed | Fan Speed | % RPM | Fan shaft |
+| Vibration | Engine Vibration | ips (inches/sec) | Fan frame, turbine frame |
+| N1Speed | Fan Speed N1 | rpm | Fan shaft |
 | FuelFlow | Fuel Flow | kg/s | Fuel metering valve |
 
 **Sensor Sampling Rate:** Continuous (1 Hz during flight, recorded hourly for trend analysis)
 
-**Digital Twin Monitoring Note:** The Digital Twin Monitoring System records hourly trend-averaged EGT values on a normalized scale calibrated for long-term degradation detection. These trend values (nominal baseline ~658°C, warning threshold ~688°C) differ from the instantaneous EICAS EGT readings shown in Section 3.3 and Appendix 10.1, which reflect peak values during takeoff and high-power operations (typically 850–950°C for the CFM56-7B). The trend-monitoring scale detects gradual EGT margin deterioration over weeks and months rather than acute exceedances; the absolute limits in this manual refer to instantaneous FADEC-monitored readings.
+**Digital Twin Monitoring Note:** The Digital Twin Monitoring System records hourly trend-averaged EGT values on a normalized scale calibrated for long-term degradation detection. These trend values (nominal baseline ~641°C, warning threshold ~672°C) differ from the instantaneous cockpit EGT readings shown in Section 3.3 and Appendix 10.1, which reflect peak values during takeoff and high-power operations (typically 860–895°C for the CF34-10E7). The trend-monitoring scale detects gradual EGT margin deterioration over weeks and months rather than acute exceedances; the absolute limits in this manual refer to instantaneous FADEC-monitored readings.
 
-**FADEC Integration:** The CFM56-7B features Full Authority Digital Engine Control (FADEC) which provides automatic engine parameter management, thrust setting, and fault detection/isolation.
+**FADEC Integration:** The CF34-10E features Full Authority Digital Engine Control (FADEC) which provides automatic engine parameter management, thrust setting, and fault detection/isolation.
 
 ### 2.3 Component Identification Schema
 
@@ -156,10 +156,10 @@ Components are identified using the following nomenclature:
 ```
 [Aircraft ID]-[System]-[Component]
 
-Example: AC1001-S01-C03
+Example: AC1003-S01-C03
          │       │    └── Component: High-Pressure Turbine
          │       └─────── System: Engine #1
-         └─────────────── Aircraft: AC1001 (N95040A)
+         └─────────────── Aircraft: AC1003 (N10002)
 ```
 
 **System Codes:**
@@ -170,44 +170,44 @@ Example: AC1001-S01-C03
 
 ---
 
-## 3. Engine System - CFM56-7B
+## 3. Engine System - CF34-10E
 
 ### 3.1 Engine Specifications
 
 | Parameter | Value |
 |-----------|-------|
-| Manufacturer | CFM International (GE/Safran) |
-| Model | CFM56-7B26 |
+| Manufacturer | GE Aviation |
+| Model | CF34-10E |
 | Type | Two-spool, high-bypass turbofan |
-| Thrust Rating | 26,300 lbf (117 kN) |
-| Bypass Ratio | 5.1:1 |
-| Overall Pressure Ratio | 32.8:1 |
-| Dry Weight | 2,370 kg (5,216 lb) |
-| Fan Diameter | 1.55 m (61 inches) |
-| Length | 2.36 m (93 inches) |
+| Thrust Rating | 18,500 lbf (82.3 kN) |
+| Bypass Ratio | 5.0:1 |
+| Overall Pressure Ratio | 27.0:1 |
+| Dry Weight | 1,620 kg (3,571 lb) |
+| Fan Diameter | 1.23 m (48.4 in) |
+| Length | 2.44 m (96 in) |
 
 ### 3.2 Component Descriptions
 
 #### 3.2.1 Fan Module
-**Part Number:** CFM-FM-7B26-100
+**Part Number:** CFM-FM-CF34-100
 **ATA Reference:** 72-21
 
-The fan module consists of a single-stage fan with 24 wide-chord titanium blades with mid-span shrouds eliminated for improved efficiency. The fan provides approximately 80% of total engine thrust through the bypass duct. Fan blades feature 3D aerodynamic design with swept leading edges.
+The fan module consists of a single-stage fan with 22 wide-chord titanium blades without mid-span shrouds, providing improved aerodynamic efficiency and reduced weight compared to earlier CF34 variants. The fan provides approximately 75% of total engine thrust through the bypass duct. Fan blades feature 3D aerodynamic design with swept leading edges optimized for the CF34-10E's bypass ratio and pressure recovery.
 
 **Inspection Intervals:**
 - Visual inspection: Every 500 flight hours
 - Borescope inspection: Every 3,000 flight hours
-- Fan blade replacement: On-condition (typically 20,000-25,000 cycles)
+- Fan blade replacement: On-condition (typically 18,000-22,000 cycles)
 
 **Critical Limits:**
-- Fan blade tip clearance: 0.060-0.090 inches cold
-- Fan track liner wear limit: 0.125 inches
+- Fan blade tip clearance: 0.055-0.085 inches cold
+- Fan track liner wear limit: 0.110 inches
 
 #### 3.2.2 Compressor Stage (High-Pressure)
-**Part Number:** CFM-HPC-7B26-200
+**Part Number:** GE-HPC-CF34-200
 **ATA Reference:** 72-32
 
-The 9-stage high-pressure compressor (HPC) achieves a pressure ratio of approximately 13.5:1. The first three stages feature variable stator vanes (VSV) controlled by the FADEC for optimum performance and stall margin across the operating envelope.
+The 9-stage high-pressure compressor (HPC) achieves a pressure ratio of approximately 12.5:1. The first three stages feature variable stator vanes (VSV) controlled by the FADEC for optimum performance and stall margin across the operating envelope.
 
 **Common Fault Modes:**
 - Compressor stall (vibration exceedance)
@@ -221,29 +221,29 @@ The 9-stage high-pressure compressor (HPC) achieves a pressure ratio of approxim
 - Stage 9 blades: Tip rub damage
 
 #### 3.2.3 High-Pressure Turbine
-**Part Number:** CFM-HPT-7B26-300
+**Part Number:** GE-HPT-CF34-300
 **ATA Reference:** 72-51
 
-The single-stage HPT drives the high-pressure compressor through a concentric shaft. Turbine blades feature advanced single-crystal alloy construction with thermal barrier coating and film cooling. The nozzle guide vanes are air-cooled with impingement and film cooling.
+The single-stage HPT drives the high-pressure compressor through a concentric shaft. Turbine blades feature advanced single-crystal alloy construction with thermal barrier coating and film cooling. The nozzle guide vanes are air-cooled with impingement and film cooling optimized for the CF34-10E's turbine inlet temperature.
 
 **Operating Limits:**
 | Parameter | Normal | Caution | Maximum |
 |-----------|--------|---------|---------|
-| EGT (Takeoff, 5 min) | < 930°C | 930-950°C | 950°C |
-| EGT (Max Continuous) | < 895°C | 895-925°C | 925°C |
-| EGT (Start) | — | — | 725°C |
+| EGT (Takeoff, 5 min) | < 870°C | 870-895°C | 900°C |
+| EGT (Max Continuous) | < 840°C | 840-870°C | 870°C |
+| EGT (Start) | — | — | 730°C |
 
 **Life-Limited Parts:**
-- HPT disk: 20,000 cycles
+- HPT disk: 18,000 cycles
 - HPT blades: On-condition (borescope monitoring)
 
 #### 3.2.4 Main Fuel Pump
-**Part Number:** CFM-FP-7B26-400
+**Part Number:** GE-FP-CF34-400
 **ATA Reference:** 73-21
 
 The engine-driven fuel pump is a positive displacement gear pump providing metered fuel flow to the combustion chamber through the fuel metering valve (FMV). The hydromechanical unit (HMU) integrates the fuel pump with the fuel metering valve under FADEC control.
 
-**Flow Rate:** 0.30 - 1.50 kg/s (normal operating range)
+**Flow Rate:** 0.20 - 1.20 kg/s (normal operating range)
 
 **Warning Signs of Degradation:**
 - Fluctuating fuel flow readings
@@ -252,10 +252,10 @@ The engine-driven fuel pump is a positive displacement gear pump providing meter
 - Uncommanded thrust changes
 
 #### 3.2.5 Thrust Bearing Assembly
-**Part Number:** CFM-TB-7B26-500
+**Part Number:** GE-TB-CF34-500
 **ATA Reference:** 72-50
 
-The #4 bearing (thrust bearing) absorbs axial loads from the high-pressure rotor system. The bearing is a ball-type design with squeeze film damper and oil jet lubrication from the engine oil system.
+The thrust bearing absorbs axial loads from the high-pressure rotor system. The bearing is a ball-type design with squeeze film damper and oil jet lubrication from the engine oil system.
 
 **Replacement Criteria:**
 - Oil debris analysis: Magnetic chip detector warnings
@@ -267,10 +267,9 @@ The #4 bearing (thrust bearing) absorbs axial loads from the high-pressure rotor
 
 | Parameter | Ground Idle | Flight Idle | Max Continuous | Takeoff |
 |-----------|-------------|-------------|----------------|---------|
-| N1Speed (% RPM) | 20-25% | 25-30% | 95% | 104% |
-| N2 (% RPM) | 55-62% | 62-68% | 95% | 101% |
-| EGT (°C) | 350-420 | 420-480 | 850-895 | 900-950 |
-| FuelFlow (kg/s) | 0.10-0.18 | 0.18-0.25 | 0.85-1.10 | 1.20-1.50 |
+| N1Speed (% RPM) | 22-28% | 28-35% | 96% | 100% |
+| EGT (°C) | 330-400 | 400-460 | 840-870 | 870-900 |
+| FuelFlow (kg/s) | 0.08-0.15 | 0.15-0.22 | 0.75-0.95 | 1.00-1.20 |
 | Oil Pressure (psi) | 35-60 | 40-70 | 45-75 | 45-75 |
 | Oil Temperature (°C) | 50-90 | 60-120 | 80-140 | 80-155 |
 | Vibration (ips) | < 1.0 | < 1.5 | < 2.5 | < 3.0 |
@@ -300,7 +299,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 **Fault Code:** ENG-SDR-001
 **Severity Classification:** CRITICAL / MAJOR / MINOR
-**Fleet Statistics:** Most common fault type (24% of engine events)
+**Fleet Statistics:** Most common fault type (22% of engine events)
 
 #### Symptoms
 - Parameter disagree messages on EICAS
@@ -340,7 +339,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 **Fault Code:** ENG-CNT-002
 **Severity Classification:** CRITICAL / MAJOR / MINOR
-**Fleet Statistics:** Second most common fault (11% of engine events)
+**Fleet Statistics:** Second most common fault (15% of engine events)
 
 #### Types of Contamination
 
@@ -384,7 +383,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 **Fault Code:** ENG-BRG-003
 **Severity Classification:** CRITICAL / MAJOR / MINOR
-**Fleet Statistics:** 10% of engine maintenance events
+**Fleet Statistics:** 12% of engine maintenance events
 
 #### Detection Methods
 - Magnetic chip detector (MCD) warnings
@@ -393,7 +392,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 - Oil consumption increase
 - Oil temperature rise
 
-#### Oil Analysis Limits (CFM56-7B Specific)
+#### Oil Analysis Limits (CF34-10E Specific)
 
 | Metal | Normal (ppm) | Watch (ppm) | Action (ppm) |
 |-------|--------------|-------------|--------------|
@@ -436,7 +435,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 **Fault Code:** ENG-LEAK-004
 **Severity Classification:** CRITICAL / MAJOR / MINOR
-**Fleet Statistics:** 14% of engine maintenance events
+**Fleet Statistics:** 13% of engine maintenance events
 
 #### Leak Classification
 
@@ -460,7 +459,7 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 | Step | Action | Inspection Point |
 |------|--------|------------------|
-| 1 | Perform visual inspection of engine | Note all fluid trails |
+| 1 | Perform visual inspection of engine nacelle and pylon | Note all fluid trails |
 | 2 | Clean suspected areas thoroughly | Prepare for leak check |
 | 3 | Operate engine at ground idle | Observe for fresh leaks |
 | 4 | Apply leak detection solution | Bubble test for pneumatic |
@@ -471,14 +470,14 @@ The Full Authority Digital Engine Control (FADEC) provides:
 **Fault Code:** ENG-VIB-005
 **Severity Classification:** CRITICAL / MAJOR / MINOR
 
-#### Vibration Limits (CFM56-7B)
+#### Vibration Limits (CF34-10E)
 
 | Level | N1 Vibration | N2 Vibration | Flight Deck Alert |
 |-------|--------------|--------------|-------------------|
 | Normal | < 2.0 ips | < 1.8 ips | None |
-| Advisory | 2.0-3.5 ips | 1.8-3.0 ips | ENG VIB (amber) |
-| Caution | 3.5-4.5 ips | 3.0-4.0 ips | ENG VIB (amber) |
-| Warning | > 4.5 ips | > 4.0 ips | ENG VIB (red) |
+| Advisory | 2.0-3.0 ips | 1.8-2.8 ips | ENG VIB (amber) |
+| Caution | 3.0-4.0 ips | 2.8-3.5 ips | ENG VIB (amber) |
+| Warning | > 4.0 ips | > 3.5 ips | ENG VIB (red) |
 
 #### Common Root Causes
 
@@ -495,15 +494,15 @@ The Full Authority Digital Engine Control (FADEC) provides:
 
 ### 5.1 System Overview
 
-The B737-800 avionics suite is designed around the Common Display System (CDS) with six interchangeable Display Units (DU), integrated with the Digital Flight Control System (DFCS) and autothrottle.
+The E190 avionics suite is built around the Honeywell Primus Epic EFIS with fully integrated digital avionics architecture. The system provides glass-cockpit displays, integrated flight management, fly-by-wire flight control interface, and comprehensive BITE diagnostics.
 
 ### 5.2 Component Descriptions
 
 #### 5.2.1 Flight Management System (FMS)
-**Part Number:** AVN-FMS-737-100
+**Part Number:** AVN-FMS-E190-100
 **ATA Reference:** 34-61
 
-The Honeywell FMC (Flight Management Computer) system provides:
+The Honeywell Primus Epic dual FMS provides:
 - 4D flight planning and navigation
 - VNAV and LNAV guidance
 - Performance calculations (V-speeds, fuel predictions)
@@ -515,26 +514,26 @@ The Honeywell FMC (Flight Management Computer) system provides:
 - CDU display anomalies
 - Position initialization failures
 
-#### 5.2.2 Air Data Computer (ADC)
-**Part Number:** AVN-ADC-737-200
+#### 5.2.2 Air Data / Inertial Reference Unit (ADIRU)
+**Part Number:** AVN-ADIRU-E190-200
 **ATA Reference:** 34-11
 
-Three independent ADCs provide:
+Three independent ADIRUs provide:
 - Barometric altitude computation
 - Indicated/calibrated airspeed
 - Mach number calculation
 - Static air temperature
-- Altitude rate
+- Inertial reference (attitude, heading, acceleration)
 
 **Calibration Requirements:**
 - Pitot-static leak test: Every 24 months
-- ADC accuracy verification: Every 12 months
+- ADIRU accuracy verification: Every 12 months
 
-#### 5.2.3 Navigation Receiver (NAV)
-**Part Number:** AVN-NAV-737-300
+#### 5.2.3 Multi-Mode Receiver (MMR)
+**Part Number:** AVN-MMR-E190-300
 **ATA Reference:** 34-51
 
-Integrated Multi-Mode Receiver (MMR) providing:
+Integrated Multi-Mode Receiver providing:
 - VOR bearing and distance (VOR/DME)
 - ILS localizer and glideslope
 - Marker beacon reception
@@ -547,15 +546,15 @@ Integrated Multi-Mode Receiver (MMR) providing:
 **Fault Code:** AVN-SDR-001
 
 **Diagnostic Steps:**
-1. Compare ADC outputs (ADC 1/2/3) via maintenance page
+1. Compare ADIRU outputs (ADIRU 1/2/3) via maintenance page
 2. Cross-check with GPS-derived altitude and airspeed
 3. Review BITE fault history for intermittent faults
 4. Check pitot-static system for leaks or blockage
 
 **Resolution:**
 - Pitot-static leak check and correction
-- ADC software reload
-- ADC replacement if hardware fault confirmed
+- ADIRU software reload
+- ADIRU replacement if hardware fault confirmed
 
 ---
 
@@ -563,39 +562,39 @@ Integrated Multi-Mode Receiver (MMR) providing:
 
 ### 6.1 System Overview
 
-The B737-800 employs a dual hydraulic system (A and B) plus standby, operating at 3,000 psi. System A and B each power half of the primary flight controls, with crossover capability for redundancy.
+The E190 employs a dual hydraulic system (Left and Right) plus standby, operating at 3,000 psi. Left and Right systems each power separate portions of the primary flight controls, with crossover capability for redundancy.
 
 ### 6.2 System Architecture
 
 | System | Power Source | Primary Functions |
 |--------|--------------|-------------------|
-| A | EDP (Eng 1), EDP (Eng 2), ACMP | Flight controls (50%), LE devices, flaps, gear |
-| B | EDP (Eng 1), EDP (Eng 2), ACMP | Flight controls (50%), TE flaps, thrust reversers |
-| Standby | ACMP | Standby rudder, LE devices, thrust reversers |
+| Left | EDP (Eng 1), EDP (Eng 2), ACMP | Flight controls (50%), LE slats, flaps, gear |
+| Right | EDP (Eng 1), EDP (Eng 2), ACMP | Flight controls (50%), TE flaps, thrust reversers |
+| Standby | ACMP | Standby rudder, LE slats, thrust reversers |
 
 ### 6.3 Component Descriptions
 
-#### 6.3.1 Main Hydraulic Pump (Engine-Driven)
-**Part Number:** HYD-EDP-737-100
+#### 6.3.1 Engine-Driven Pump
+**Part Number:** HYD-EDP-E190-100
 **ATA Reference:** 29-11
 
-Each engine drives one pump for System A and one for System B:
+Each engine drives one pump for the Left system and one for the Right system:
 - Operating pressure: 3,000 psi nominal
-- Flow rate: 28 gpm at 3,000 psi
-- Case drain limit: 5 gpm
+- Flow rate: 20 gpm at 3,000 psi
+- Case drain limit: 4 gpm
 
 #### 6.3.2 Hydraulic Reservoir
-**Part Number:** HYD-RES-737-200
+**Part Number:** HYD-RES-E190-200
 **ATA Reference:** 29-21
 
-- System A reservoir: 5.5 gallons usable
-- System B reservoir: 5.5 gallons usable
-- Standby reservoir: 0.8 gallons usable
+- Left system reservoir: 4.0 gallons usable
+- Right system reservoir: 4.0 gallons usable
+- Standby reservoir: 0.6 gallons usable
 - Operating temperature: -54°C to +107°C
 - Fluid type: MIL-PRF-83282 or Skydrol 5
 
 #### 6.3.3 Flap Actuator Assembly
-**Part Number:** HYD-FLAP-737-300
+**Part Number:** HYD-FLAP-E190-300
 **ATA Reference:** 29-31
 
 The trailing edge flap system uses:
@@ -613,9 +612,9 @@ The trailing edge flap system uses:
 
 | Component | Access | Typical Cause |
 |-----------|--------|---------------|
-| EDP | Engine cowl | Shaft seal wear |
-| ACMP | E/E bay | Pump seal, fittings |
-| Reservoir | E/E bay | Sight glass gasket |
+| EDP | Engine nacelle | Shaft seal wear |
+| ACMP | Avionics bay | Pump seal, fittings |
+| Reservoir | Avionics bay | Sight glass gasket |
 | Actuators | Wing panels | Rod seal wear |
 | Lines | Various | B-nut loosening |
 
@@ -661,7 +660,7 @@ The trailing edge flap system uses:
 
 | Code | Description | Severity | ATA | Primary Action |
 |------|-------------|----------|-----|----------------|
-| AVN-SDR-001 | Sensor Drift | MAJ/MIN | 34 | ADC comparison, calibration |
+| AVN-SDR-001 | Sensor Drift | MAJ/MIN | 34 | ADIRU comparison, calibration |
 | AVN-ELF-002 | Electrical Fault | MAJ/MIN | 34 | Power check, connector inspect |
 | AVN-FMS-003 | FMS Malfunction | MAJ | 34 | Reset, database reload |
 | AVN-NAV-004 | NAV Receiver Fault | MIN | 34 | Antenna check, LRU swap |
@@ -692,7 +691,7 @@ The trailing edge flap system uses:
 ```
 START: Engine Vibration Warning/Advisory
 │
-├─► Is vibration > 4.5 ips (N1) or > 4.0 ips (N2)?
+├─► Is vibration > 4.0 ips (N1) or > 3.5 ips (N2)?
 │   │
 │   ├─► YES ─► Reduce thrust immediately
 │   │          If vibration persists > 4.0 ips, shutdown engine
@@ -739,10 +738,10 @@ START: Sensor Parameter Disagree / Drift Indication
 │   │          Verify harness connections
 │   │          └─► Replace probe if > 15°C variance
 │   │
-│   ├─► N1/N2 ─► Compare FADEC channels A and B
-│   │            Check speed sensor tone wheel
-│   │            Verify wiring to EEC
-│   │            └─► Replace sensor or EEC channel
+│   ├─► N1Speed ─► Compare FADEC channels A and B
+│   │              Check speed sensor tone wheel
+│   │              Verify wiring to EEC
+│   │              └─► Replace sensor or EEC channel
 │   │
 │   ├─► FuelFlow ─► Compare commanded vs actual
 │   │               Check fuel flow transmitter
@@ -767,7 +766,7 @@ START: Sensor Parameter Disagree / Drift Indication
 ### 8.3 Hydraulic Low Pressure Procedure
 
 ```
-START: HYD SYS PRESS (System A or B) Warning
+START: HYD SYS PRESS (Left or Right) Warning
 │
 ├─► Check hydraulic quantity
 │   │
@@ -829,7 +828,7 @@ START: HYD SYS PRESS (System A or B) Warning
 |------|----------|----------|-----------|
 | FMS database update | 28 days | 0.5 hr | 1 technician |
 | Pitot-static leak test | 24 months | 4.0 hr | 1 technician |
-| ADC accuracy check | 12 months | 2.0 hr | 1 technician |
+| ADIRU accuracy check | 12 months | 2.0 hr | 1 technician |
 | VOR/ILS accuracy check | 12 months | 2.0 hr | 1 technician |
 | BITE fault log review | Weekly | 0.5 hr | 1 technician |
 | Antenna inspection | A-check | 1.0 hr | 1 mechanic |
@@ -854,7 +853,7 @@ START: HYD SYS PRESS (System A or B) Warning
 
 **Tools Required:**
 - Oil dispenser with flexible spout
-- Calibrated dipstick (P/N: CFM-TOOL-001)
+- Calibrated dipstick (P/N: GE-TOOL-001)
 - Lint-free wipes
 
 **Procedure:**
@@ -882,13 +881,13 @@ START: HYD SYS PRESS (System A or B) Warning
 
 **Procedure:**
 1. Ensure hydraulic system depressurized
-2. Locate sample port on reservoir (E/E bay)
+2. Locate sample port on reservoir (avionics bay)
 3. Clean area around sample port
 4. Connect adapter and open sample valve
 5. Discard first 50ml (flush line)
 6. Collect 100ml sample in clean bottle
 7. Close valve and disconnect adapter
-8. Label sample: Aircraft reg, system (A/B), date, hours
+8. Label sample: Aircraft reg, system (Left/Right), date, hours
 9. Submit to approved laboratory within 48 hours
 
 ---
@@ -897,21 +896,20 @@ START: HYD SYS PRESS (System A or B) Warning
 
 ### 10.1 Quick Reference - Normal Operating Limits
 
-#### Engine Parameters (CFM56-7B)
+#### Engine Parameters (CF34-10E)
 
 | Parameter | Ground Idle | Flight Idle | Max Continuous | Takeoff (5 min) |
 |-----------|-------------|-------------|----------------|-----------------|
-| N1Speed (%) | 20-25 | 25-30 | 95 | 104 |
-| N2 (%) | 55-62 | 62-68 | 95 | 101 |
-| EGT (°C) | 350-420 | 420-480 | 895 | 950 |
+| N1Speed (%) | 22-28 | 28-35 | 96 | 100 |
+| EGT (°C) | 330-400 | 400-460 | 870 | 900 |
 | Oil Pressure (psi) | 35-60 | 40-70 | 45-75 | 45-75 |
 | Oil Temp (°C) | 50-90 | 60-120 | 80-140 | 80-155 |
 | Vibration (ips) | < 1.0 | < 1.5 | < 2.5 | < 3.0 |
 
 #### Hydraulic System
 
-| Parameter | System A | System B | Standby |
-|-----------|----------|----------|---------|
+| Parameter | Left System | Right System | Standby |
+|-----------|-------------|--------------|---------|
 | Pressure | 2,800-3,200 psi | 2,800-3,200 psi | 2,800-3,200 psi |
 | Quantity | 70-100% | 70-100% | 70-100% |
 | Fluid Temp | -40 to +107°C | -40 to +107°C | -40 to +107°C |
@@ -921,24 +919,21 @@ START: HYD SYS PRESS (System A or B) Warning
 | Abbreviation | Definition |
 |--------------|------------|
 | ACMP | AC Motor Pump |
-| ADC | Air Data Computer |
+| ADIRU | Air Data / Inertial Reference Unit |
 | AGB | Accessory Gearbox |
 | AMM | Aircraft Maintenance Manual |
 | BITE | Built-In Test Equipment |
 | CDU | Control Display Unit |
-| CFM | CFM International |
 | CMC | Central Maintenance Computer |
-| DAC | Dual Annular Combustor |
-| DFCS | Digital Flight Control System |
 | EDP | Engine-Driven Pump |
 | EEC | Electronic Engine Control |
+| EFIS | Electronic Flight Instrument System |
 | EICAS | Engine Indication and Crew Alerting System |
 | EGT | Exhaust Gas Temperature |
 | FADEC | Full Authority Digital Engine Control |
 | FH | Flight Hours |
-| FMC | Flight Management Computer |
 | FMS | Flight Management System |
-| FMV | Fuel Metering Valve |
+| FMV | Fuel Metering Value |
 | FOD | Foreign Object Damage |
 | HMU | Hydromechanical Unit |
 | HPC | High Pressure Compressor |
@@ -948,6 +943,7 @@ START: HYD SYS PRESS (System A or B) Warning
 | MCD | Magnetic Chip Detector |
 | MCT | Maximum Continuous Thrust |
 | MEL | Minimum Equipment List |
+| MMR | Multi-Mode Receiver |
 | NAV | Navigation |
 | QAR | Quick Access Recorder |
 | SOAP | Spectrometric Oil Analysis Program |
@@ -957,21 +953,21 @@ START: HYD SYS PRESS (System A or B) Warning
 
 | Document | Number | Description |
 |----------|--------|-------------|
-| Aircraft Maintenance Manual | AMM 737 | Primary maintenance reference |
-| Fault Isolation Manual | FIM 737 | Troubleshooting guidance |
-| Illustrated Parts Catalog | IPC 737 | Parts identification |
-| Component Maintenance Manual | CMM CFM56-7B | Engine overhaul data |
-| Service Bulletin Index | SB 737 | Modification tracking |
+| Aircraft Maintenance Manual | AMM E190 | Primary maintenance reference |
+| Fault Isolation Manual | FIM E190 | Troubleshooting guidance |
+| Illustrated Parts Catalog | IPC E190 | Parts identification |
+| Component Maintenance Manual | CMM CF34-10E | Engine overhaul data |
+| Service Bulletin Index | SB E190 | Modification tracking |
 | Airworthiness Directives | AD List | Mandatory compliance |
-| Master Minimum Equipment List | MMEL 737 | Dispatch deviations |
+| Master Minimum Equipment List | MMEL E190 | Dispatch deviations |
 
 ### 10.4 Emergency Contacts
 
 | Function | Contact | Availability |
 |----------|---------|--------------|
-| AOG Desk | +1-800-555-0737 | 24/7 |
-| Engine Support (CFM) | +1-513-555-0156 | 24/7 |
-| Boeing Technical Support | +1-206-555-0100 | 24/7 |
+| AOG Desk | +1-800-555-0190 | 24/7 |
+| Engine Support (GE Aviation) | +1-513-555-0134 | 24/7 |
+| Embraer Technical Support | +1-954-555-0100 | 24/7 |
 | Technical Records | tech.records@exampleair.com | 24/7 |
 | Engineering Support | engineering@exampleair.com | 24/7 |
 | Parts Supply | parts@exampleair.com | 24/7 |
@@ -982,20 +978,21 @@ Based on fleet data analysis (July – September 2024):
 
 | Metric | Value |
 |--------|-------|
-| Total Maintenance Events | 370 |
-| Critical Events | 192 (52%) |
-| Major Events | 115 (31%) |
-| Minor Events | 63 (17%) |
-| Engine-Related | 259 (70%) |
-| Hydraulics-Related | 78 (21%) |
-| Avionics-Related | 33 (9%) |
+| Total Maintenance Events | 92 |
+| Critical Events | 48 (52%) |
+| Major Events | 29 (31%) |
+| Minor Events | 15 (17%) |
+| Engine-Related | 60 (65%) |
+| Hydraulics-Related | 17 (19%) |
+| Avionics-Related | 15 (16%) |
 
 **Top Fault Types:**
-1. Overheat (EGT exceedance) — 104 events (28%)
-2. Bearing wear — 93 events (25%)
-3. Vibration exceedance — 74 events (20%)
-4. Sensor drift — 56 events (15%)
-5. Contamination / Leak — 43 events (12%)
+1. Overheat (EGT exceedance) — 25 events (27%)
+2. Sensor drift — 20 events (22%)
+3. Bearing wear — 18 events (20%)
+4. Vibration exceedance — 15 events (16%)
+5. Contamination — 8 events (9%)
+6. Leak — 6 events (6%)
 
 ### 10.6 Revision History Log
 
@@ -1007,4 +1004,4 @@ Based on fleet data analysis (July – September 2024):
 
 **END OF DOCUMENT**
 
-*This manual is for demonstration purposes. Always refer to official Boeing documentation for actual maintenance procedures.*
+*This manual is for demonstration purposes. Always refer to official Embraer documentation for actual maintenance procedures.*

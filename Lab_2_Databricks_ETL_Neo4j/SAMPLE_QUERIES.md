@@ -206,6 +206,21 @@ ORDER BY SensorCount DESC
 
 > **Concepts**: `WITH` pipes intermediate results forward — here it computes sensor counts per system type, then passes them to `RETURN` for sorting.
 
+### N1 speed distribution by aircraft model
+
+```sql
+MATCH (a:Aircraft)-[:HAS_SYSTEM]->(s:System {type: 'Engine'})
+RETURN a.model AS Model,
+       a.manufacturer AS Manufacturer,
+       collect(DISTINCT s.name)[0] AS EngineType,
+       count(s) AS EngineSystems
+ORDER BY Model
+```
+
+> **Concepts**: `collect(DISTINCT ...)[0]` picks one engine name from the list — useful for surfacing a representative value without returning a full array.
+>
+> **Note — A220-300 N1Speed:** If your dataset includes A220-300 aircraft, their N1Speed sensor readings will cluster around **~2,600 RPM** while every other model sits between **4,600–5,100 RPM**. This is correct, not a data error. The A220-300's PW1500G engine uses an epicyclic reduction gearbox that decouples the fan from the low-pressure compressor shaft, allowing the fan to spin roughly 30% slower than a conventional turbofan of similar thrust. Any cross-fleet N1 analysis or kNN clustering query will naturally separate A220-300 aircraft into their own group based solely on this speed differential.
+
 ---
 
 ## Maintenance

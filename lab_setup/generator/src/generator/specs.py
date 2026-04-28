@@ -69,14 +69,28 @@ ENGINE_SPECS: dict[str, EngineSpec] = {
         n1_baseline=4680.0, n1_noise_std=42.0,
         fuel_baseline=0.88, fuel_noise_std=0.018,
     ),
+    # PW1500G geared turbofan: fan runs ~30% slower than conventional engines due to
+    # epicyclic gearbox, so n1_baseline is ~2600 RPM vs ~4700+ for CFM/LEAP types.
+    "A220-300": EngineSpec(
+        engine_type="PW1500G",
+        egt_baseline=625.0, egt_noise_std=2.5,
+        egt_degradation_range=(0.001, 0.009),
+        egt_warning=652.0, egt_critical=660.0,
+        vib_baseline=0.110, vib_noise_std=0.006,
+        vib_degradation_range=(0.00002, 0.00010),
+        vib_warning=0.25, vib_critical=0.30,
+        n1_baseline=2600.0, n1_noise_std=30.0,
+        fuel_baseline=1.05, fuel_noise_std=0.022,
+    ),
 }
 
 # Model allocation across the fleet (proportions must sum to 1.0)
 MODEL_DISTRIBUTION: list[tuple[str, float]] = [
-    ("B737-800", 0.40),
-    ("A320-200", 0.30),
+    ("B737-800", 0.35),
+    ("A320-200", 0.25),
     ("A321neo",  0.20),
     ("E190",     0.10),
+    ("A220-300", 0.10),
 ]
 
 MANUFACTURER: dict[str, str] = {
@@ -84,6 +98,7 @@ MANUFACTURER: dict[str, str] = {
     "A320-200": "Airbus",
     "A321neo":  "Airbus",
     "E190":     "Embraer",
+    "A220-300": "Airbus",
 }
 
 

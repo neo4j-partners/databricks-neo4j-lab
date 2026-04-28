@@ -98,7 +98,7 @@ CALL {
 CALL {
   LOAD CSV WITH HEADERS FROM 'file:///rels_component_removal_large.csv' AS row
   MATCH (c:Component {component_id: row[":START_ID(Component)"]}), (r:Removal {removal_id: row[":END_ID(RemovalEvent)"]})
-  CREATE (c)-[:REMOVED_COMPONENT]->(r)
+  CREATE (r)-[:REMOVED_COMPONENT]->(c)
 } IN TRANSACTIONS OF 10000 ROWS;
 
 CALL {
@@ -170,7 +170,7 @@ MATCH (:System)-[:HAS_COMPONENT]->(c)-[:HAS_EVENT]->(m:MaintenanceEvent {severit
 RETURN c.type, count(*) AS cnt ORDER BY cnt DESC;
 
 // 4) Top 20 most expensive removal reasons with occurrence analysis
-MATCH (c:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
 RETURN r.RMV_REA_TX AS removal_reason,
        count(*) AS occurrence_count,
        avg(r.cost_estimate) AS avg_cost,
@@ -188,7 +188,7 @@ RETURN a.tail_number, a.model, a.manufacturer,
 ORDER BY total_removal_cost DESC LIMIT 20;
 
 // 6) Warranty impact analysis on removal costs
-MATCH (:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(:Component)
 WITH r.warranty_status AS warranty,
      count(*) AS count,
      avg(r.cost_estimate) AS avg_cost,
@@ -199,7 +199,7 @@ RETURN warranty, count, avg_cost, median_cost, p95_cost, total_cost
 ORDER BY total_cost DESC;
 
 // 7) Component reliability analysis - MTBR (Mean Time Between Removals)
-MATCH (c:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
 WHERE r.time_since_install IS NOT NULL
 RETURN c.type AS component_type,
        avg(r.time_since_install) AS avg_time_to_removal_hours,
@@ -210,7 +210,7 @@ RETURN c.type AS component_type,
 ORDER BY avg_time_to_removal_hours ASC;
 
 // 8) Monthly removal trends and seasonality
-MATCH (:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(:Component)
 WITH date.truncate('month', date(substring(r.removal_date, 0, 10))) AS month,
      count(*) AS removals,
      sum(r.cost_estimate) AS total_cost,
@@ -219,7 +219,7 @@ RETURN month, removals, total_cost, avg_cost
 ORDER BY month DESC LIMIT 24;
 
 // 9) Supplier performance analysis
-MATCH (:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(:Component)
 RETURN r.supplier_code AS supplier,
        count(*) AS parts_removed,
        avg(r.time_since_install) AS avg_part_life_hours,
@@ -228,7 +228,7 @@ RETURN r.supplier_code AS supplier,
 ORDER BY parts_removed DESC LIMIT 20;
 
 // 10) Critical priority removals by location
-MATCH (:Component)-[:REMOVED_COMPONENT]->(r:Removal {removal_priority: 'CRITICAL'})
+MATCH (r:Removal {removal_priority: 'CRITICAL'})-[:REMOVED_COMPONENT]->(:Component)
 RETURN r.removal_location AS airport,
        count(*) AS critical_removals,
        avg(r.cost_estimate) AS avg_cost,

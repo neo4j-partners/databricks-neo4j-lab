@@ -47,6 +47,18 @@ DOCUMENTS: list[DocumentMeta] = [
         aircraft_type="B737-800",
         title="B737-800 Maintenance and Troubleshooting Manual",
     ),
+    DocumentMeta(
+        filename="MAINTENANCE_E190.md",
+        document_id="AMM-E190-2024-001",
+        aircraft_type="E190",
+        title="E190 Maintenance and Troubleshooting Manual",
+    ),
+    DocumentMeta(
+        filename="MAINTENANCE_A220.md",
+        document_id="AMM-A220-2024-001",
+        aircraft_type="A220-300",
+        title="A220-300 Maintenance and Troubleshooting Manual",
+    ),
 ]
 
 

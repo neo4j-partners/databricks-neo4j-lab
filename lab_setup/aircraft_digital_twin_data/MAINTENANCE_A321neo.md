@@ -65,15 +65,16 @@ The A321neo represents the latest evolution of the A320 family with:
 
 ### 1.3 Fleet Configuration
 
-The RegionalCo A321neo fleet consists of five aircraft configured for medium to long-haul operations:
+The A321neo fleet operates across four partner carriers configured for medium to long-haul operations. The combined fleet of approximately 20 aircraft is distributed as follows:
 
-| Aircraft ID | Registration | ICAO 24 | Entry into Service |
-|-------------|--------------|---------|-------------------|
-| AC1003 | N54980C | 6d4e29 | March 2021 |
-| AC1007 | N86057G | b3f182 | July 2021 |
-| AC1011 | N89365K | e8a4c6 | November 2021 |
-| AC1015 | N65164O | 4c7d91 | March 2022 |
-| AC1019 | N96107S | 91b5f3 | July 2022 |
+| Operator | Aircraft Count | Primary Routes |
+|----------|---------------|----------------|
+| ExampleAir | 5 | Domestic medium-haul |
+| SkyWays | 5 | Domestic medium-haul |
+| RegionalCo | 5 | Mixed domestic/regional |
+| NorthernJet | 5 | Domestic medium-haul |
+
+Aircraft entered service between 2020 and 2023, configured in a single-class or dual-class layout for 180–220 passengers.
 
 ### 1.4 ATA Chapter Reference
 
@@ -159,6 +160,8 @@ Each LEAP-1A engine is equipped with comprehensive monitoring sensors:
 | OIL-Q | Oil Quantity | % | Oil tank |
 
 **Sensor Sampling Rate:** Continuous (1 Hz flight data, 50 Hz vibration analysis)
+
+**Digital Twin Monitoring Note:** The Digital Twin Monitoring System records hourly trend-averaged EGT values on a normalized scale calibrated for long-term degradation detection. These trend values (nominal baseline ~634°C, warning threshold ~663°C) differ from the instantaneous ECAM EGT readings shown in Section 3.4 and Appendix 10.1, which reflect peak values during takeoff and high-power operations (typically 950–1,040°C for the LEAP-1A). The trend-monitoring scale detects gradual EGT margin deterioration over weeks and months rather than acute exceedances; the absolute limits in this manual refer to instantaneous FADEC-monitored readings.
 
 **Engine Monitoring Unit (EMU):** The LEAP-1A features an enhanced EMU providing:
 - Real-time trend monitoring
@@ -1078,34 +1081,33 @@ START: Fan Blade Damage Reported/Suspected
 
 ### 10.5 Fleet Maintenance Statistics Summary
 
-Based on fleet data analysis (July - September 2024):
+Based on fleet data analysis (July – September 2024):
 
 | Metric | Value |
 |--------|-------|
-| Total Maintenance Events | 74 |
-| Critical Events | 25 (34%) |
-| Major Events | 17 (23%) |
-| Minor Events | 32 (43%) |
-| Engine-Related | 45 (61%) |
-| Avionics-Related | 15 (20%) |
-| Hydraulics-Related | 14 (19%) |
+| Total Maintenance Events | 185 |
+| Critical Events | 96 (52%) |
+| Major Events | 57 (31%) |
+| Minor Events | 32 (17%) |
+| Engine-Related | 113 (61%) |
+| Avionics-Related | 37 (20%) |
+| Hydraulics-Related | 35 (19%) |
 
 **Top Fault Types:**
-1. Vibration Exceedance - 14 events (19%)
-2. Electrical Fault - 11 events (15%)
-3. Overheat - 11 events (15%)
-4. Contamination - 9 events (12%)
-5. Leak - 9 events (12%)
-6. Fuel Starvation - 7 events (9%)
-7. Sensor Drift - 8 events (11%)
-8. Bearing Wear - 5 events (7%)
+1. Bearing wear — 41 events (22%)
+2. Overheat (EGT exceedance) — 37 events (20%)
+3. Vibration exceedance — 30 events (16%)
+4. Contamination — 26 events (14%)
+5. Electrical fault — 22 events (12%)
+6. Sensor drift — 18 events (10%)
+7. Fuel starvation — 11 events (6%)
 
 **Corrective Action Distribution:**
-1. Adjusted tolerance - 18 (24%)
-2. Cleaned and reassembled - 17 (23%)
-3. Inspected and found no fault - 16 (22%)
-4. Replaced component - 12 (16%)
-5. Software patch applied - 11 (15%)
+1. Replaced component — 51 (28%)
+2. Cleaned and reassembled — 43 (23%)
+3. Inspected and cleared — 41 (22%)
+4. Software patch applied — 31 (17%)
+5. Adjusted tolerance — 19 (10%)
 
 ### 10.6 Revision History Log
 

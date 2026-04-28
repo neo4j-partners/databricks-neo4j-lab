@@ -64,65 +64,77 @@ CREATE (:Removal {
 });
 
 // Relationships
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_system.csv' AS row
-MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (s:System {system_id: row[":END_ID(System)"]})
-CREATE (a)-[:HAS_SYSTEM]->(s);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_system.csv' AS row
+  MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (s:System {system_id: row[":END_ID(System)"]})
+  CREATE (a)-[:HAS_SYSTEM]->(s)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_system_component.csv' AS row
-MATCH (s:System {system_id: row[":START_ID(System)"]}), (c:Component {component_id: row[":END_ID(Component)"]})
-CREATE (s)-[:HAS_COMPONENT]->(c);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_system_component.csv' AS row
+  MATCH (s:System {system_id: row[":START_ID(System)"]}), (c:Component {component_id: row[":END_ID(Component)"]})
+  CREATE (s)-[:HAS_COMPONENT]->(c)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_system_sensor.csv' AS row
-MATCH (s:System {system_id: row[":START_ID(System)"]}), (sn:Sensor {sensor_id: row[":END_ID(Sensor)"]})
-CREATE (s)-[:HAS_SENSOR]->(sn);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_system_sensor.csv' AS row
+  MATCH (s:System {system_id: row[":START_ID(System)"]}), (sn:Sensor {sensor_id: row[":END_ID(Sensor)"]})
+  CREATE (s)-[:HAS_SENSOR]->(sn)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_component_event.csv' AS row
-MATCH (c:Component {component_id: row[":START_ID(Component)"]}), (m:MaintenanceEvent {event_id: row[":END_ID(MaintenanceEvent)"]})
-CREATE (c)-[:HAS_EVENT]->(m);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_component_event.csv' AS row
+  MATCH (c:Component {component_id: row[":START_ID(Component)"]}), (m:MaintenanceEvent {event_id: row[":END_ID(MaintenanceEvent)"]})
+  CREATE (c)-[:HAS_EVENT]->(m)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_component_removal.csv' AS row
-MATCH (c:Component {component_id: row[":START_ID(Component)"]}), (r:Removal {removal_id: row[":END_ID(RemovalEvent)"]})
-CREATE (c)-[:REMOVED_COMPONENT]->(r);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_component_removal.csv' AS row
+  MATCH (c:Component {component_id: row[":START_ID(Component)"]}), (r:Removal {removal_id: row[":END_ID(RemovalEvent)"]})
+  CREATE (r)-[:REMOVED_COMPONENT]->(c)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_removal.csv' AS row
-MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (r:Removal {removal_id: row[":END_ID(RemovalEvent)"]})
-CREATE (a)-[:HAS_REMOVAL]->(r);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_removal.csv' AS row
+  MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (r:Removal {removal_id: row[":END_ID(RemovalEvent)"]})
+  CREATE (a)-[:HAS_REMOVAL]->(r)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_flight.csv' AS row
-MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (f:Flight {flight_id: row[":END_ID(Flight)"]})
-CREATE (a)-[:OPERATES_FLIGHT]->(f);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_aircraft_flight.csv' AS row
+  MATCH (a:Aircraft {aircraft_id: row[":START_ID(Aircraft)"]}), (f:Flight {flight_id: row[":END_ID(Flight)"]})
+  CREATE (a)-[:OPERATES_FLIGHT]->(f)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_flight_departure.csv' AS row
-MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (ap:Airport {airport_id: row[":END_ID(Airport)"]})
-CREATE (f)-[:DEPARTS_FROM]->(ap);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_flight_departure.csv' AS row
+  MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (ap:Airport {airport_id: row[":END_ID(Airport)"]})
+  CREATE (f)-[:DEPARTS_FROM]->(ap)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_flight_arrival.csv' AS row
-MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (ap:Airport {airport_id: row[":END_ID(Airport)"]})
-CREATE (f)-[:ARRIVES_AT]->(ap);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_flight_arrival.csv' AS row
+  MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (ap:Airport {airport_id: row[":END_ID(Airport)"]})
+  CREATE (f)-[:ARRIVES_AT]->(ap)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_flight_delay.csv' AS row
-MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (d:Delay {delay_id: row[":END_ID(Delay)"]})
-CREATE (f)-[:HAS_DELAY]->(d);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_flight_delay.csv' AS row
+  MATCH (f:Flight {flight_id: row[":START_ID(Flight)"]}), (d:Delay {delay_id: row[":END_ID(Delay)"]})
+  CREATE (f)-[:HAS_DELAY]->(d)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_event_system.csv' AS row
-MATCH (m:MaintenanceEvent {event_id: row[":START_ID(MaintenanceEvent)"]}), (s:System {system_id: row[":END_ID(System)"]})
-CREATE (m)-[:AFFECTS_SYSTEM]->(s);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_event_system.csv' AS row
+  MATCH (m:MaintenanceEvent {event_id: row[":START_ID(MaintenanceEvent)"]}), (s:System {system_id: row[":END_ID(System)"]})
+  CREATE (m)-[:AFFECTS_SYSTEM]->(s)
+} IN TRANSACTIONS OF 1000 ROWS;
 
-USING PERIODIC COMMIT 1000
-LOAD CSV WITH HEADERS FROM 'file:///rels_event_aircraft.csv' AS row
-MATCH (m:MaintenanceEvent {event_id: row[":START_ID(MaintenanceEvent)"]}), (a:Aircraft {aircraft_id: row[":END_ID(Aircraft)"]})
-CREATE (m)-[:AFFECTS_AIRCRAFT]->(a);
+CALL {
+  LOAD CSV WITH HEADERS FROM 'file:///rels_event_aircraft.csv' AS row
+  MATCH (m:MaintenanceEvent {event_id: row[":START_ID(MaintenanceEvent)"]}), (a:Aircraft {aircraft_id: row[":END_ID(Aircraft)"]})
+  CREATE (m)-[:AFFECTS_AIRCRAFT]->(a)
+} IN TRANSACTIONS OF 1000 ROWS;
 
 // ---- Example Queries ----
 
@@ -142,8 +154,8 @@ MATCH (:System)-[:HAS_COMPONENT]->(c)-[:HAS_EVENT]->(m:MaintenanceEvent {severit
 RETURN c.type, count(*) AS cnt ORDER BY cnt DESC;
 
 // 4) Component removals by reason with cost analysis
-MATCH (c:Component)-[:REMOVED_COMPONENT]->(r:Removal)
-RETURN r.RMV_REA_TX AS removal_reason, 
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
+RETURN r.RMV_REA_TX AS removal_reason,
        count(*) AS occurrence_count,
        avg(r.cost_estimate) AS avg_cost,
        sum(r.cost_estimate) AS total_cost,
@@ -152,23 +164,23 @@ ORDER BY occurrence_count DESC;
 
 // 5) Aircraft with highest removal costs
 MATCH (a:Aircraft)-[:HAS_REMOVAL]->(r:Removal)
-RETURN a.tail_number, a.model, 
+RETURN a.tail_number, a.model,
        count(r) AS removal_count,
        sum(r.cost_estimate) AS total_removal_cost,
        avg(r.cost_estimate) AS avg_removal_cost
 ORDER BY total_removal_cost DESC LIMIT 10;
 
 // 6) Warranty vs out-of-warranty removal analysis
-MATCH (:Component)-[:REMOVED_COMPONENT]->(r:Removal)
-WITH r.warranty_status AS warranty, 
-     count(*) AS count, 
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(:Component)
+WITH r.warranty_status AS warranty,
+     count(*) AS count,
      avg(r.cost_estimate) AS avg_cost,
      sum(r.cost_estimate) AS total_cost
 RETURN warranty, count, avg_cost, total_cost
 ORDER BY total_cost DESC;
 
 // 7) Component reliability analysis - time between installation and removal
-MATCH (c:Component)-[:REMOVED_COMPONENT]->(r:Removal)
+MATCH (r:Removal)-[:REMOVED_COMPONENT]->(c:Component)
 WHERE r.time_since_install IS NOT NULL
 RETURN c.type AS component_type,
        avg(r.time_since_install) AS avg_time_to_removal_hours,

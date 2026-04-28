@@ -52,15 +52,16 @@
 
 ### 1.2 Fleet Configuration
 
-The SkyWays A320-200 fleet consists of five aircraft configured for medium-haul operations:
+The A320-200 fleet operates across four partner carriers configured for medium-haul operations. The combined fleet of approximately 30 aircraft is distributed as follows:
 
-| Aircraft ID | Registration | ICAO 24 | Entry into Service |
-|-------------|--------------|---------|-------------------|
-| AC1002 | N30268B | aee78a | March 2019 |
-| AC1006 | N81338F | 53f91d | July 2019 |
-| AC1010 | N32276J | 9abd95 | November 2019 |
-| AC1014 | N76758N | 1bd252 | February 2020 |
-| AC1018 | N63098R | 131424 | June 2020 |
+| Operator | Aircraft Count | Primary Routes |
+|----------|---------------|----------------|
+| ExampleAir | 8 | Domestic medium-haul |
+| SkyWays | 8 | Domestic medium-haul |
+| RegionalCo | 7 | Mixed domestic/regional |
+| NorthernJet | 7 | Domestic medium-haul |
+
+Aircraft entered service between 2017 and 2023, configured in a single-class or dual-class layout for 150–180 passengers.
 
 ### 1.3 ATA Chapter Reference
 
@@ -141,6 +142,8 @@ Each V2500 engine is equipped with four primary monitoring sensors:
 | FuelFlow | Fuel Flow | kg/s | Fuel metering unit |
 
 **Sensor Sampling Rate:** Continuous (1 Hz during flight, recorded hourly for trend analysis)
+
+**Digital Twin Monitoring Note:** The Digital Twin Monitoring System records hourly trend-averaged EGT values on a normalized scale calibrated for long-term degradation detection. These trend values (nominal baseline ~645°C, warning threshold ~674°C) differ from the instantaneous ECAM EGT readings shown in Section 3.3 and Appendix 10.1, which reflect peak values during takeoff and high-power operations. The trend-monitoring scale is used to detect gradual EGT margin deterioration over weeks and months rather than acute exceedances. Note: the digital twin dataset models this A320-200 variant as equipped with CFM56-5B engines; procedure steps in this manual reference the IAE V2500-A1 alternative powerplant.
 
 ### 2.3 Component Identification Schema
 
@@ -852,7 +855,36 @@ START: Low Hydraulic Pressure Warning
 | Engineering Support | engineering@skyways.aero | 24/7 |
 | Parts Supply | parts@skyways.aero | 24/7 |
 
-### 10.5 Revision History Log
+### 10.5 Fleet Maintenance Statistics Summary
+
+Based on fleet data analysis (July – September 2024):
+
+| Metric | Value |
+|--------|-------|
+| Total Maintenance Events | 277 |
+| Critical Events | 144 (52%) |
+| Major Events | 86 (31%) |
+| Minor Events | 47 (17%) |
+| Engine-Related | 161 (58%) |
+| Avionics-Related | 61 (22%) |
+| Hydraulics-Related | 55 (20%) |
+
+**Top Fault Types:**
+1. Overheat (EGT exceedance) — 75 events (27%)
+2. Bearing wear — 63 events (23%)
+3. Vibration exceedance — 53 events (19%)
+4. Sensor drift — 39 events (14%)
+5. Contamination — 28 events (10%)
+6. Leak — 19 events (7%)
+
+**Corrective Action Distribution:**
+1. Inspected and cleared — 72 (26%)
+2. Replaced component — 69 (25%)
+3. Cleaned and reassembled — 61 (22%)
+4. Software patch applied — 47 (17%)
+5. Adjusted tolerance — 28 (10%)
+
+### 10.6 Revision History Log
 
 | Page | Rev | Date | Change Description |
 |------|-----|------|--------------------|

@@ -28,7 +28,7 @@ RETURN gds.version() AS version
 
 ```sql
 CALL gds.graph.list()
-YIELD graphName, nodeCount, relationshipCount, schema
+YIELD graphName, nodeCount, relationshipCount
 RETURN graphName, nodeCount, relationshipCount
 ```
 
@@ -311,23 +311,20 @@ ORDER BY PageRank DESC
 
 > **Concepts**: Once written, scores are plain node properties — queryable without any active projection. `IS NOT NULL` ensures only enriched Airport nodes appear.
 
-### Airports where PageRank and Betweenness disagree most
+### Side-by-side centrality comparison
 
 ```sql
 MATCH (ap:Airport)
 WHERE ap.pagerank_score IS NOT NULL
   AND ap.betweenness_score IS NOT NULL
-WITH ap,
-     ap.pagerank_score AS pr,
-     ap.betweenness_score AS bt
 RETURN ap.iata                        AS IATA,
        ap.city                        AS City,
-       round(pr, 4)                   AS PageRank,
-       round(bt, 1)                   AS Betweenness
-ORDER BY ap.iata
+       round(ap.pagerank_score, 4)    AS PageRank,
+       round(ap.betweenness_score, 1) AS Betweenness
+ORDER BY PageRank DESC
 ```
 
-> **Concepts**: Airports that rank high on PageRank but low on Betweenness are traffic hubs whose removal would not split the network. Airports that rank high on Betweenness but low on PageRank are narrow structural connectors — less trafficked but critical to network integrity.
+> **Concepts**: Airports that rank high on PageRank but low on Betweenness are traffic hubs whose removal would not split the network. Airports that rank high on Betweenness but low on PageRank are narrow structural connectors — less trafficked but critical to network integrity. The two scores are on different scales, so rank disagreement is easier to spot by scanning both columns than by computing a single difference metric.
 
 ### Maintenance delays departing from the top PageRank airport
 
@@ -518,16 +515,18 @@ These require all three notebooks to have run (or the write steps above to have 
 
 ```sql
 MATCH (a:Aircraft {tail_number: 'N10000'})
-OPTIONAL MATCH (a)-[r1:SIMILAR_FAULT_PROFILE]->(peer1:Aircraft)
-OPTIONAL MATCH (a)-[r2:SIMILAR_PROFILE]->(peer2:Aircraft)
-RETURN peer1.tail_number                AS FaultProfilePeer,
-       round(r1.jaccard_score, 4)       AS JaccardScore,
-       peer2.tail_number                AS KNNPeer,
-       round(r2.similarity_score, 4)    AS KNNScore
-ORDER BY JaccardScore DESC NULLS LAST
+CALL (a) {
+  OPTIONAL MATCH (a)-[r:SIMILAR_FAULT_PROFILE]->(peer:Aircraft)
+  RETURN collect({tail: peer.tail_number, jaccard: round(r.jaccard_score, 4)}) AS FaultProfilePeers
+}
+CALL (a) {
+  OPTIONAL MATCH (a)-[r:SIMILAR_PROFILE]->(peer:Aircraft)
+  RETURN collect({tail: peer.tail_number, knn: round(r.similarity_score, 4)}) AS KNNPeers
+}
+RETURN FaultProfilePeers, KNNPeers
 ```
 
-> **Concepts**: `OPTIONAL MATCH` keeps rows even when one similarity relationship is missing — equivalent to a SQL FULL OUTER JOIN. Peers that appear in both columns are aligned by both neighborhood structure and feature-vector distance, making them the strongest signals for proactive maintenance.
+> **Concepts**: Two `CALL (a) { ... }` subqueries execute independently against the same starting node and each collect their results into a list. This avoids the cartesian product that two `OPTIONAL MATCH` clauses on the same variable would produce. Peers appearing in both lists are aligned by both neighborhood structure (Jaccard) and feature-vector distance (kNN), making them the strongest signals for proactive maintenance.
 
 ### Aircraft that appear as peers in both similarity algorithms
 
@@ -561,4 +560,4 @@ RETURN ap.iata                                       AS IATA,
 ORDER BY PageRank DESC
 ```
 
-> **Concepts**: Limits to the top 10 airports by PageRank using `WITH ap ORDER BY ... LIMIT 1`, then aggregates delay data for those airports only. Dividing delay count by flight count normalizes for airport size — a 10% maintenance delay rate means something different at a 100-flight hub than at a 10-flight spoke.
+> **Concepts**: Limits to the top 10 airports by PageRank using `WITH ap ORDER BY ... LIMIT 10`, then aggregates delay data for those airports only. Dividing delay count by flight count normalizes for airport size — a 10% maintenance delay rate means something different at a 100-flight hub than at a 10-flight spoke.
