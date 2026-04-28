@@ -53,7 +53,7 @@ ORDER BY Count DESC
 ### See one aircraft's complete hierarchy
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})-[r1:HAS_SYSTEM]->(s:System)-[r2:HAS_COMPONENT]->(c:Component)
+MATCH (a:Aircraft {tail_number: 'N10000'})-[r1:HAS_SYSTEM]->(s:System)-[r2:HAS_COMPONENT]->(c:Component)
 RETURN a, r1, s, r2, c
 ```
 
@@ -62,7 +62,7 @@ RETURN a, r1, s, r2, c
 ### Aircraft hierarchy (tabular view)
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})-[:HAS_SYSTEM]->(s:System)
+MATCH (a:Aircraft {tail_number: 'N10000'})-[:HAS_SYSTEM]->(s:System)
 WHERE s.type IS NOT NULL AND s.name IS NOT NULL
 OPTIONAL MATCH (s)-[:HAS_COMPONENT]->(c:Component)
 RETURN a.tail_number AS Aircraft,
@@ -99,7 +99,7 @@ ORDER BY AircraftCount DESC
 ### Aircraft detail card
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})
+MATCH (a:Aircraft {tail_number: 'N10000'})
 OPTIONAL MATCH (a)-[:HAS_SYSTEM]->(s:System)
 OPTIONAL MATCH (a)-[:OPERATES_FLIGHT]->(f:Flight)
 OPTIONAL MATCH (a)-[:HAS_REMOVAL]->(r:Removal)
@@ -183,7 +183,7 @@ ORDER BY Count DESC
 ### Sensors on a specific aircraft
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})-[:HAS_SYSTEM]->(s:System)-[:HAS_SENSOR]->(sn:Sensor)
+MATCH (a:Aircraft {tail_number: 'N10000'})-[:HAS_SYSTEM]->(s:System)-[:HAS_SENSOR]->(sn:Sensor)
 WHERE s.type IS NOT NULL AND sn.type IS NOT NULL
 RETURN s.name AS System,
        s.type AS SystemType,
@@ -334,7 +334,7 @@ ORDER BY FlightCount DESC
 ### Flights for a specific aircraft
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})-[:OPERATES_FLIGHT]->(f:Flight)
+MATCH (a:Aircraft {tail_number: 'N10000'})-[:OPERATES_FLIGHT]->(f:Flight)
 WHERE f.scheduled_departure IS NOT NULL
 OPTIONAL MATCH (f)-[:DEPARTS_FROM]->(dep:Airport)
 OPTIONAL MATCH (f)-[:ARRIVES_AT]->(arr:Airport)
@@ -531,7 +531,7 @@ LIMIT 20
 ### Full aircraft profile: systems, maintenance, flights, removals
 
 ```sql
-MATCH (a:Aircraft {tail_number: 'N95040A'})
+MATCH (a:Aircraft {tail_number: 'N10000'})
 OPTIONAL MATCH (a)-[:HAS_SYSTEM]->(s:System)
 WITH a, count(s) AS SystemCount
 OPTIONAL MATCH (a)-[:OPERATES_FLIGHT]->(f:Flight)
