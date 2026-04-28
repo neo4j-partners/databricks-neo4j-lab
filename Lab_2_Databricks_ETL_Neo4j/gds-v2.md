@@ -51,8 +51,8 @@ RETURN gds.graph.project(
 ```
 
 > **Concepts**: Cypher aggregation projection uses `RETURN gds.graph.project(...)` (a function, not a procedure). The `MATCH` pattern traverses through Flight nodes to build a virtual Airport-to-Airport graph. `undirectedRelationshipTypes: ['FLIES_TO']` treats every route bidirectionally — A→B and B→A are equivalent for centrality purposes.
-> 
-> ### Stream PageRank — which airports are most influential?
+
+### Stream PageRank — which airports are most influential?
 
 ```sql
 CALL gds.pageRank.stream('airport-routes', {
@@ -68,10 +68,9 @@ RETURN gds.util.asNode(nodeId).iata AS IATA,
 ORDER BY PageRank DESC
 ```
 
-> **Concepts**: PageRank scores an airport by both the volume of connections and the importance of the airports it connects to. `relationshipWeightProperty: 'weight'` means high-frequency routes contribute more influence. `dampingFactor: 0.85` is the standard value (probability of following a link vs. jumping randomly).
-> 
-> 
-> ### Write PageRank and Betweenness scores to Airport nodes
+> **Concepts**: PageRank scores an airport by both the volume of connections and the importance of the airports it connects to. Importance is recursive: an airport gains a high score not just by having many routes, but by being connected to other high-scoring airports. A regional hub with direct routes to three major international hubs will outrank a spoke with routes to ten small regional airports — the quality of connections matters as much as the count. `relationshipWeightProperty: 'weight'` means high-frequency routes carry more influence than low-frequency ones, so a daily non-stop between two cities matters more than a once-weekly connection. `dampingFactor: 0.85` is the standard value (probability of following a link vs. jumping randomly).
+
+### Write PageRank and Louvain community to Airport nodes
 
 ```sql
 CALL gds.pageRank.write('airport-routes', {
@@ -81,24 +80,24 @@ CALL gds.pageRank.write('airport-routes', {
 })
 YIELD nodePropertiesWritten;
 
-CALL gds.betweenness.write('airport-routes', {
-    writeProperty: 'betweenness_score'
+CALL gds.louvain.write('airport-routes', {
+    writeProperty: 'community_id',
+    relationshipWeightProperty: 'weight'
 })
-YIELD nodePropertiesWritten
+YIELD communityCount, nodePropertiesWritten
 ```
 
-> **Concepts**: `write` mode persists scores as node properties, making them queryable from any Cypher client and visible in the graph visualization. Each statement runs sequentially — both use the same `airport-routes` projection.
-> 
+> **Concepts**: `write` mode persists results as node properties, making them queryable from any Cypher client and visible in the graph visualization. Each statement runs sequentially using the same `airport-routes` projection.
 
-### Airports ranked by PageRank (after write)
+### Airports ranked by PageRank with community (after write)
 
 ```sql
 MATCH (ap:Airport)
 WHERE ap.pagerank_score IS NOT NULL
-RETURN ap.iata                          AS IATA,
-       ap.city                          AS City,
-       round(ap.pagerank_score, 4)      AS PageRank,
-       round(ap.betweenness_score, 1)   AS Betweenness
+RETURN ap.iata                     AS IATA,
+       ap.city                     AS City,
+       round(ap.pagerank_score, 4) AS PageRank,
+       ap.community_id             AS Community
 ORDER BY PageRank DESC
 ```
 
@@ -120,4 +119,3 @@ LIMIT 20
 ```
 
 > **Concepts**: Two-step pattern: first find the top airport by PageRank using `WITH ap ORDER BY ... LIMIT 1`, then traverse outward to flights with maintenance-caused delays. This joins graph topology (centrality) with operational data (delays) in a single Cypher query.
-> 

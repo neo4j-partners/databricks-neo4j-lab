@@ -9,7 +9,7 @@ Notebooks run the full pipeline (feature compute → project → write) from Dat
 | Notebook | Writes to Neo4j |
 |---|---|
 | 04 — kNN | `*_norm` properties on `Aircraft` nodes; `SIMILAR_PROFILE` relationships with `similarity_score` |
-| 05 — PageRank / Betweenness | `pagerank_score` and `betweenness_score` properties on `Airport` nodes |
+| 05 — PageRank / Louvain | `pagerank_score` and `community_id` properties on `Airport` nodes |
 | 06 — Node Similarity | `SIMILAR_FAULT_PROFILE` relationships with `jaccard_score` |
 
 ---
@@ -34,6 +34,18 @@ RETURN graphName, nodeCount, relationshipCount
 
 > **Concepts**: Projections are held in heap memory and cleared on instance restart. Use this to confirm a projection exists before running an algorithm, or to spot stale projections consuming memory.
 
+### Drop all projections at once
+
+```sql
+CALL gds.graph.list()
+YIELD graphName
+CALL gds.graph.drop(graphName, false)
+YIELD graphName AS dropped
+RETURN dropped
+```
+
+> **Tip**: Chains `list()` into `drop()` in a single query. The `false` argument suppresses errors if a projection disappears between the list and drop steps. Useful when restarting a lab or recovering from a failed run that left stale projections in memory.
+
 ---
 
 ## Notebook 04 — kNN Aircraft Similarity
@@ -48,6 +60,7 @@ WHERE a.avg_egt_norm IS NOT NULL
 RETURN a.tail_number                          AS TailNumber,
        round(a.avg_egt_norm, 3)               AS AvgEGT,
        round(a.stddev_vibration_norm, 3)      AS StddevVibration,
+       round(a.avg_fuel_flow_norm, 3)         AS AvgFuelFlow,
        round(a.total_events_norm, 3)          AS TotalEvents,
        round(a.critical_events_norm, 3)       AS CriticalEvents
 ORDER BY a.tail_number
@@ -73,12 +86,12 @@ CALL gds.graph.project(
             ]
         }
     },
-    {}
+    '*'
 )
 YIELD graphName, nodeCount, relationshipCount
 ```
 
-> **Concepts**: kNN operates purely on node properties — no relationships are projected (hence `{}`). The `gds.graph.drop('...', false)` before projection prevents an error if the named projection already exists. `false` means "fail silently if missing."
+> **Concepts**: kNN operates purely on node properties — no relationships need to be traversed. `'*'` projects all relationship types as a wildcard (GDS 2026+ requires at least one relationship type even for property-only algorithms). The `gds.graph.drop('...', false)` before projection prevents an error if the named projection already exists. `false` means "fail silently if missing."
 
 ### Stream kNN similarity pairs
 
@@ -92,7 +105,8 @@ CALL gds.knn.stream('aircraft-profiles', {
         'total_events_norm', 'critical_events_norm'
     ],
     similarityCutoff: 0.4,
-    randomSeed: 42
+    randomSeed: 42,
+    concurrency: 1
 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).tail_number AS Aircraft,
@@ -118,7 +132,8 @@ CALL gds.knn.write('aircraft-profiles', {
         'avg_fuel_flow_norm',
         'total_events_norm', 'critical_events_norm'
     ],
-    randomSeed: 42
+    randomSeed: 42,
+    concurrency: 1
 })
 YIELD relationshipsWritten, nodesCompared
 ```
@@ -190,7 +205,7 @@ CALL gds.graph.drop('aircraft-profiles', false) YIELD graphName
 
 ---
 
-## Notebook 05 — PageRank and Betweenness on the Airport Route Network
+## Notebook 05 — PageRank and Louvain Community Detection on the Airport Route Network
 
 Flights connect airports through intermediate Flight nodes — there are no direct Airport-to-Airport relationships in the base graph. The Cypher aggregation projection builds a virtual weighted Airport graph, where edge weight equals the number of flights on each route.
 
@@ -264,21 +279,22 @@ ORDER BY PageRank DESC
 
 > **Concepts**: PageRank scores an airport by both the volume of connections and the importance of the airports it connects to. `relationshipWeightProperty: 'weight'` means high-frequency routes contribute more influence. `dampingFactor: 0.85` is the standard value (probability of following a link vs. jumping randomly).
 
-### Stream Betweenness Centrality — which airports are critical connectors?
+### Stream Louvain — which airports cluster together?
 
 ```sql
-CALL gds.betweenness.stream('airport-routes')
-YIELD nodeId, score
-WHERE score > 0
+CALL gds.louvain.stream('airport-routes', {
+    relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, communityId
 RETURN gds.util.asNode(nodeId).iata AS IATA,
        gds.util.asNode(nodeId).city AS City,
-       round(score, 2)              AS Betweenness
-ORDER BY Betweenness DESC
+       communityId                  AS Community
+ORDER BY Community, IATA
 ```
 
-> **Concepts**: Betweenness measures how often an airport lies on the shortest path between any two other airports. High-betweenness airports are structural connectors — removing them fragments the network most severely. Compare the ranking against PageRank: they can disagree, and that disagreement is operationally meaningful.
+> **Concepts**: Louvain detects communities — groups of airports more densely connected to each other than to the rest of the network. `relationshipWeightProperty: 'weight'` means high-frequency routes pull airports into the same community more strongly than low-frequency ones. Communities often correspond to geographic regions or shared hub affiliations.
 
-### Write PageRank and Betweenness scores to Airport nodes
+### Write PageRank and Louvain community to Airport nodes
 
 ```sql
 CALL gds.pageRank.write('airport-routes', {
@@ -288,42 +304,42 @@ CALL gds.pageRank.write('airport-routes', {
 })
 YIELD nodePropertiesWritten;
 
-CALL gds.betweenness.write('airport-routes', {
-    writeProperty: 'betweenness_score'
+CALL gds.louvain.write('airport-routes', {
+    writeProperty: 'community_id',
+    relationshipWeightProperty: 'weight'
 })
-YIELD nodePropertiesWritten
+YIELD communityCount, nodePropertiesWritten
 ```
 
-> **Concepts**: `write` mode persists scores as node properties, making them queryable from any Cypher client and visible in the graph visualization. Each statement runs sequentially — both use the same `airport-routes` projection.
+> **Concepts**: `write` mode persists results as node properties, making them queryable from any Cypher client and visible in the graph visualization. Each statement runs sequentially using the same `airport-routes` projection.
 
-### Airports ranked by PageRank (after write)
+### Airports ranked by PageRank with community (after write)
 
 ```sql
 MATCH (ap:Airport)
 WHERE ap.pagerank_score IS NOT NULL
-RETURN ap.iata                          AS IATA,
-       ap.city                          AS City,
-       round(ap.pagerank_score, 4)      AS PageRank,
-       round(ap.betweenness_score, 1)   AS Betweenness
+RETURN ap.iata                     AS IATA,
+       ap.city                     AS City,
+       round(ap.pagerank_score, 4) AS PageRank,
+       ap.community_id             AS Community
 ORDER BY PageRank DESC
 ```
 
 > **Concepts**: Once written, scores are plain node properties — queryable without any active projection. `IS NOT NULL` ensures only enriched Airport nodes appear.
 
-### Side-by-side centrality comparison
+### Community membership — which airports cluster together?
 
 ```sql
 MATCH (ap:Airport)
-WHERE ap.pagerank_score IS NOT NULL
-  AND ap.betweenness_score IS NOT NULL
-RETURN ap.iata                        AS IATA,
-       ap.city                        AS City,
-       round(ap.pagerank_score, 4)    AS PageRank,
-       round(ap.betweenness_score, 1) AS Betweenness
-ORDER BY PageRank DESC
+WHERE ap.community_id IS NOT NULL
+RETURN ap.community_id                  AS Community,
+       count(ap)                        AS Airports,
+       collect(ap.iata)                 AS Members,
+       round(avg(ap.pagerank_score), 4) AS AvgPageRank
+ORDER BY Airports DESC
 ```
 
-> **Concepts**: Airports that rank high on PageRank but low on Betweenness are traffic hubs whose removal would not split the network. Airports that rank high on Betweenness but low on PageRank are narrow structural connectors — less trafficked but critical to network integrity. The two scores are on different scales, so rank disagreement is easier to spot by scanning both columns than by computing a single difference metric.
+> **Concepts**: Groups airports by their Louvain community and shows the member IATA codes alongside the community's average PageRank. Communities with a high average PageRank are influential clusters — losing any one member affects the others disproportionately.
 
 ### Maintenance delays departing from the top PageRank airport
 
@@ -552,7 +568,7 @@ OPTIONAL MATCH (f)-[:HAS_DELAY]->(d:Delay {cause: 'Maintenance'})
 RETURN ap.iata                                       AS IATA,
        ap.city                                       AS City,
        round(ap.pagerank_score, 4)                   AS PageRank,
-       round(ap.betweenness_score, 1)                AS Betweenness,
+       ap.community_id                               AS Community,
        count(DISTINCT f)                             AS TotalFlights,
        count(d)                                      AS MaintenanceDelays,
        round(100.0 * count(d) / count(DISTINCT f), 1) AS MaintenanceDelayPct
