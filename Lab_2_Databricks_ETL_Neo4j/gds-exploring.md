@@ -48,7 +48,6 @@ WHERE a.avg_egt_norm IS NOT NULL
 RETURN a.tail_number                          AS TailNumber,
        round(a.avg_egt_norm, 3)               AS AvgEGT,
        round(a.stddev_vibration_norm, 3)      AS StddevVibration,
-       round(a.avg_fuel_flow_norm, 3)         AS AvgFuelFlow,
        round(a.total_events_norm, 3)          AS TotalEvents,
        round(a.critical_events_norm, 3)       AS CriticalEvents
 ORDER BY a.tail_number
