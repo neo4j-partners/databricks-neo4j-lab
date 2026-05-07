@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
+import sys
 import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Literal
-
-import sys
 
 import typer
 from neo4j import Driver, GraphDatabase
@@ -22,12 +21,14 @@ from .schema import (
     create_extraction_constraints,
     create_fulltext_indexes,
     create_indexes,
+    drop_extraction_constraints,
 )
 
 app = typer.Typer(
     name="populate-aircraft-db",
     help="Load the Aircraft Digital Twin dataset into a Neo4j Aura instance.",
     add_completion=False,
+    pretty_exceptions_show_locals=False,
 )
 
 
@@ -67,11 +68,11 @@ def _connect(settings: Settings) -> Generator[Driver, None, None]:
 
 @dataclass
 class _LLMCredentials:
-    provider: Literal["openai", "anthropic", "azure"]
+    provider: Literal["openai", "anthropic"]
     openai_key: str | None
     anthropic_key: str | None
-    azure_key: str | None
     llm_model: str
+    llm_max_tokens: int
     embedding_model: str
     embedding_dims: int
 
@@ -81,7 +82,6 @@ def _resolve_llm_credentials(settings: Settings) -> _LLMCredentials:
     provider = settings.llm_provider
     openai_key = None
     anthropic_key = None
-    azure_key = None
 
     if provider == "openai":
         if settings.openai_api_key is None:
@@ -91,6 +91,7 @@ def _resolve_llm_credentials(settings: Settings) -> _LLMCredentials:
             )
         openai_key = settings.openai_api_key.get_secret_value()
         llm_model = settings.openai_extraction_model
+        llm_max_tokens = settings.openai_extraction_max_completion_tokens
     elif provider == "anthropic":
         # Anthropic still needs OpenAI for embeddings.
         if settings.openai_api_key is None:
@@ -106,38 +107,21 @@ def _resolve_llm_credentials(settings: Settings) -> _LLMCredentials:
             )
         anthropic_key = settings.anthropic_api_key.get_secret_value()
         llm_model = settings.anthropic_extraction_model
-    elif provider == "azure":
-        for field, label in [
-            ("azure_openai_api_key", "AZURE_OPENAI_API_KEY"),
-            ("azure_openai_endpoint", "AZURE_OPENAI_ENDPOINT"),
-            ("azure_openai_llm_deployment", "AZURE_OPENAI_LLM_DEPLOYMENT"),
-            ("azure_openai_embedding_deployment", "AZURE_OPENAI_EMBEDDING_DEPLOYMENT"),
-        ]:
-            if getattr(settings, field) is None:
-                raise typer.BadParameter(
-                    f"{label} is required when using Azure. "
-                    "Set it in .env or as an env var."
-                )
-        azure_key = settings.azure_openai_api_key.get_secret_value()  # type: ignore[union-attr]
-        llm_model = settings.azure_openai_llm_deployment  # type: ignore[assignment]
+        llm_max_tokens = settings.anthropic_extraction_max_tokens
     else:
         raise typer.BadParameter(
-            f"Unknown provider: {provider!r}. Use 'openai', 'anthropic', or 'azure'."
+            f"Unknown provider: {provider!r}. Use 'openai' or 'anthropic'."
         )
 
-    if provider == "azure":
-        embedding_model = settings.azure_openai_embedding_deployment
-        embedding_dims = settings.azure_openai_embedding_dimensions
-    else:
-        embedding_model = settings.openai_embedding_model
-        embedding_dims = settings.openai_embedding_dimensions
+    embedding_model = settings.openai_embedding_model
+    embedding_dims = settings.openai_embedding_dimensions
 
     return _LLMCredentials(
         provider=provider,
         openai_key=openai_key,
         anthropic_key=anthropic_key,
-        azure_key=azure_key,
         llm_model=llm_model,
+        llm_max_tokens=llm_max_tokens,
         embedding_model=embedding_model,
         embedding_dims=embedding_dims,
     )
@@ -161,22 +145,30 @@ def _run_enrich(driver: Driver, settings: Settings, creds: _LLMCredentials) -> N
     clear_enrichment_data(driver)
     print()
 
+    print("Dropping extraction constraints for pipeline write phase...")
+    drop_extraction_constraints(driver)
+    print()
+
     if settings.enrich_sample_size:
-        print(f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model},"
-              f" sample_size={settings.enrich_sample_size} chunks/doc)...")
+        print(
+            f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model}, "
+            f"max_tokens={creds.llm_max_tokens}, "
+            f"sample_size={settings.enrich_sample_size} chunks/doc)..."
+        )
     else:
-        print(f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model})...")
+        print(
+            f"Running SimpleKGPipeline (LLM: {creds.provider}/{creds.llm_model}, "
+            f"max_tokens={creds.llm_max_tokens})..."
+        )
 
     process_all_documents(
         driver,
-        settings.data_dir,
+        settings.document_dir,
         provider=creds.provider,
         openai_api_key=creds.openai_key,
         anthropic_api_key=creds.anthropic_key,
-        azure_api_key=creds.azure_key,
-        azure_endpoint=settings.azure_openai_endpoint if creds.provider == "azure" else None,
-        azure_api_version=settings.azure_openai_api_version if creds.provider == "azure" else None,
         llm_model=creds.llm_model,
+        llm_max_tokens=creds.llm_max_tokens,
         embedding_model=creds.embedding_model,
         embedding_dimensions=creds.embedding_dims,
         chunk_size=settings.chunk_size,
@@ -232,22 +224,38 @@ def setup_cmd() -> None:
             print(f"\n[FAIL] Enrichment failed: {exc}")
             print("CSV data was loaded successfully. Fix the issue and re-run:")
             print("  uv run populate-aircraft-db setup")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from exc
 
-        verify(driver)
+        verify(
+            driver,
+            expected_embedding_dimensions=settings.openai_embedding_dimensions,
+        )
 
     elapsed = time.monotonic() - start
     print(f"\nDone in {_fmt_elapsed(elapsed)}.")
 
 
 @app.command("verify")
-def verify_cmd() -> None:
-    """Print node and relationship counts (read-only)."""
+def verify_cmd(
+    strict: bool = typer.Option(
+        False,
+        "--strict",
+        help="Exit with a nonzero status when verification warnings are found.",
+    ),
+) -> None:
+    """Run comprehensive graph verification (read-only)."""
     settings = Settings()  # type: ignore[call-arg]
 
     print(f"Connecting to {settings.neo4j_uri}...")
     with _connect(settings) as driver:
-        verify(driver)
+        passed = verify(
+            driver,
+            expected_embedding_dimensions=settings.openai_embedding_dimensions,
+            strict=strict,
+        )
+
+    if strict and not passed:
+        raise typer.Exit(code=1)
 
 
 @app.command("clean")
@@ -274,6 +282,99 @@ def clean_enrichment_cmd() -> None:
         clear_enrichment_data(driver)
 
     print("\nDone.")
+
+
+@app.command("load-operational")
+def load_operational_cmd() -> None:
+    """Load only CSV operational data and relink existing enrichment."""
+    from .pipeline import link_to_existing_graph, validate_enrichment
+
+    settings = Settings()  # type: ignore[call-arg]
+
+    start = time.monotonic()
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        print("Creating constraints...")
+        create_constraints(driver)
+        print("\nCreating indexes...")
+        create_indexes(driver)
+        print("\nCreating fulltext indexes...")
+        create_fulltext_indexes(driver)
+        print()
+
+        load_nodes(driver, settings.data_dir)
+        print()
+        load_relationships(driver, settings.data_dir)
+        print()
+
+        print("Linking existing enrichment to operational graph...")
+        link_to_existing_graph(driver)
+
+        validate_enrichment(driver)
+
+    elapsed = time.monotonic() - start
+    print(f"\nDone in {_fmt_elapsed(elapsed)}.")
+
+
+@app.command("enrich")
+def enrich_cmd() -> None:
+    """Run GraphRAG enrichment against an already-loaded operational graph."""
+    settings = Settings()  # type: ignore[call-arg]
+    creds = _resolve_llm_credentials(settings)
+
+    print(f"Connecting to {settings.neo4j_uri}...")
+    with _connect(settings) as driver:
+        _run_enrich(driver, settings, creds)
+
+    print("\nDone.")
+
+
+@app.command("debug-extract")
+def debug_extract_cmd(
+    document: str = typer.Option(
+        "MAINTENANCE_A321neo.md",
+        "--document",
+        "-d",
+        help="Maintenance manual filename in DOCUMENT_DIR.",
+    ),
+    chunks: str = typer.Option(
+        "3,5,6,7,9,10,11,12,13,15,16",
+        "--chunks",
+        "-c",
+        help="Comma-separated chunk indexes to send to the extractor.",
+    ),
+) -> None:
+    """Validate extractor output for selected chunks without writing to Neo4j."""
+    from .pipeline import debug_extract_chunks
+
+    settings = Settings()  # type: ignore[call-arg]
+    creds = _resolve_llm_credentials(settings)
+    try:
+        chunk_indexes = [int(index.strip()) for index in chunks.split(",") if index.strip()]
+    except ValueError as exc:
+        raise typer.BadParameter("--chunks must be a comma-separated list of integers") from exc
+
+    try:
+        passed = debug_extract_chunks(
+            settings.document_dir,
+            filename=document,
+            chunk_indexes=chunk_indexes,
+            provider=creds.provider,
+            openai_api_key=creds.openai_key,
+            anthropic_api_key=creds.anthropic_key,
+            llm_model=creds.llm_model,
+            llm_max_tokens=creds.llm_max_tokens,
+            chunk_size=settings.chunk_size,
+            chunk_overlap=settings.chunk_overlap,
+        )
+    except ImportError as exc:
+        print(f"[FAIL] {exc}")
+        if creds.provider == "anthropic":
+            print("Install Anthropic support with: uv sync --extra anthropic")
+        raise typer.Exit(code=1) from exc
+    if not passed:
+        raise typer.Exit(code=1)
 
 
 @app.command("samples")
@@ -304,9 +405,6 @@ def agent_samples_cmd() -> None:
             provider=creds.provider,
             openai_key=creds.openai_key,
             anthropic_key=creds.anthropic_key,
-            azure_key=creds.azure_key,
-            azure_endpoint=settings.azure_openai_endpoint if creds.provider == "azure" else None,
-            azure_api_version=settings.azure_openai_api_version if creds.provider == "azure" else None,
             llm_model=creds.llm_model,
             embedding_model=creds.embedding_model,
             embedding_dimensions=creds.embedding_dims,

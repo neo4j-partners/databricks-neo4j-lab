@@ -270,7 +270,7 @@ wheels = [
 
 [[package]]
 name = "neo4j-graphrag"
-version = "1.13.0"
+version = "1.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fsspec" },
@@ -284,9 +284,9 @@ dependencies = [
     { name = "tenacity" },
     { name = "types-pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/67/035110b7d40ba2e9ac7b4274248967dc6ad568b99bcda4fb152c59b500d0/neo4j_graphrag-1.13.0.tar.gz", hash = "sha256:99d56fce33ff3b3ad8c77b366ad4ac2714625694fa23789768ca4efc8556f6c5", size = 1322484, upload-time = "2026-02-03T14:45:33.178Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/93/b3f6bc7d513e46fb4123714a980b245abb5bdb766cb3cc334ff93aab3273/neo4j_graphrag-1.15.0.tar.gz", hash = "sha256:7f0cd3504971d445536e97337e49f36ae0077922b52f49f790fa1a167c254884", size = 1351233, upload-time = "2026-04-23T07:54:23.67Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b4/1c/6e37fc237cb4e4c9921b73baa90bba68c7758e01d065c2f6ff07eb1659eb/neo4j_graphrag-1.13.0-py3-none-any.whl", hash = "sha256:cfa3a1ebbf2caffa48bc047c0a059a36e1fc64afce5c50048228f29701580c76", size = 222240, upload-time = "2026-02-03T14:45:31.475Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/11/6a5e3451ab45fe81e5f8fdf48fdc20c7951a4a1a1131bea252b834d655d1/neo4j_graphrag-1.15.0-py3-none-any.whl", hash = "sha256:f3b68856a0a3c1e9be09bc0d2048a6a6ea7ea5b866659ca47baffca3a99b6551", size = 251181, upload-time = "2026-04-23T07:54:21.961Z" },
 ]
 
 [package.optional-dependencies]
@@ -418,8 +418,8 @@ anthropic = [
 requires-dist = [
     { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.49.0" },
     { name = "neo4j", specifier = ">=5.17.0" },
-    { name = "neo4j-graphrag", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=1.0.0" },
-    { name = "neo4j-graphrag", extras = ["openai"], specifier = ">=1.0.0" },
+    { name = "neo4j-graphrag", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=1.15.0" },
+    { name = "neo4j-graphrag", extras = ["openai"], specifier = ">=1.15.0" },
     { name = "pydantic", specifier = ">=2.7.0" },
     { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "rich", specifier = ">=13.0.0" },

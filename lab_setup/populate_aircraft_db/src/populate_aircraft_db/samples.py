@@ -43,11 +43,11 @@ def _table(headers: list[str], rows: list[list], widths: list[int] | None = None
             for row in rows:
                 col_max = max(col_max, len(str(row[i] if i < len(row) else "")))
             widths.append(min(col_max + 1, 50))
-    print("  " + "  ".join(h.ljust(w) for h, w in zip(headers, widths)))
+    print("  " + "  ".join(h.ljust(w) for h, w in zip(headers, widths, strict=False)))
     print("  " + "  ".join("\u2500" * w for w in widths))
     for row in rows:
         cells = []
-        for val, w in zip(row, widths):
+        for val, w in zip(row, widths, strict=False):
             s = str(val) if val is not None else "\u2014"
             if len(s) > w:
                 s = s[: w - 1] + "\u2026"
@@ -387,7 +387,7 @@ def _vector_similarity(driver: Driver, limit: int) -> None:
         return
     print(f"  Seed: \"{rows[0]['seed_text']}\u2026\"\n")
     print(f"  {'Score':<8}  Similar chunk")
-    print(f"  {'\u2500' * 8}  {'\u2500' * 56}")
+    print("  " + "\u2500" * 8 + "  " + "\u2500" * 56)
     for r in rows:
         print(f"  {r['similarity']:.4f}    {r['match_text']}\u2026")
     print()

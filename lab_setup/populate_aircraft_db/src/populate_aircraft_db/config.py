@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import DirectoryPath, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,7 +11,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Resolved once at import time — stable regardless of cwd.
 _PKG_DIR = Path(__file__).resolve().parent
 _ENV_FILE = _PKG_DIR.parent.parent / ".env"
-_DATA_DIR = _PKG_DIR.parent.parent.parent / "aircraft_digital_twin_data"
+_LAB_SETUP_DIR = _PKG_DIR.parent.parent.parent
+_DATA_DIR = _LAB_SETUP_DIR / "aircraft_digital_twin_data_v2"
+_DOCUMENT_DIR = _LAB_SETUP_DIR / "aircraft_digital_twin_data"
 
 
 class Settings(BaseSettings):
@@ -27,29 +29,24 @@ class Settings(BaseSettings):
     neo4j_password: SecretStr
 
     data_dir: DirectoryPath = _DATA_DIR  # type: ignore[assignment]
+    document_dir: DirectoryPath = _DOCUMENT_DIR  # type: ignore[assignment]
 
     # OpenAI embeddings — required for the `setup` command.
-    openai_api_key: Optional[SecretStr] = None
+    openai_api_key: SecretStr | None = None
     openai_embedding_model: str = "text-embedding-3-small"
     openai_embedding_dimensions: int = 1536
 
     # OpenAI chat model — used by the `setup` command for entity extraction.
     openai_extraction_model: str = "gpt-5-mini"
+    openai_extraction_max_completion_tokens: int = 8000
 
     # LLM provider selection — "openai" or "anthropic".
-    llm_provider: Literal["openai", "anthropic", "azure"] = "openai"
+    llm_provider: Literal["openai", "anthropic"] = "openai"
 
     # Anthropic — only required when llm_provider is "anthropic".
-    anthropic_api_key: Optional[SecretStr] = None
-    anthropic_extraction_model: str = "claude-sonnet-4-5-20250929"
-
-    # Azure OpenAI — required when llm_provider is "azure".
-    azure_openai_api_key: Optional[SecretStr] = None
-    azure_openai_endpoint: Optional[str] = None
-    azure_openai_api_version: str = "2025-04-01-preview"
-    azure_openai_llm_deployment: Optional[str] = None
-    azure_openai_embedding_deployment: Optional[str] = None
-    azure_openai_embedding_dimensions: int = 1536
+    anthropic_api_key: SecretStr | None = None
+    anthropic_extraction_model: str = "claude-sonnet-4-6"
+    anthropic_extraction_max_tokens: int = 8000
 
     # Chunking settings for the `setup` command.
     chunk_size: int = 800

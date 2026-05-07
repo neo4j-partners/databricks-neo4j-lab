@@ -2,6 +2,38 @@
 
 Sample Cypher queries for the v2 dataset. Copy and paste into the [Neo4j Aura Query interface](https://console.neo4j.io) to explore the graph.
 
+## Creating Nodes and Relationships
+
+### Create an aircraft
+
+```cypher
+MERGE (a:Aircraft {tail_number: 'N99999'})
+ON CREATE SET
+  a.manufacturer = 'Boeing',
+  a.model        = '737-800',
+  a.operator     = 'Demo Airlines'
+RETURN a
+```
+
+> **Concepts**: `MERGE` finds the node if it already exists or creates it — safe to run more than once. `ON CREATE SET` only fires when a new node is actually created, so re-running will not overwrite existing properties. The lookup key (`tail_number`) should be unique and indexed.
+
+### Create a system, attach it to the aircraft, and add a component
+
+```cypher
+MERGE (a:Aircraft {tail_number: 'N99999'})
+MERGE (s:System {name: 'Hydraulic System A'})
+  ON CREATE SET s.type = 'Hydraulic'
+MERGE (a)-[:HAS_SYSTEM]->(s)
+MERGE (c:Component {name: 'Hydraulic Pump 1'})
+  ON CREATE SET c.type = 'Pump'
+MERGE (s)-[:HAS_COMPONENT]->(c)
+RETURN a, s, c
+```
+
+> **Concepts**: Chaining multiple `MERGE` statements in one query is idempotent — running it twice produces the same graph. Each `MERGE` on a relationship (`HAS_SYSTEM`, `HAS_COMPONENT`) also implies both endpoint nodes already exist, so node `MERGE`s must come first. Returning `a, s, c` renders the three-node subgraph visually in Neo4j Browser.
+
+---
+
 ## Graph Schema
 
 ### Node labels and counts

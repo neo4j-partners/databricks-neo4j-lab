@@ -20,19 +20,26 @@ Node labels and properties:
 - System {system_id, aircraft_id, type, name}  (type: Engine, Avionics, Hydraulics)
 - Component {component_id, system_id, type, name}
 - Sensor {sensor_id, system_id, type, name, unit}  (type: EGT, Vibration, N1Speed, FuelFlow)
+- Reading {reading_id, sensor_id, timestamp, value}
 - Airport {airport_id, name, city, country, iata, icao, lat, lon}
 - Flight {flight_id, flight_number, aircraft_id, operator, origin, destination, scheduled_departure, scheduled_arrival}
 - Delay {delay_id, cause, minutes}  (cause: Weather, Maintenance, Carrier, NAS)
 - MaintenanceEvent {event_id, component_id, system_id, aircraft_id, fault, severity, reported_at, corrective_action}  (severity: MINOR, MAJOR, CRITICAL)
-- Removal {removal_id, component_id, aircraft_id, removal_date, reason, tsn, csn}
+- Removal {removal_id, tracking_number, component_id, aircraft_id, removal_date, reason, work_order_number, technician_id, part_number, serial_number, tsn, flight_hours_at_removal, csn, replacement_required, shop_visit_required, warranty_status, removal_priority, cost_estimate, installation_date}
 - Document {documentId, aircraftType, title, type}
 - Chunk {text, index, embedding}
+- AircraftModel {name, manufacturer}
+- SystemReference {name, systemType, aircraftType}
+- ComponentReference {name, componentType, partNumber, aircraftType}
+- Fault {name, faultCode, severity, aircraftType}
+- MaintenanceProcedure {name, procedureType, interval, aircraftType}
 - OperatingLimit {name, parameterName, unit, regime, minValue, maxValue, aircraftType}
 
 Relationships:
 - (Aircraft)-[:HAS_SYSTEM]->(System)
 - (System)-[:HAS_COMPONENT]->(Component)
 - (System)-[:HAS_SENSOR]->(Sensor)
+- (Sensor)-[:HAS_READING]->(Reading)
 - (Component)-[:HAS_EVENT]->(MaintenanceEvent)
 - (MaintenanceEvent)-[:AFFECTS_SYSTEM]->(System)
 - (MaintenanceEvent)-[:AFFECTS_AIRCRAFT]->(Aircraft)
@@ -45,6 +52,13 @@ Relationships:
 - (Document)-[:APPLIES_TO]->(Aircraft)
 - (Chunk)-[:FROM_DOCUMENT]->(Document)
 - (Chunk)-[:NEXT_CHUNK]->(Chunk)
+- (AircraftModel)-[:DESCRIBES_MODEL]->(Aircraft)
+- (SystemReference)-[:DESCRIBES_SYSTEM]->(System)
+- (ComponentReference)-[:DESCRIBES_COMPONENT]->(Component)
+- (AircraftModel)-[:HAS_SYSTEM]->(SystemReference)
+- (SystemReference)-[:HAS_COMPONENT]->(ComponentReference)
+- (ComponentReference)-[:HAS_FAULT]->(Fault)
+- (Fault)-[:CORRECTED_BY]->(MaintenanceProcedure)
 - (OperatingLimit)-[:FROM_CHUNK]->(Chunk)
 - (Sensor)-[:HAS_LIMIT]->(OperatingLimit)
 
@@ -201,11 +215,11 @@ def _result_table(records: list[dict[str, Any]], max_rows: int = 10) -> None:
         for row in records[:max_rows]:
             col_max = max(col_max, len(str(row.get(k, ""))))
         widths.append(min(col_max + 1, 50))
-    print("  " + "  ".join(k.ljust(w) for k, w in zip(keys, widths)))
+    print("  " + "  ".join(k.ljust(w) for k, w in zip(keys, widths, strict=False)))
     print("  " + "  ".join("\u2500" * w for w in widths))
     for row in records[:max_rows]:
         cells = []
-        for k, w in zip(keys, widths):
+        for k, w in zip(keys, widths, strict=False):
             s = str(row.get(k, "")) if row.get(k) is not None else "\u2014"
             if len(s) > w:
                 s = s[: w - 1] + "\u2026"
@@ -224,9 +238,6 @@ def _create_llm_client(
     *,
     openai_key: str | None = None,
     anthropic_key: str | None = None,
-    azure_key: str | None = None,
-    azure_endpoint: str | None = None,
-    azure_api_version: str | None = None,
     llm_model: str,
     embedding_model: str,
     embedding_dimensions: int,
@@ -275,34 +286,6 @@ def _create_llm_client(
 
         def embed(text: str) -> list[float]:
             resp = oai_client.embeddings.create(
-                model=embedding_model,
-                input=text,
-                dimensions=embedding_dimensions,
-            )
-            return resp.data[0].embedding
-
-    elif provider == "azure":
-        from openai import AzureOpenAI
-
-        client = AzureOpenAI(
-            api_key=azure_key,
-            azure_endpoint=azure_endpoint or "",
-            api_version=azure_api_version or "2025-04-01-preview",
-        )
-
-        def chat(system: str, user: str) -> str:
-            resp = client.chat.completions.create(
-                model=llm_model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                max_completion_tokens=1000,
-            )
-            return resp.choices[0].message.content or ""
-
-        def embed(text: str) -> list[float]:
-            resp = client.embeddings.create(
                 model=embedding_model,
                 input=text,
                 dimensions=embedding_dimensions,
@@ -440,9 +423,6 @@ def run_agent_samples(
     provider: str,
     openai_key: str | None = None,
     anthropic_key: str | None = None,
-    azure_key: str | None = None,
-    azure_endpoint: str | None = None,
-    azure_api_version: str | None = None,
     llm_model: str,
     embedding_model: str,
     embedding_dimensions: int,
@@ -453,9 +433,6 @@ def run_agent_samples(
         provider,
         openai_key=openai_key,
         anthropic_key=anthropic_key,
-        azure_key=azure_key,
-        azure_endpoint=azure_endpoint,
-        azure_api_version=azure_api_version,
         llm_model=llm_model,
         embedding_model=embedding_model,
         embedding_dimensions=embedding_dimensions,
